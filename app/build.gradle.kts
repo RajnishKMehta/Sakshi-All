@@ -48,7 +48,7 @@ android {
         applicationId = "rajnishkmehta.sakshi.camera"
         minSdk = 29
         targetSdk = 37
-        versionCode = 0
+        versionCode = 95
         versionName = versionCode.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -62,6 +62,7 @@ android {
             if (useKeystoreProperties) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            resValue("string", "app_name", "Camera")
         }
 
         getByName("debug") {
