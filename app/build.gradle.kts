@@ -42,10 +42,10 @@ android {
     buildToolsVersion = "37.0.0"
     ndkVersion = "29.0.14206865"
 
-    namespace = "app.grapheneos.camera"
+    namespace = "rajnishkmehta.sakshi.camera"
 
     defaultConfig {
-        applicationId = "app.grapheneos.camera"
+        applicationId = "rajnishkmehta.sakshi.camera"
         minSdk = 29
         targetSdk = 37
         versionCode = 94
