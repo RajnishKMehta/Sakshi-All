@@ -1,6 +1,10 @@
 name: Validate Gradle Wrapper
 
-on: [pull_request, push]
+on:
+     push:
+       branches: main
+       
+     pull_request: 
 
 jobs:
   validation:
