@@ -62,7 +62,6 @@ android {
             if (useKeystoreProperties) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            resValue("string", "app_name", "Camera")
         }
 
         getByName("debug") {
