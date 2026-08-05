@@ -30,6 +30,12 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.OnScaleGestureListener
 import android.view.Surface
+import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
+import rajnishkmehta.sakshi.sdk.api.SakshiClient
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
@@ -615,6 +621,7 @@ open class MainActivity : AppCompatActivity(),
         gestureDetector = GestureDetector(this, this)
 
         camConfig = CamConfig(this)
+        checkVault()
         cameraControl = CameraControl(camConfig)
         mainOverlay = binding.mainOverlay
         imageCapturer = ImageCapturer(this)
@@ -1344,6 +1351,8 @@ open class MainActivity : AppCompatActivity(),
     }
 
     lateinit var camConfig: CamConfig
+
+    lateinit var sakshiClient: SakshiClient
     private lateinit var cameraControl: CameraControl
 
     companion object {
@@ -1876,6 +1885,72 @@ open class MainActivity : AppCompatActivity(),
         if (shouldRestartRecording) {
             shouldRestartRecording = false
             videoCapturer.startRecording()
+        }
+    }
+
+
+    private fun checkVault() {
+        sakshiClient = SakshiClient.create(this@MainActivity)
+
+        lifecycleScope.launch {
+            val pingResult = sakshiClient.pingVault()
+            if (!pingResult.isSuccess) {
+                if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
+            }
+
+            // Dummy call to register observation handling for CopyDoneAck
+            // In actual workflow, this could be triggered when copy begins
+            handleCopyDone("dummy_file_id")
+        }
+    }
+
+    private fun showVaultUnavailableDialog() {
+        val input = android.widget.EditText(this)
+        input.setText(camConfig.vaultPackage)
+        val padding = (16 * resources.displayMetrics.density).toInt()
+        input.setPadding(padding, padding, padding, padding)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.vault_not_found_title)
+            .setMessage(R.string.vault_not_found_desc)
+            .setView(input)
+            .setPositiveButton(R.string.change_vault) { _, _ ->
+                val newPackage = input.text.toString()
+                val tempClient = SakshiClient.create(this@MainActivity)
+                lifecycleScope.launch {
+                    if (tempClient.pingVault().isSuccess) {
+                        camConfig.vaultPackage = newPackage
+                        sakshiClient = tempClient
+                    } else {
+                        if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
+                    }
+                }
+            }
+            .setNeutralButton(R.string.download_sakshi_vault) { _, _ ->
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse("https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk")
+                startActivity(i)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .setCancelable(false)
+            .show()
+    }
+
+    fun handleCopyDone(fileId: String) {
+        lifecycleScope.launch {
+            sakshiClient.observeCopyDone(fileId).collect { result ->
+                when (result) {
+                    is SakshiResult.Success -> {
+                        val ack = result.data
+                        // TODO: Implement post-copy behavior later
+                        // We received the callback correctly, but we won't implement the functionality yet.
+                    }
+                    is SakshiResult.Failure -> {
+                        // Implement proper error handling for SDK interaction
+                        // Log the error or handle it
+                    }
+                }
+            }
         }
     }
 }

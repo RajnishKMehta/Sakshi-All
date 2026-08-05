@@ -100,6 +100,8 @@ dependencies {
 
     implementation(libs.zxing.core)
 
+    implementation(libs.sakshi.sdk)
+
     androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.test.ext.junit.ktx)
     androidTestImplementation(libs.androidx.test.rules)
