@@ -16,14 +16,14 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportWidth="108"
+    android:viewportHeight="108">
     <!-- android:tint="?attr/colorControlNormal"> -->
     <group
-        android:scaleX="2.079"
-        android:scaleY="2.079"
-        android:translateX="29.052"
-        android:translateY="31.131">
+        android:scaleX="0.05625"
+        android:scaleY="0.05625"
+        android:translateX="27"
+        android:translateY="27">
 
     <path
         android:fillColor="@android:color/white"
