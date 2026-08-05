@@ -35,7 +35,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
-                <app.grapheneos.camera.ui.QROverlay
+                <rajnishkmehta.sakshi.camera.ui.QROverlay
                     android:id="@+id/qr_overlay"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -137,7 +137,7 @@
 
                 </FrameLayout>
 
-                <app.grapheneos.camera.ui.CountDownTimerUI
+                <rajnishkmehta.sakshi.camera.ui.CountDownTimerUI
                     android:id="@+id/c_timer"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -152,7 +152,7 @@
                     app:layout_constraintEnd_toEndOf="@id/preview"
                     app:layout_constraintBottom_toBottomOf="@id/preview"/>
 
-                <app.grapheneos.camera.ui.CustomGrid
+                <rajnishkmehta.sakshi.camera.ui.CustomGrid
                     android:id="@+id/preview_grid"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -404,7 +404,7 @@
                 android:layout_marginBottom="10dp"
                 android:importantForAccessibility="no"/>
 
-            <app.grapheneos.camera.ui.seekbar.ZoomBar
+            <rajnishkmehta.sakshi.camera.ui.seekbar.ZoomBar
                 android:id="@+id/zoom_bar"
                 android:layout_width="wrap_content"
                 android:progressTint="@android:color/transparent"
@@ -452,7 +452,7 @@
                     android:layout_gravity="center"
                     android:background="#99ffffff"/>
 
-                <app.grapheneos.camera.ui.seekbar.ExposureBar
+                <rajnishkmehta.sakshi.camera.ui.seekbar.ExposureBar
                     android:id="@+id/exposure_bar"
                     android:layout_width="wrap_content"
                     android:progressTint="@android:color/transparent"
@@ -474,7 +474,7 @@
 
         </LinearLayout>
 
-        <app.grapheneos.camera.ui.BottomTabLayout
+        <rajnishkmehta.sakshi.camera.ui.BottomTabLayout
             android:id="@+id/camera_mode_tabs"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
@@ -557,7 +557,7 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
 
-                    <app.grapheneos.camera.ui.QRToggle
+                    <rajnishkmehta.sakshi.camera.ui.QRToggle
                         android:id="@+id/qr_scan_toggle"
                         android:layout_width="@dimen/qr_toggle_button_size"
                         android:layout_height="@dimen/qr_toggle_button_size"
@@ -591,7 +591,7 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
 
-                    <app.grapheneos.camera.ui.QRToggle
+                    <rajnishkmehta.sakshi.camera.ui.QRToggle
                         android:id="@+id/data_matrix_toggle"
                         android:layout_gravity="center"
                         android:src="@drawable/data_matrix"
@@ -625,7 +625,7 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
 
-                    <app.grapheneos.camera.ui.QRToggle
+                    <rajnishkmehta.sakshi.camera.ui.QRToggle
                         android:id="@+id/aztec_toggle"
                         android:layout_gravity="center"
                         android:src="@drawable/aztec"
@@ -659,7 +659,7 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
 
-                <app.grapheneos.camera.ui.QRToggle
+                <rajnishkmehta.sakshi.camera.ui.QRToggle
                     android:id="@+id/pdf417_toggle"
                     android:layout_gravity="center"
                     android:src="@drawable/pdf417"
