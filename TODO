@@ -1,0 +1,99 @@
+Before implementing any Sakshi SDK integration, first study the SDK documentation completely.
+
+Read these documents in order:
+
+1. https://github.com/RajnishKMehta/Sakshi-SDK/blob/main/README.md
+2. temp-docs/sakshi-sdk_api_usage.adoc (local file)
+3. https://github.com/RajnishKMehta/Sakshi-SDK/blob/main/docs/architecture.adoc
+4. https://github.com/RajnishKMehta/Sakshi-SDK/blob/main/docs/ipc_specification.adoc (optional reference if needed)
+
+Do not start implementation until you fully understand how the SDK works.
+
+To avoid repeatedly searching through the documentation, create concise reference notes inside the `temp-docs/` directory containing only the important APIs, workflows, callbacks, request/response models, and integration details that will be useful during development.
+
+Use those notes as your temporary reference while implementing the project.
+
+----------------------------
+
+After understanding the SDK, begin integrating it into Sakshi Camera.
+
+Implement the integration cleanly using modern Android best practices.
+
+Follow the SDK documentation exactly wherever applicable.
+
+--------------
+Default Camera Settings
+--------------
+
+Update the default camera preferences:
+
+- Camera Sounds: OFF
+- Zero Shutter Lag: ON
+- Image Quality: 100%
+- Remove EXIF after capture: OFF
+
+--------------
+Vault Integration
+--------------
+
+Default Vault package:
+
+rajnishkmehta.sakshi.vault
+
+When the Camera application starts:
+
+1. Determine the currently configured Vault package.
+2. Use the Sakshi SDK to send a Vault Ping request.
+3. Validate the response using `VaultPingResponse`.
+
+If the Vault responds successfully:
+
+- Continue normally.
+
+If no compatible Vault responds:
+
+- Show a user-friendly dialog explaining that the configured Vault application is unavailable.
+- Allow the user to select another installed application.
+- Verify the selected application using the SDK ping before accepting it.
+- If validation succeeds, save it as the new Vault application.
+- If validation fails, display an error and ask the user to choose another application.
+
+The dialog should also include a secondary action:
+
+"If you don't have a compatible Vault installed, download the official Sakshi Vault."
+
+Download URL:
+
+https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk
+
+The currently selected Vault application must also be configurable later from the Camera settings screen.
+
+--------------
+SDK Events
+--------------
+
+Implement handling for all important SDK callbacks and errors.
+
+For `CopyDoneAck`:
+
+- Receive the callback correctly.
+- Add a clear TODO indicating that the post-copy behavior will be implemented later.
+- Do not implement that functionality yet.
+
+Implement proper error handling for every SDK interaction.
+
+--------------
+Implementation Quality
+--------------
+
+Keep the integration:
+
+- Clean
+- Modular
+- Well documented
+- Maintainable
+- Consistent with the existing project architecture
+
+If you discover any limitation, missing SDK API, or documentation issue during integration, document it before implementing workarounds.
+
+Only begin coding after the documentation has been fully understood.
