@@ -235,4 +235,13 @@
 
     <string name="wait_for_focus_lock">Wait for Focus Lock</string>
     <string name="invalid_photo_quality_value">Invalid value set for photo quality</string>
+
+    <string name="vault_package">Vault Application</string>
+    <string name="vault_package_desc">Change the Vault app package for secure data storage</string>
+
+
+    <string name="vault_not_found_title">Vault Unavailable</string>
+    <string name="vault_not_found_desc">The configured Vault application is unavailable.</string>
+    <string name="download_sakshi_vault">Download Official Vault</string>
+    <string name="change_vault">Change Vault App</string>
 </resources>

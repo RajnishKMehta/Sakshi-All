@@ -42,6 +42,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
 class VideoCapturer(private val mActivity: MainActivity) {
 
     val camConfig = mActivity.camConfig
@@ -214,68 +217,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
                 if (event is VideoRecordEvent.Start) {
                     onRecordingStart()
-                }
-
-                if (event is VideoRecordEvent.Status) {
-                    updateTimerTime(event.recordingStats.recordedDurationNanos)
-                }
-
-                if (event is VideoRecordEvent.Finalize) {
-                    afterRecordingStops()
-
-                    camConfig.mPlayer.playVRStopSound()
-
-                    if (event.hasError()) {
-                        when (event.error) {
-                            VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA -> {
-                                discardUnusedOutput(recordingCtx)
-                                ctx.showMessage(R.string.recording_too_short_to_be_saved)
-                                return@start
-                            }
-                            VideoRecordEvent.Finalize.ERROR_ENCODING_FAILED,
-                            VideoRecordEvent.Finalize.ERROR_RECORDER_ERROR,
-                            VideoRecordEvent.Finalize.ERROR_UNKNOWN -> {
-                                discardUnusedOutput(recordingCtx)
-                                ctx.showMessage(ctx.getString(R.string.unable_to_save_video_verbose, event.error))
-                                return@start
-                            }
-                            else -> {
-                                ctx.showMessage(ctx.getString(R.string.error_during_recording, event.error))
-                                // The errors left unnamed here (the camera going away, storage
-                                // running out) finalize whatever was written before they hit, which
-                                // is worth keeping — but only if anything was.
-                                if (event.recordingStats.numBytesRecorded == 0L) {
-                                    discardUnusedOutput(recordingCtx)
-                                    return@start
-                                }
-                            }
-                        }
-                    }
-
-                    val uri = recordingCtx.uri
-
-                    if (recordingCtx.isPendingMediaStoreUri) {
-                        try {
-                            removePendingFlagFromUri(ctx.contentResolver, uri)
-                        } catch (e: Exception) {
-                            ctx.showMessage(R.string.unable_to_save_video)
-                        }
-                    }
-
-                    if (recordingCtx.shouldAddToGallery) {
-                        val item = CapturedItem(ITEM_TYPE_VIDEO, dateString, uri)
-                        camConfig.updateLastCapturedItem(item)
-
-                        ctx.updateThumbnail()
-
-                        if (ctx is SecureMainActivity) {
-                            ctx.capturedItems.add(item)
-                        }
-                    }
-
-                    if (ctx is VideoCaptureActivity) {
-                        ctx.afterRecording(uri)
-                    }
                 }
             }
 
