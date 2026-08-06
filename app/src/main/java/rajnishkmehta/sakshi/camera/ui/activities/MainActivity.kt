@@ -1890,7 +1890,11 @@ open class MainActivity : AppCompatActivity(),
 
 
     private fun checkVault() {
-        sakshiClient = SakshiClient.create(this@MainActivity)
+        val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
+            vaultPackageName = camConfig.vaultPackage,
+            connectionTimeoutMs = 5000L
+        )
+        sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
 
         lifecycleScope.launch {
             val pingResult = sakshiClient.pingVault()
@@ -1905,35 +1909,22 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun showVaultUnavailableDialog() {
-        val input = android.widget.EditText(this)
-        input.setText(camConfig.vaultPackage)
-        val padding = (16 * resources.displayMetrics.density).toInt()
-        input.setPadding(padding, padding, padding, padding)
+        val dialog = rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog()
+        dialog.isMandatory = true
+        dialog.show(supportFragmentManager, rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog.TAG)
 
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.vault_not_found_title)
-            .setMessage(R.string.vault_not_found_desc)
-            .setView(input)
-            .setPositiveButton(R.string.change_vault) { _, _ ->
-                val newPackage = input.text.toString()
-                val tempClient = SakshiClient.create(this@MainActivity)
-                lifecycleScope.launch {
-                    if (tempClient.pingVault().isSuccess) {
-                        camConfig.vaultPackage = newPackage
-                        sakshiClient = tempClient
-                    } else {
-                        if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
-                    }
-                }
+        supportFragmentManager.setFragmentResultListener("vault_selection", this) { _, bundle ->
+            val newPackage = bundle.getString("package_name")
+            if (newPackage != null) {
+                // The dialog already updated camConfig.vaultPackage
+                // We just need to re-create our SakshiClient to point to the new package
+                val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
+                    vaultPackageName = newPackage,
+                    connectionTimeoutMs = 5000L
+                )
+                sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
             }
-            .setNeutralButton(R.string.download_sakshi_vault) { _, _ ->
-                val i = Intent(Intent.ACTION_VIEW)
-                i.data = Uri.parse("https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk")
-                startActivity(i)
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .setCancelable(false)
-            .show()
+        }
     }
 
     fun handleCopyDone(fileId: String) {

@@ -206,7 +206,23 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
             sVAPToggle.performClick()
         }
 
+
         val sLS = binding.storageLocationSetting
+
+        binding.vaultPackageSetting.setOnClickListener {
+            val dialog = rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog()
+            dialog.isMandatory = false
+            dialog.show(supportFragmentManager, rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog.TAG)
+        }
+
+        supportFragmentManager.setFragmentResultListener("vault_selection", this) { _, bundle ->
+            val newPackage = bundle.getString("package_name")
+            if (newPackage != null) {
+                binding.vaultPackageSubtitle.text = newPackage
+            }
+        }
+        binding.vaultPackageSubtitle.text = camConfig.vaultPackage
+
         sLS.setOnClickListener {
             sLField.performClick()
         }
