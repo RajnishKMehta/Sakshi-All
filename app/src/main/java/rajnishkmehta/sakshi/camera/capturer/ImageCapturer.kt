@@ -25,8 +25,10 @@ import rajnishkmehta.sakshi.camera.ui.showIgnoringShortEdgeMode
 import rajnishkmehta.sakshi.camera.util.printStackTraceToString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-private const val imageFileFormat = ".jpg"
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
+private const val imageFileFormat = ".jpg"
 class ImageCapturer(val mActivity: MainActivity) {
     val camConfig = mActivity.camConfig
 
@@ -171,6 +173,20 @@ class ImageCapturer(val mActivity: MainActivity) {
 
         if (mActivity is SecureMainActivity) {
             mActivity.capturedItems.add(item)
+        }
+
+        val mimeType = item.mimeType()
+        val fileId = item.fileName()
+        val photoRequest = rajnishkmehta.sakshi.sdk.api.models.PhotoRequest(
+            fileId = fileId,
+            uri = item.uri,
+            mimeType = mimeType
+        )
+        mActivity.lifecycleScope.launch {
+            val result = mActivity.sakshiClient.sendPhoto(photoRequest)
+            if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
+                android.util.Log.e("SakshiSDK", "Photo ingestion failed: ${result.error.message}")
+            }
         }
     }
 
