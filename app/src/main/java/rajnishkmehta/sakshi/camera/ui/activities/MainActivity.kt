@@ -1896,9 +1896,12 @@ open class MainActivity : AppCompatActivity(),
         )
         sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
 
+
         lifecycleScope.launch {
             val pingResult = sakshiClient.pingVault()
             if (!pingResult.isSuccess) {
+                val msg = pingResult.errorOrNull()?.message ?: "Unknown error"
+                android.widget.Toast.makeText(this@MainActivity, "Ping failed: $msg", android.widget.Toast.LENGTH_LONG).show()
                 if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
             }
 

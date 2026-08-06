@@ -28,7 +28,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
+import java.util.UUID
+import java.util.Locale
+
 private const val imageFileFormat = ".jpg"
+
 class ImageCapturer(val mActivity: MainActivity) {
     val camConfig = mActivity.camConfig
 
@@ -175,8 +179,12 @@ class ImageCapturer(val mActivity: MainActivity) {
             mActivity.capturedItems.add(item)
         }
 
+
         val mimeType = item.mimeType()
-        val fileId = item.fileName()
+        // Generate a better ID than just filename
+        val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
+        val fileId = "img_${uniqueHash}"
+
         val photoRequest = rajnishkmehta.sakshi.sdk.api.models.PhotoRequest(
             fileId = fileId,
             uri = item.uri,
@@ -185,9 +193,10 @@ class ImageCapturer(val mActivity: MainActivity) {
         mActivity.lifecycleScope.launch {
             val result = mActivity.sakshiClient.sendPhoto(photoRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                android.util.Log.e("SakshiSDK", "Photo ingestion failed: ${result.error.message}")
+                android.util.Log.e("SakshiSDK", "Photo ingestion failed: " + result.error.message)
             }
         }
+
     }
 
     fun onStorageLocationNotFound() {

@@ -95,11 +95,23 @@ class VaultSelectionDialog : DialogFragment() {
             override fun onBackPressed() {
                 if (isMandatory) {
                     if (backPressedOnce) {
-                        requireActivity().finish()
+                        // "double back par camera khul jaye ye jo abhi app hi close ho jata hai wo nahi ho"
+                        // Wait, the user said "double back par camera khul jaye ye jo abhi app hi close ho jata hai wo nahi ho bas wo vault select wala kat jaye"
+                        // Which means on double back, just dismiss the dialog and continue with the app!
+                        dismissAllowingStateLoss()
                     } else {
                         backPressedOnce = true
-                        Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
-                        view?.postDelayed({ backPressedOnce = false }, 2000)
+                        Toast.makeText(context, "Press back again to use Camera without Vault", Toast.LENGTH_SHORT).show()
+                        val v = view
+                        if (v != null) {
+                            v.postDelayed({ backPressedOnce = false }, 2000)
+                        } else {
+                            // If view is null (which shouldn't happen while dialog is open), use a coroutine
+                            lifecycleScope.launch {
+                                kotlinx.coroutines.delay(2000)
+                                backPressedOnce = false
+                            }
+                        }
                     }
                 } else {
                     super.onBackPressed()
