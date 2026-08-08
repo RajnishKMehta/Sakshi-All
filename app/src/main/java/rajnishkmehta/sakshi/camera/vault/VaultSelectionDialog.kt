@@ -18,12 +18,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.camera.CamConfig
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import rajnishkmehta.sakshi.camera.R
 
-class VaultSelectionDialog : DialogFragment() {
+class VaultSelectionDialog : BottomSheetDialogFragment() {
 
     private val viewModel: VaultSelectionViewModel by viewModels()
     private lateinit var adapter: VaultAppAdapter
@@ -35,7 +38,7 @@ class VaultSelectionDialog : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
+        setStyle(STYLE_NORMAL, R.style.Theme_VaultSelection)
     }
 
     override fun onCreateView(
@@ -91,54 +94,53 @@ class VaultSelectionDialog : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = object : Dialog(requireContext(), theme) {
-            override fun onBackPressed() {
-                if (isMandatory) {
+        val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+
+        dialog.setOnShowListener {
+            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            if (bottomSheet != null) {
+                val behavior = BottomSheetBehavior.from(bottomSheet)
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.skipCollapsed = true
+            }
+        }
+
+        if (isMandatory) {
+            dialog.onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
                     if (backPressedOnce) {
-                        // "double back par camera khul jaye ye jo abhi app hi close ho jata hai wo nahi ho"
-                        // Wait, the user said "double back par camera khul jaye ye jo abhi app hi close ho jata hai wo nahi ho bas wo vault select wala kat jaye"
-                        // Which means on double back, just dismiss the dialog and continue with the app!
                         dismissAllowingStateLoss()
                     } else {
                         backPressedOnce = true
                         Toast.makeText(context, "Press back again to use Camera without Vault", Toast.LENGTH_SHORT).show()
-                        val v = view
-                        if (v != null) {
-                            v.postDelayed({ backPressedOnce = false }, 2000)
-                        } else {
-                            // If view is null (which shouldn't happen while dialog is open), use a coroutine
-                            lifecycleScope.launch {
-                                kotlinx.coroutines.delay(2000)
-                                backPressedOnce = false
-                            }
+                        lifecycleScope.launch {
+                            kotlinx.coroutines.delay(2000)
+                            backPressedOnce = false
                         }
                     }
-                } else {
-                    super.onBackPressed()
                 }
-            }
+            })
+            dialog.setCanceledOnTouchOutside(false)
+            dialog.setCancelable(false)
         }
-        dialog.setCanceledOnTouchOutside(!isMandatory)
-        dialog.setCancelable(!isMandatory)
+
         return dialog
     }
 
     private fun onAppSelected(appInfo: AppInfo) {
-        // Show loading/verifying state if needed
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
 
         viewModel.verifyVaultApp(appInfo.packageName) { isCompatible ->
             if (!isAdded) return@verifyVaultApp
             if (isCompatible) {
-                val camConfig = CamConfig(requireActivity() as MainActivity)
-                camConfig.vaultPackage = appInfo.packageName
+                if (requireActivity() is MainActivity) {
+                    val camConfig = CamConfig(requireActivity() as MainActivity)
+                    camConfig.vaultPackage = appInfo.packageName
+                }
+
                 Toast.makeText(requireContext(), "Vault updated successfully", Toast.LENGTH_SHORT).show()
 
-                // If it's mandatory, we might need to notify MainActivity to refresh SakshiClient
-                // A better approach would be to have an interface callback, but for simplicity we can dismiss
-                // and let MainActivity recreate it if we use a callback or broadcast.
-                // We'll use parentFragmentManager result API.
                 parentFragmentManager.setFragmentResult("vault_selection", Bundle().apply {
                     putString("package_name", appInfo.packageName)
                 })

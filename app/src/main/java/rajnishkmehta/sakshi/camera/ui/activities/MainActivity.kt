@@ -1901,7 +1901,9 @@ open class MainActivity : AppCompatActivity(),
             val pingResult = sakshiClient.pingVault()
             if (!pingResult.isSuccess) {
                 val msg = pingResult.errorOrNull()?.message ?: "Unknown error"
-                android.widget.Toast.makeText(this@MainActivity, "Ping failed: $msg", android.widget.Toast.LENGTH_LONG).show()
+                // Let user know the Vault connection failed
+                android.widget.Toast.makeText(this@MainActivity, "Vault connection failed: $msg", android.widget.Toast.LENGTH_LONG).show()
+                // Force selection dialog whenever vault ping fails
                 if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
             }
 
