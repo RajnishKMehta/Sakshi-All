@@ -1,0 +1,39 @@
+# Built application & library files
+*.apk
+*.aar
+*.jar
+*.war
+*.ear
+*.bundle
+
+# Files for the Android Tooling
+.gradle/
+build/
+sakshi-sdk/build/
+captured_blobs/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log Files
+*.log
+.cache
+.profile
+.bash_history
+.replit
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.navigation/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+.directory
+
+# Keystore files
+*.jks
+*.keystore

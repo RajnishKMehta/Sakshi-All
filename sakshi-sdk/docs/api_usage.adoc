@@ -1,0 +1,155 @@
+= Sakshi SDK Client API Usage Guide
+Rajnish Kumar <RajnishKMehta@proton.me>
+v1.0.0-beta.4, 2026-07-30
+:description: Guide for developers building client applications using the Sakshi SDK.
+:keywords: sakshi, sdk, client, api, android, camera, audio, integration
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: highlight.js
+
+== 1. Overview
+
+This guide explains how developers building client applications (e.g. Camera, Audio Recorder, or Viewer apps) use the **Sakshi SDK** to communicate with Sakshi Vault.
+
+== 2. Initialization
+
+Instantiate `SakshiClient` using `SakshiClient.create(...)`:
+
+[source,kotlin]
+----
+import android.content.Context
+import rajnishkmehta.sakshi.sdk.api.SakshiClient
+import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
+
+val config = SakshiClientConfig(
+    vaultPackageName = "rajnishkmehta.sakshi.vault",
+    connectionTimeoutMs = 5000L
+)
+
+val client: SakshiClient = SakshiClient.create(context, config)
+----
+
+== 3. Vault Service Health Check (Ping)
+
+Verify whether the Vault application is installed and responsive:
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
+
+val pingResult: SakshiResult<VaultPingResponse> = client.pingVault()
+if (pingResult.isSuccess) {
+    val pingResponse = pingResult.getOrNull()
+    println("Vault is available! Version: ${pingResponse?.vaultVersion}, latency: ${pingResponse?.responseTimeMs}ms")
+} else {
+    println("Ping failed: ${pingResult.errorOrNull()?.message}")
+}
+----
+
+== 4. Photo Submission
+
+Send a photo payload to Vault for storage:
+
+[source,kotlin]
+----
+import android.net.Uri
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
+import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
+
+val photoRequest = PhotoRequest(
+    fileId = "photo_2026_1001",
+    uri = photoContentUri, // android.net.Uri
+    mimeType = "${mimeType}" // example image/jpeg
+)
+
+val result: SakshiResult<CopyDoneAck> = client.sendPhoto(photoRequest)
+when (result) {
+    is SakshiResult.Success -> {
+        val ack = result.data
+        println("Photo ingested successfully! File ID: ${ack.fileId}, Bytes: ${ack.totalCopiedBytes}")
+    }
+    is SakshiResult.Failure -> {
+        println("Photo ingestion failed: ${result.error.message}")
+    }
+}
+----
+
+== 5. Incremental Video Synchronization
+
+Start video sync when a recording begins:
+
+[source,kotlin]
+----
+import android.net.Uri
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest
+import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+
+val videoRequest = VideoSyncRequest(
+    fileId = "video_rec_999",
+    uri = activeVideoRecordingUri, // android.net.Uri
+    mimeType = "${mimeType}" // example video/mp4
+)
+
+// Collect real-time progress updates
+lifecycleScope.launch {
+    client.startVideoSync(videoRequest).collect { result ->
+        when (result) {
+            is SakshiResult.Success -> {
+                val status = result.data
+                println("Sync State: ${status.state}, Offset: ${status.lastCopiedOffsetBytes} bytes")
+            }
+            is SakshiResult.Failure -> {
+                println("Sync Error: ${result.error.message}")
+            }
+        }
+    }
+}
+----
+
+== 6. Observing Copy Done Acknowledgement
+
+Client applications can explicitly observe when Vault finishes copying a file:
+
+[source,kotlin]
+----
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
+
+lifecycleScope.launch {
+    client.observeCopyDone("video_rec_999").collect { result ->
+        when (result) {
+            is SakshiResult.Success -> {
+                val ack: CopyDoneAck = result.data
+                println("Copy Done! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
+            }
+            is SakshiResult.Failure -> {
+                println("Copy observation error: ${result.error.message}")
+            }
+        }
+    }
+}
+----
+
+== 7. Querying Recording Status
+
+Check if a recording exists in Vault database:
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
+
+val queryResult: SakshiResult<RecordingQueryResponse> = client.isRecordingSynced("video_rec_999")
+val response = queryResult.getOrNull()
+if (response != null && response.exists) {
+    println("Recording exists in Vault! Completed: ${response.isCompleted}, Last Offset: ${response.lastCopiedOffsetBytes}")
+}
+----
