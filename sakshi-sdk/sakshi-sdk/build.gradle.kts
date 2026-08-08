@@ -1,10 +1,6 @@
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.SourcesJar
-
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.maven.publish)
+    id("com.android.library")
+
 }
 
 android {
@@ -49,58 +45,8 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.annotation)
-    implementation(libs.androidx.core.ktx)
-}
-
-mavenPublishing {
-    coordinates("io.github.rajnishkmehta.sakshi", "sakshi-sdk", libs.versions.sakshi.sdk.get())
-
-    publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
-
-    configure(AndroidSingleVariantLibrary(
-        javadocJar = JavadocJar.Empty(),
-        sourcesJar = SourcesJar.Sources(),
-        variant = "release"
-    ))
-
-    pom {
-        name.set("Sakshi SDK")
-        description.set("Official Android SDK for building secure integrations with the Sakshi ecosystem through a modern IPC communication layer.")
-        url.set("https://github.com/RajnishKMehta/sakshi-sdk")
-
-        licenses {
-            license {
-                name.set("Apache License, Version 2.0")
-                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-            }
-        }
-
-        developers {
-            developer {
-                id.set("rajnishkmehta")
-                name.set("Rajnish")
-                email.set("RajnishKMehta@proton.me")
-            }
-        }
-
-        scm {
-            connection.set("scm:git:github.com/RajnishKMehta/sakshi-sdk.git")
-            developerConnection.set("scm:git:ssh://github.com/RajnishKMehta/sakshi-sdk.git")
-            url.set("https://github.com/RajnishKMehta/sakshi-sdk")
-        }
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "githubPackages"
-            url = uri("https://maven.pkg.github.com/RajnishKMehta/sakshi-sdk")
-            credentials(PasswordCredentials::class)
-        }
-    }
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.annotation:annotation:1.7.1")
+    implementation("androidx.core:core-ktx:1.12.0")
 }

@@ -1,0 +1,79 @@
+name: Manual Multi-Variant Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-all:
+    name: Build All APK Variants
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Setup Keystore (Decode existing or generate new)
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding Keystore from GitHub Secrets..."
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.keystore
+          else
+            echo "Keystore secret not found. Generating a new temporary Keystore..."
+            keytool -genkey -v \
+              -keystore app/release.keystore \
+              -alias "${{ secrets.KEY_ALIAS || 'tempAlias' }}" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass "${{ secrets.KEYSTORE_PASSWORD || 'tempPassword' }}" \
+              -keypass "${{ secrets.KEY_PASSWORD || 'tempPassword' }}" \
+              -dname "CN=SakshiVault, OU=Development, O=SakshiVault, L=City, S=State, C=US"
+          fi
+
+      - name: Build All APKs (Debug & Release)
+        env:
+          KEYSTORE_FILE: release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'tempPassword' }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'tempAlias' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'tempPassword' }}
+        run: |
+          # Runs checks and builds all debug and release APK variants
+          ./gradlew check assemble
+
+      - name: Clean up Keystore
+        if: always()
+        run: rm -f app/release.keystore
+
+      - name: Upload All Generated APKs as Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: sakshi-vault-apks-${{ github.sha }}
+          path: |
+           **/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload All Generated aab as Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: sakshi-vault-apks-${{ github.sha }}
+          path: |
+           **/*.aab
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Find all APK files
+        run: |
+         echo "Searching for APKs..."
+         find . -type f -name "*.apk"

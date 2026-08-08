@@ -3,6 +3,11 @@ name: Build application
 on:
   workflow_dispatch: 
   push:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
     branches: [main]
   pull_request:
 

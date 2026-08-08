@@ -131,9 +131,9 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
 
-        viewModel.verifyVaultApp(appInfo.packageName) { isCompatible ->
+        viewModel.verifyVaultApp(appInfo.packageName) { result ->
             if (!isAdded) return@verifyVaultApp
-            if (isCompatible) {
+            if (result.isSuccess) {
                 if (requireActivity() is MainActivity) {
                     val camConfig = CamConfig(requireActivity() as MainActivity)
                     camConfig.vaultPackage = appInfo.packageName
@@ -148,7 +148,8 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
             } else {
                 progressBar.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), "Selected app is not a compatible Sakshi Vault", Toast.LENGTH_LONG).show()
+                val errorMsg = result.errorOrNull()?.message ?: "Selected app is not a compatible Sakshi Vault"
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
             }
         }
     }
