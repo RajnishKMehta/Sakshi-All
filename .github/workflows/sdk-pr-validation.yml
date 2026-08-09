@@ -7,16 +7,6 @@ on:
       - "**"
     paths:
       - 'sakshi-sdk/**'
-    paths-ignore:
-      - "**/*.md"
-      - "**/*.adoc"
-      - "**/*.txt"
-      - "LICENSE"
-      - ".gitignore"
-      - ".editorconfig"
-      - ".gitattributes"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
 
   # Allow manual runs
   workflow_dispatch:
@@ -30,6 +20,10 @@ jobs:
   validate:
     name: Validate PR & Build
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: sakshi-sdk
 
     steps:
       # Checkout repository
@@ -49,4 +43,4 @@ jobs:
 
       # Validate and build release AAR
       - name: Validate PR & Build
-        run: ./gradlew :sakshi-sdk:check :sakshi-sdk:assembleRelease
+        run: ./gradlew check assembleRelease

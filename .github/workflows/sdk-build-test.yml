@@ -7,14 +7,6 @@ on:
       - main
     paths:
       - 'sakshi-sdk/**'
-    paths-ignore:
-      - "**/*.md"
-      - "LICENSE"
-      - ".gitignore"
-      - ".editorconfig"
-      - ".gitattributes"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
 
   # manual run
   workflow_dispatch:
@@ -28,6 +20,10 @@ jobs:
   build:
     name: Build & Run Tests
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: sakshi-sdk
 
     steps:
       # Checkout Repo
@@ -51,4 +47,4 @@ jobs:
 
       # Build, lint and run all checks
       - name: Build & Test
-        run: ./gradlew :sakshi-sdk:check :sakshi-sdk:assembleRelease
+        run: ./gradlew check assembleRelease

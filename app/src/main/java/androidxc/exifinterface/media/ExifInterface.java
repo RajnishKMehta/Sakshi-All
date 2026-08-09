@@ -131,6 +131,7 @@ import java.util.zip.CRC32;
  *       </ul>
  * </ul>
  */
+@SuppressWarnings({"this-escape"})
 public class ExifInterface {
     private static final String TAG = "ExifInterface";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -4091,6 +4092,7 @@ public class ExifInterface {
      * @throws IOException if an I/O error occurs while retrieving file descriptor via
      *         {@link FileInputStream#getFD()}.
      */
+    @SuppressWarnings({"this-escape"})
     public ExifInterface(@NonNull File file) throws IOException {
         if (file == null) {
             throw new NullPointerException("file cannot be null");
@@ -4106,6 +4108,7 @@ public class ExifInterface {
      * @throws IOException if an I/O error occurs while retrieving file descriptor via
      *         {@link FileInputStream#getFD()}.
      */
+    @SuppressWarnings({"this-escape"})
     public ExifInterface(@NonNull String filename) throws IOException {
         if (filename == null) {
             throw new NullPointerException("filename cannot be null");
@@ -4122,6 +4125,7 @@ public class ExifInterface {
      * @throws NullPointerException if file descriptor is null
      * @throws IOException if an error occurs while duplicating the file descriptor.
      */
+    @SuppressWarnings({"this-escape"})
     public ExifInterface(@NonNull FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
             throw new NullPointerException("fileDescriptor cannot be null");
@@ -4165,6 +4169,7 @@ public class ExifInterface {
      * @param inputStream the input stream that contains the image data
      * @throws NullPointerException if the input stream is null
      */
+    @SuppressWarnings({"this-escape"})
     public ExifInterface(@NonNull InputStream inputStream) throws IOException {
         this(inputStream, STREAM_TYPE_FULL_IMAGE_DATA);
     }
@@ -4181,6 +4186,7 @@ public class ExifInterface {
      * @throws IOException if an I/O error occurs while retrieving file descriptor via
      *         {@link FileInputStream#getFD()}.
      */
+    @SuppressWarnings({"this-escape"})
     public ExifInterface(@NonNull InputStream inputStream, @ExifStreamType int streamType)
             throws IOException {
         if (inputStream == null) {
@@ -4401,7 +4407,7 @@ public class ExifInterface {
      * @param tag the name of the tag.
      * @param value the value of the tag.
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "this-escape"})
     public void setAttribute(@NonNull String tag, @Nullable String value) {
         if (tag == null) {
             throw new NullPointerException("tag shouldn't be null");

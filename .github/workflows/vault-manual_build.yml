@@ -8,6 +8,10 @@ jobs:
     name: Build All APK Variants
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: sakshi-vault
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7

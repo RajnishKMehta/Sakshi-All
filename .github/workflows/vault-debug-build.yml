@@ -6,13 +6,6 @@ on:
   pull_request:
     paths:
       - 'sakshi-vault/**'
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.adoc'
-      - 'docs/**'
-      - 'README*'
-      - 'LICENSE'
-      - '.gitignore'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -22,6 +15,10 @@ jobs:
   debug-build:
     name: Build Debug APK
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: sakshi-vault
 
     steps:
       - name: Checkout Repository
