@@ -38,6 +38,20 @@ class SakshiVaultRemoteService : Service() {
     private lateinit var scheduler: SyncScheduler
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
+    @Volatile
+    private var isInitialized = false
+
+    @Synchronized
+    private fun ensureInitialized() {
+        if (!isInitialized) {
+            database = VaultDatabase.getDatabase(this)
+            storageManager = AppPrivateStorageManager(this)
+            copyEngine = CopyEngine(this, database, storageManager)
+            scheduler = SyncScheduler(this, database, copyEngine)
+            isInitialized = true
+        }
+    }
+
     private val binder = object : ISakshiVaultService.Stub() {
 
         /**
@@ -45,10 +59,19 @@ class SakshiVaultRemoteService : Service() {
          */
         override fun ping(requestBundle: Bundle): Bundle {
             Log.d(tag, "Received ping request")
-            return Bundle().apply {
-                putBoolean("is_available", true)
-                putString("vault_version", "1.0.0")
-                putLong("timestamp", System.currentTimeMillis())
+            return try {
+                ensureInitialized()
+                Bundle().apply {
+                    putBoolean("is_available", true)
+                    putString("vault_version", "1.0.0")
+                    putLong("timestamp", System.currentTimeMillis())
+                }
+            } catch (e: Throwable) {
+                Log.e(tag, "Error processing ping request", e)
+                Bundle().apply {
+                    putBoolean("is_available", false)
+                    putString("error_message", "Vault service initialization or ping failed: ${e.message}")
+                }
             }
         }
 
@@ -57,38 +80,47 @@ class SakshiVaultRemoteService : Service() {
          * persists metadata in the database, and acknowledges success.
          */
         override fun sendPhoto(photoBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = photoBundle.getString("file_id") ?: ""
-            val uriStr = photoBundle.getString("uri") ?: ""
-            val mimeType = photoBundle.getString("mime_type")
-            Log.d(tag, "Received sendPhoto request: fileId=$fileId, uri=$uriStr, mimeType=$mimeType")
+            try {
+                ensureInitialized()
+                val fileId = photoBundle.getString("file_id") ?: ""
+                val uriStr = photoBundle.getString("uri") ?: ""
+                val mimeType = photoBundle.getString("mime_type")
+                Log.d(tag, "Received sendPhoto request: fileId=$fileId, uri=$uriStr, mimeType=$mimeType")
 
-            if (fileId.isEmpty() || uriStr.isEmpty()) {
-                val error = SakshiError.Unknown("Invalid photo payload: empty file_id or uri", null)
-                VaultResponder.sendError(callback, error)
-                return
-            }
-
-            serviceScope.launch {
-                try {
-                    val vaultUriStr = copyEngine.copyPhoto(fileId, uriStr, mimeType)
-                    val realPath = vaultUriStr.removePrefix("file://")
-                    val fileLength = File(realPath).length()
-
-                    val response = CopyDoneAck(
-                        fileId,
-                        Uri.parse(vaultUriStr),
-                        fileLength,
-                        System.currentTimeMillis()
-                    )
-                    VaultResponder.sendPhotoAck(callback, response)
-                    Log.d(tag, "Successfully copied photo $fileId to vault storage")
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to copy photo $fileId", e)
-                    VaultResponder.sendError(
-                        callback,
-                        SakshiError.Unknown("Failed to copy photo to vault storage: ${e.message}", e)
-                    )
+                if (fileId.isEmpty() || uriStr.isEmpty()) {
+                    val error = SakshiError.InvalidPayload("Invalid photo payload: empty file_id or uri")
+                    VaultResponder.sendError(callback, error)
+                    return
                 }
+
+                serviceScope.launch {
+                    try {
+                        val vaultUriStr = copyEngine.copyPhoto(fileId, uriStr, mimeType)
+                        val realPath = vaultUriStr.removePrefix("file://")
+                        val fileLength = File(realPath).length()
+
+                        val response = CopyDoneAck(
+                            fileId,
+                            Uri.parse(vaultUriStr),
+                            fileLength,
+                            System.currentTimeMillis()
+                        )
+                        VaultResponder.sendPhotoAck(callback, response)
+                        Log.d(tag, "Successfully copied photo $fileId to vault storage")
+                    } catch (e: Exception) {
+                        Log.e(tag, "Failed to copy photo $fileId", e)
+                        VaultResponder.sendError(
+                            callback,
+                            SakshiError.Unknown("Failed to copy photo to vault storage: ${e.message}", e)
+                        )
+                    }
+                }
+            } catch (e: Throwable) {
+                Log.e(tag, "Error handling sendPhoto request", e)
+                VaultResponder.sendError(
+                    callback,
+                    SakshiError.IpcError(message = "Vault error handling sendPhoto: ${e.message}", cause = e)
+                )
             }
         }
 
@@ -96,19 +128,67 @@ class SakshiVaultRemoteService : Service() {
          * Registers a video file and schedules an adaptive, non-overlapping periodic synchronization loop.
          */
         override fun startVideoSync(videoSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = videoSyncBundle.getString("file_id") ?: ""
-            val sourceUriStr = videoSyncBundle.getString("uri") ?: ""
-            val mimeType = videoSyncBundle.getString("mime_type")
-            Log.d(tag, "Received startVideoSync request: fileId=$fileId, uri=$sourceUriStr, mimeType=$mimeType")
+            try {
+                ensureInitialized()
+                val fileId = videoSyncBundle.getString("file_id") ?: ""
+                val sourceUriStr = videoSyncBundle.getString("uri") ?: ""
+                val mimeType = videoSyncBundle.getString("mime_type")
+                Log.d(tag, "Received startVideoSync request: fileId=$fileId, uri=$sourceUriStr, mimeType=$mimeType")
 
-            if (fileId.isEmpty() || sourceUriStr.isEmpty()) {
-                val error = SakshiError.Unknown("Invalid video sync payload: empty file_id or uri", null)
-                VaultResponder.sendError(callback, error)
-                return
-            }
+                if (fileId.isEmpty()) {
+                    val error = SakshiError.InvalidPayload("Invalid video sync payload: empty file_id")
+                    VaultResponder.sendError(callback, error)
+                    return
+                }
 
-            serviceScope.launch {
-                scheduler.startSync(fileId, sourceUriStr, mimeType, callback)
+                if (sourceUriStr.isEmpty()) {
+                    // Check if recording already exists or is syncing
+                    serviceScope.launch {
+                        try {
+                            val record = database.mediaRecordDao().getRecord(fileId)
+                            if (record != null) {
+                                if (record.completionState == "COMPLETED") {
+                                    val uriParsed = record.vaultUri?.let { Uri.parse(it) }
+                                    VaultResponder.sendCopyDone(
+                                        callback,
+                                        CopyDoneAck(fileId, uriParsed, record.lastCopiedOffset, System.currentTimeMillis())
+                                    )
+                                } else {
+                                    scheduler.registerCallback(fileId, callback)
+                                }
+                            } else {
+                                VaultResponder.sendError(
+                                    callback,
+                                    SakshiError.InvalidPayload("Invalid video sync payload: missing 'uri' for file_id '$fileId'")
+                                )
+                            }
+                        } catch (e: Exception) {
+                            VaultResponder.sendError(
+                                callback,
+                                SakshiError.Unknown("Error checking video sync record: ${e.message}", e)
+                            )
+                        }
+                    }
+                    return
+                }
+
+                serviceScope.launch {
+                    try {
+                        scheduler.startSync(fileId, sourceUriStr, mimeType, callback)
+                    } catch (e: Exception) {
+                        Log.e(tag, "Error starting video sync for $fileId", e)
+                        VaultResponder.sendError(
+                            callback,
+                            SakshiError.Unknown("Failed to start video sync: ${e.message}", e)
+                        )
+                    }
+                }
+            } catch (e: Throwable) {
+                Log.e(tag, "Error handling startVideoSync request", e)
+                VaultResponder.sendError(
+                    callback,
+                    SakshiError.IpcError(message = "Vault error handling startVideoSync: ${e.message}", cause = e)
+                )
             }
         }
 
@@ -117,15 +197,32 @@ class SakshiVaultRemoteService : Service() {
          * to sync any remaining trailing bytes before marking as complete.
          */
         override fun stopVideoSync(fileId: String, callback: ISakshiVaultCallback) {
-            Log.d(tag, "Received stopVideoSync request: fileId=$fileId")
-            if (fileId.isEmpty()) {
-                val error = SakshiError.Unknown("Invalid stopVideoSync payload: empty file_id", null)
-                VaultResponder.sendError(callback, error)
-                return
-            }
+            try {
+                ensureInitialized()
+                Log.d(tag, "Received stopVideoSync request: fileId=$fileId")
+                if (fileId.isEmpty()) {
+                    val error = SakshiError.InvalidPayload("Invalid stopVideoSync payload: empty file_id")
+                    VaultResponder.sendError(callback, error)
+                    return
+                }
 
-            serviceScope.launch {
-                scheduler.stopSync(fileId, callback)
+                serviceScope.launch {
+                    try {
+                        scheduler.stopSync(fileId, callback)
+                    } catch (e: Exception) {
+                        Log.e(tag, "Error stopping video sync for $fileId", e)
+                        VaultResponder.sendError(
+                            callback,
+                            SakshiError.Unknown("Failed to stop video sync: ${e.message}", e)
+                        )
+                    }
+                }
+            } catch (e: Throwable) {
+                Log.e(tag, "Error handling stopVideoSync request", e)
+                VaultResponder.sendError(
+                    callback,
+                    SakshiError.IpcError(message = "Vault error handling stopVideoSync: ${e.message}", cause = e)
+                )
             }
         }
 
@@ -134,15 +231,27 @@ class SakshiVaultRemoteService : Service() {
          */
         override fun isRecordingSynced(fileId: String): Bundle {
             Log.d(tag, "Received isRecordingSynced query: fileId=$fileId")
-            val record = runBlocking {
-                database.mediaRecordDao().getRecord(fileId)
-            }
+            return try {
+                ensureInitialized()
+                val record = runBlocking {
+                    database.mediaRecordDao().getRecord(fileId)
+                }
 
-            return Bundle().apply {
-                putBoolean("exists", record != null)
-                putString("sync_state", record?.completionState ?: "IDLE_WAITING")
-                putLong("offset_bytes", record?.lastCopiedOffset ?: 0L)
-                putBoolean("is_completed", record?.completionState == "COMPLETED")
+                Bundle().apply {
+                    putBoolean("exists", record != null)
+                    putString("sync_state", record?.completionState ?: "IDLE_WAITING")
+                    putLong("offset_bytes", record?.lastCopiedOffset ?: 0L)
+                    putBoolean("is_completed", record?.completionState == "COMPLETED")
+                }
+            } catch (e: Throwable) {
+                Log.e(tag, "Error querying isRecordingSynced for $fileId", e)
+                Bundle().apply {
+                    putBoolean("exists", false)
+                    putString("sync_state", "FAILED")
+                    putLong("offset_bytes", 0L)
+                    putBoolean("is_completed", false)
+                    putString("error_message", "Vault error querying sync status: ${e.message}")
+                }
             }
         }
     }
@@ -150,14 +259,15 @@ class SakshiVaultRemoteService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d(tag, "SakshiVaultRemoteService onCreate")
-        database = VaultDatabase.getDatabase(this)
-        storageManager = AppPrivateStorageManager(this)
-        copyEngine = CopyEngine(this, database, storageManager)
-        scheduler = SyncScheduler(this, database, copyEngine)
-
-        // Automatically resume any interrupted, pending synchronizations from database
-        scheduler.resumePendingSyncs()
+        try {
+            ensureInitialized()
+            // Automatically resume any interrupted, pending synchronizations from database
+            scheduler.resumePendingSyncs()
+        } catch (e: Throwable) {
+            Log.e(tag, "Failed to complete onCreate initialization in SakshiVaultRemoteService", e)
+        }
     }
+
 
     override fun onBind(intent: Intent?): IBinder {
         Log.d(tag, "Client bound to service with intent: $intent")

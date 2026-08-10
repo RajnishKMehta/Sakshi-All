@@ -31,6 +31,13 @@ class SyncScheduler(
     private val activeJobs = ConcurrentHashMap<String, Job>()
     private val activeCallbacks = ConcurrentHashMap<String, ISakshiVaultCallback>()
 
+    /**
+     * Registers or updates a callback for an active or pending fileId.
+     */
+    fun registerCallback(fileId: String, callback: ISakshiVaultCallback) {
+        activeCallbacks[fileId] = callback
+    }
+
     private val syncIntervalMs = 2000L
     private val consecutiveNoBytesLimit = 5
     private val additionalChecksLimit = 3

@@ -1900,15 +1900,19 @@ open class MainActivity : AppCompatActivity(),
         lifecycleScope.launch {
             val pingResult = sakshiClient.pingVault()
             if (!pingResult.isSuccess) {
-                val msg = pingResult.errorOrNull()?.message ?: "Unknown error"
-                // Let user know the Vault connection failed
+                val error = pingResult.errorOrNull()
+                val msg = error?.message ?: "Unknown error"
+                android.util.Log.e("MainActivity", "Vault connection failed: $error", error)
+                // Let user know the Vault connection failed with detailed error
                 android.widget.Toast.makeText(this@MainActivity, "Vault connection failed: $msg", android.widget.Toast.LENGTH_LONG).show()
                 // Force selection dialog whenever vault ping fails
                 if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
+            } else {
+                val pingResp = pingResult.getOrNull()
+                android.util.Log.d("MainActivity", "Vault ping succeeded: version=${pingResp?.vaultVersion}, latency=${pingResp?.responseTimeMs}ms")
             }
 
-            // Dummy call to register observation handling for CopyDoneAck
-            // In actual workflow, this could be triggered when copy begins
+            // Register observation handling for CopyDoneAck
             handleCopyDone("dummy_file_id")
         }
     }

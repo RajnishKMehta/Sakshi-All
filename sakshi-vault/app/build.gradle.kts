@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.devtools.ksp)
 }
 
 android {
@@ -17,24 +18,11 @@ android {
     buildFeatures {
         buildConfig = true
     }
-/*
-    // ABI Splits Configuration
-    }
-    splits {
-        abi {
-            isEnable = isReleaseBuild
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = true
-        }
-    }
-*/
-    // Define the keystore file based on the environment variable or default to "release.keystore"
+
     val keystorePath = System.getenv("KEYSTORE_FILE") ?: "release.keystore"
     val keystore = file(keystorePath)
 
     signingConfigs {
-        // only configure the release signing if the keystore exists
         if (keystore.exists()) {
             create("release") {
                 storeFile = keystore
@@ -52,13 +40,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Apply the signing config
             if (keystore.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
         debug {
-            applicationIdSuffix = ".debug"
+            // applicationIdSuffix removed to align package names with release build
             versionNameSuffix = "-dev"
         }
     }
@@ -83,12 +70,14 @@ dependencies {
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
 
     // Sakshi SDK
-    implementation(libs.sakshi.sdk)
+    // implementation(libs.sakshi.sdk)
+    implementation(project(":sakshi-sdk"))
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 }
+

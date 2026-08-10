@@ -1,6 +1,7 @@
 [versions]
 agp = "9.3.0"
 kotlin = "2.1.0"
+ksp = "2.1.0-1.0.29"
 room = "2.6.1"
 coroutines = "1.10.1"
 sakshi = "1.0.0-beta.4"
@@ -8,6 +9,7 @@ androidx-core = "1.15.0"
 androidx-lifecycle = "2.8.7"
 
 [libraries]
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "androidx-lifecycle" }
@@ -26,4 +28,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+maven-publish = { id = "com.vanniktech.maven.publish", version = "0.37.0" }

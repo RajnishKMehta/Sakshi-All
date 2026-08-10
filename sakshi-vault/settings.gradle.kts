@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "sakshi-vault"
 include(":app")
+include(":sakshi-sdk")
+project(":sakshi-sdk").projectDir = file("../sakshi-sdk/sakshi-sdk")

@@ -41,6 +41,20 @@ internal class VaultServiceConnection(
             }
         }
 
+        val pm = context.packageManager
+        val isPackageInstalled = try {
+            pm.getPackageInfo(config.vaultPackageName, 0)
+            true
+        } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+            false
+        }
+
+        if (!isPackageInstalled) {
+            return SakshiResult.Failure(
+                SakshiError.VaultNotInstalled("Vault application package '${config.vaultPackageName}' is not installed on this device.")
+            )
+        }
+
         val deferred = CompletableDeferred<ISakshiVaultService>()
         connectionDeferred = deferred
 
@@ -48,13 +62,25 @@ internal class VaultServiceConnection(
             setPackage(config.vaultPackageName)
         }
 
-        val bound = runCatching {
+        val bound = try {
             context.bindService(intent, this, Context.BIND_AUTO_CREATE)
-        }.getOrDefault(false)
+        } catch (e: SecurityException) {
+            connectionDeferred = null
+            return SakshiResult.Failure(
+                SakshiError.PermissionDenied("Permission denied binding to Vault package '${config.vaultPackageName}': ${e.message}")
+            )
+        } catch (e: Exception) {
+            connectionDeferred = null
+            return SakshiResult.Failure(
+                SakshiError.ServiceUnavailable("Failed to bind to Vault package '${config.vaultPackageName}': ${e.message}")
+            )
+        }
 
         if (!bound) {
             connectionDeferred = null
-            return SakshiResult.Failure(SakshiError.VaultNotInstalled())
+            return SakshiResult.Failure(
+                SakshiError.ServiceUnavailable("Vault service action '${config.vaultServiceAction}' in package '${config.vaultPackageName}' could not be bound.")
+            )
         }
 
         val service = withTimeoutOrNull(config.connectionTimeoutMs) {
@@ -65,8 +91,11 @@ internal class VaultServiceConnection(
             SakshiResult.Success(service)
         } else {
             unbindInternal()
-            SakshiResult.Failure(SakshiError.ServiceUnavailable("Timed out connecting to Vault service"))
+            SakshiResult.Failure(
+                SakshiError.ServiceUnavailable("Timed out (${config.connectionTimeoutMs}ms) connecting to Vault service '${config.vaultPackageName}'.")
+            )
         }
+
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {

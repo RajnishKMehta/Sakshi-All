@@ -65,7 +65,7 @@ android {
         }
 
         getByName("debug") {
-            applicationIdSuffix = ".dev"
+            // applicationIdSuffix removed to align package names with release build
             resValue("string", "app_name", "Camera d")
             // isDebuggable = false
         }
@@ -100,7 +100,9 @@ dependencies {
 
     implementation(libs.zxing.core)
 
-    implementation(libs.sakshi.sdk)
+    // Local SDK Project dependency
+    // implementation(libs.sakshi.sdk)
+    implementation(project(":sakshi-sdk"))
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)
     implementation(libs.fragment.ktx)

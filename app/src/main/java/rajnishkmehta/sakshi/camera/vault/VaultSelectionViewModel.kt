@@ -46,7 +46,7 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun verifyVaultApp(packageName: String, onResult: (Boolean) -> Unit) {
+    fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
             val config = SakshiClientConfig(
                 vaultPackageName = packageName,
@@ -54,7 +54,12 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             )
             val tempClient = SakshiClient.create(getApplication(), config)
             val result = tempClient.pingVault()
-            onResult(result.isSuccess)
+            if (result.isSuccess) {
+                onResult(true, null)
+            } else {
+                val errorMsg = result.errorOrNull()?.message ?: "Vault ping failed"
+                onResult(false, errorMsg)
+            }
         }
     }
 
