@@ -131,7 +131,7 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
 
-        viewModel.verifyVaultApp(appInfo.packageName) { isCompatible ->
+        viewModel.verifyVaultApp(appInfo.packageName) { isCompatible, errorMsg ->
             if (!isAdded) return@verifyVaultApp
             if (isCompatible) {
                 if (requireActivity() is MainActivity) {
@@ -148,7 +148,7 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
             } else {
                 progressBar.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), "Selected app is not a compatible Sakshi Vault", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Selected app is not compatible: ${errorMsg ?: "Unknown error"}", Toast.LENGTH_LONG).show()
             }
         }
     }

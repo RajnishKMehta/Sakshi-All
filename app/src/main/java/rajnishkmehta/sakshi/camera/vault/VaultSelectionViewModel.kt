@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
+import rajnishkmehta.sakshi.sdk.api.SakshiError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
@@ -46,7 +47,7 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun verifyVaultApp(packageName: String, onResult: (Boolean) -> Unit) {
+    fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
             val config = SakshiClientConfig(
                 vaultPackageName = packageName,
@@ -54,7 +55,13 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             )
             val tempClient = SakshiClient.create(getApplication(), config)
             val result = tempClient.pingVault()
-            onResult(result.isSuccess)
+            if (result.isSuccess) {
+                onResult(true, null)
+            } else {
+                val err = result.errorOrNull()
+                val message = err?.message ?: "Unknown error"
+                onResult(false, message)
+            }
         }
     }
 
