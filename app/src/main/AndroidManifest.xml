@@ -14,7 +14,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="rajnishkmehta.sakshi.permission.BIND_VAULT" />
 
     <!--
       androidx.media3:media3-common declares this for ExoPlayer's network playback. We only pull

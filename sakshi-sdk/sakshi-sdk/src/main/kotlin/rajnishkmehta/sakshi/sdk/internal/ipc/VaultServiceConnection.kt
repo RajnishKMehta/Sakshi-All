@@ -48,13 +48,20 @@ internal class VaultServiceConnection(
             setPackage(config.vaultPackageName)
         }
 
-        val bound = runCatching {
+        val boundResult = runCatching {
             context.bindService(intent, this, Context.BIND_AUTO_CREATE)
-        }.getOrDefault(false)
+        }
+
+        val bound = boundResult.getOrDefault(false)
 
         if (!bound) {
             connectionDeferred = null
-            return SakshiResult.Failure(SakshiError.VaultNotInstalled())
+            val ex = boundResult.exceptionOrNull()
+            return if (ex is SecurityException) {
+                SakshiResult.Failure(SakshiError.PermissionDenied("SecurityException during bindService: ${ex.message}"))
+            } else {
+                SakshiResult.Failure(SakshiError.VaultNotInstalled("Vault application is not installed or service is unavailable. Cause: ${ex?.message ?: "unknown"}"))
+            }
         }
 
         val service = withTimeoutOrNull(config.connectionTimeoutMs) {

@@ -50,13 +50,13 @@ kotlin {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.core.ktx)
 }
 
 mavenPublishing {
-    coordinates("io.github.rajnishkmehta.sakshi", "sakshi-sdk", libs.versions.sakshi.sdk.get())
+    coordinates("io.github.rajnishkmehta.sakshi", "sakshi-sdk", "1.0.0-beta.4")
 
     publishToMavenCentral(automaticRelease = true)
     signAllPublications()

@@ -86,9 +86,9 @@ dependencies {
     annotationProcessor(libs.room.compiler)
 
     // Sakshi SDK
-    implementation(libs.sakshi.sdk)
+    implementation(project(":sakshi-sdk"))
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.coroutines.android)
 }
