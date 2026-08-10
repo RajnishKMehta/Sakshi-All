@@ -9,7 +9,7 @@
         android:supportsRtl="true">
 
         <service
-            android:name="${applicationId}.service.SakshiVaultRemoteService"
+            android:name="rajnishkmehta.sakshi.vault.service.SakshiVaultRemoteService"
             android:exported="true"
 
             >
