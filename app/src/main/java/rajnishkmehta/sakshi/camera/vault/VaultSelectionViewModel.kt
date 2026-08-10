@@ -9,8 +9,6 @@ import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 
 class VaultSelectionViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -55,6 +53,8 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             )
             val tempClient = SakshiClient.create(getApplication(), config)
             val result = tempClient.pingVault()
+            tempClient.disconnect()
+
             if (result.isSuccess) {
                 onResult(true, null)
             } else {
