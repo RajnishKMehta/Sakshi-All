@@ -31,10 +31,10 @@ import java.io.File
 class SakshiVaultRemoteService : Service() {
 
     private val tag = "SakshiVaultService"
-    private lateinit var database: VaultDatabase
-    private lateinit var storageManager: StorageManager
-    private lateinit var copyEngine: CopyEngine
-    private lateinit var scheduler: SyncScheduler
+    private var database: VaultDatabase? = null
+    private var storageManager: StorageManager? = null
+    private var copyEngine: CopyEngine? = null
+    private var scheduler: SyncScheduler? = null
     private var serviceScope: CoroutineScope? = null
 
     private val binder = object : ISakshiVaultService.Stub() {
@@ -69,7 +69,7 @@ class SakshiVaultRemoteService : Service() {
 
             serviceScope?.launch {
                 try {
-                    val vaultUriStr = copyEngine.copyPhoto(fileId, uriStr, mimeType)
+                    val vaultUriStr = copyEngine?.copyPhoto(fileId, uriStr, mimeType) ?: throw IllegalStateException("CopyEngine not initialized")
                     val realPath = vaultUriStr.removePrefix("file://")
                     val fileLength = File(realPath).length()
 
@@ -107,7 +107,7 @@ class SakshiVaultRemoteService : Service() {
             }
 
             serviceScope?.launch {
-                scheduler.startSync(fileId, sourceUriStr, mimeType, callback)
+                scheduler?.startSync(fileId, sourceUriStr, mimeType, callback)
             }
         }
 
@@ -124,7 +124,7 @@ class SakshiVaultRemoteService : Service() {
             }
 
             serviceScope?.launch {
-                scheduler.stopSync(fileId, callback)
+                scheduler?.stopSync(fileId, callback)
             }
         }
 
@@ -134,7 +134,7 @@ class SakshiVaultRemoteService : Service() {
         override fun isRecordingSynced(fileId: String): Bundle {
             Log.d(tag, "Received isRecordingSynced query: fileId=$fileId")
             val record = runBlocking {
-                database.mediaRecordDao().getRecord(fileId)
+                database?.mediaRecordDao()?.getRecord(fileId)
             }
 
             return Bundle().apply {
@@ -149,14 +149,19 @@ class SakshiVaultRemoteService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d(tag, "SakshiVaultRemoteService onCreate")
-        serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-        database = VaultDatabase.getDatabase(this)
-        storageManager = AppPrivateStorageManager(this)
-        copyEngine = CopyEngine(this, database, storageManager)
-        scheduler = SyncScheduler(this, database, copyEngine)
+        try {
+            serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+            database = VaultDatabase.getDatabase(applicationContext)
+            storageManager = AppPrivateStorageManager(applicationContext)
+            copyEngine = CopyEngine(applicationContext, database!!, storageManager!!)
+            scheduler = SyncScheduler(applicationContext, database!!, copyEngine!!)
 
-        // Automatically resume any interrupted, pending synchronizations from database
-        scheduler.resumePendingSyncs()
+            // Automatically resume any interrupted, pending synchronizations from database
+            scheduler?.resumePendingSyncs()
+            Log.d(tag, "SakshiVaultRemoteService onCreate completed successfully")
+        } catch (e: Exception) {
+            Log.e(tag, "Error initializing SakshiVaultRemoteService in onCreate: ${e.message}", e)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder {
@@ -166,8 +171,12 @@ class SakshiVaultRemoteService : Service() {
 
     override fun onDestroy() {
         Log.d(tag, "SakshiVaultRemoteService onDestroy")
-        scheduler.cancelAll()
-        serviceScope?.cancel()
+        try {
+            scheduler?.cancelAll()
+            serviceScope?.cancel()
+        } catch (e: Exception) {
+            Log.e(tag, "Error during onDestroy: ${e.message}", e)
+        }
         super.onDestroy()
     }
 }
