@@ -99,3 +99,11 @@ version.ref = "room"
 [libraries.room-compiler]
 module = "androidx.room:room-compiler"
 version.ref = "room"
+
+[plugins.ksp]
+id = "com.google.devtools.ksp"
+version.ref = "ksp"
+
+[plugins.kotlin-kapt]
+id = "org.jetbrains.kotlin.kapt"
+version.ref = "kotlin"
