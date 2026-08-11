@@ -29,6 +29,9 @@ internal class VaultServiceConnection(
     private var connectionDeferred: CompletableDeferred<ISakshiVaultService>? = null
     private var activeBinder: IBinder? = null
 
+    // We keep track of binding state to avoid multiple bindings
+    private var isBinding = false
+
     /**
      * Obtains an active connection to [ISakshiVaultService], binding if necessary.
      *
@@ -38,6 +41,20 @@ internal class VaultServiceConnection(
         boundService?.let {
             if (it.asBinder().isBinderAlive) {
                 return SakshiResult.Success(it)
+            } else {
+                clearServiceState()
+            }
+        }
+
+        if (connectionDeferred != null) {
+            val service = withTimeoutOrNull(config.connectionTimeoutMs) {
+                connectionDeferred!!.await()
+            }
+            return if (service != null) {
+                SakshiResult.Success(service)
+            } else {
+                unbindInternal()
+                SakshiResult.Failure(SakshiError.ServiceUnavailable("Timed out connecting to Vault service"))
             }
         }
 

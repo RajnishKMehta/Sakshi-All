@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.IBinder
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import kotlinx.coroutines.*
-// import rajnishkmehta.sakshi.vault.BuildConfig *don't remove*
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 import rajnishkmehta.sakshi.vault.storage.StorageManager
@@ -36,7 +35,7 @@ class SakshiVaultRemoteService : Service() {
     private lateinit var storageManager: StorageManager
     private lateinit var copyEngine: CopyEngine
     private lateinit var scheduler: SyncScheduler
-    private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var serviceScope: CoroutineScope? = null
 
     private val binder = object : ISakshiVaultService.Stub() {
 
@@ -68,7 +67,7 @@ class SakshiVaultRemoteService : Service() {
                 return
             }
 
-            serviceScope.launch {
+            serviceScope?.launch {
                 try {
                     val vaultUriStr = copyEngine.copyPhoto(fileId, uriStr, mimeType)
                     val realPath = vaultUriStr.removePrefix("file://")
@@ -107,7 +106,7 @@ class SakshiVaultRemoteService : Service() {
                 return
             }
 
-            serviceScope.launch {
+            serviceScope?.launch {
                 scheduler.startSync(fileId, sourceUriStr, mimeType, callback)
             }
         }
@@ -124,7 +123,7 @@ class SakshiVaultRemoteService : Service() {
                 return
             }
 
-            serviceScope.launch {
+            serviceScope?.launch {
                 scheduler.stopSync(fileId, callback)
             }
         }
@@ -150,6 +149,7 @@ class SakshiVaultRemoteService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d(tag, "SakshiVaultRemoteService onCreate")
+        serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         database = VaultDatabase.getDatabase(this)
         storageManager = AppPrivateStorageManager(this)
         copyEngine = CopyEngine(this, database, storageManager)
@@ -167,7 +167,7 @@ class SakshiVaultRemoteService : Service() {
     override fun onDestroy() {
         Log.d(tag, "SakshiVaultRemoteService onDestroy")
         scheduler.cancelAll()
-        serviceScope.cancel()
+        serviceScope?.cancel()
         super.onDestroy()
     }
 }
