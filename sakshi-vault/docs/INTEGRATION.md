@@ -10,7 +10,6 @@ The Sakshi SDK handles all the heavy lifting of Inter-Process Communication (IPC
 
 For a client application to successfully communicate with the Sakshi Vault service, it must declare the required custom permission in its `AndroidManifest.xml` file.
 
-The Vault is protected by the `rajnishkmehta.sakshi.permission.BIND_VAULT` permission to ensure only authorized client apps can send data.
 
 Add the following to your client app's `AndroidManifest.xml`:
 
@@ -19,7 +18,6 @@ Add the following to your client app's `AndroidManifest.xml`:
     package="com.your.client.app">
 
     <!-- 1. Declare that your app uses the Sakshi Vault binding permission -->
-    <uses-permission android:name="rajnishkmehta.sakshi.permission.BIND_VAULT" />
 
     <!-- 2. (Optional but recommended) If targeting Android 11+ (API 30+),
             declare the Vault package in the queries element so the SDK can discover it -->
@@ -53,7 +51,7 @@ If you want to understand the inner workings of how the **Vault** responds to th
 
 ## Quick Summary: How it works
 
-1. **Client App**: Integrates the Sakshi SDK client library and requests `BIND_VAULT` permission.
+1. **Client App**: Integrates the Sakshi SDK client library.
 2. **Binding**: The SDK binds to the Vault using the action `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE`.
 3. **Data Transfer**:
    - **Photos**: Client sends a `PhotoRequest` bundle; Vault copies the file and returns a `CopyDoneAck`.

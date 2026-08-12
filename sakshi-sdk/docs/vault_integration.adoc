@@ -21,7 +21,7 @@ In the Vault application's `AndroidManifest.xml`, declare the remote IPC service
 <service
     android:name=".service.SakshiVaultRemoteService"
     android:exported="true"
-    android:permission="rajnishkmehta.sakshi.permission.BIND_VAULT">
+
     <intent-filter>
         <action android:name="rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE" />
     </intent-filter>
