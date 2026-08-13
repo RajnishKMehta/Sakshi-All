@@ -1,9 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.devtools.ksp")
 
 }
 
 android {
+    buildToolsVersion = "37.0.0"
     namespace = "rajnishkmehta.sakshi.vault"
     compileSdk = 37
 
@@ -70,7 +72,7 @@ dependencies {
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
 
 
     // Sakshi SDK
