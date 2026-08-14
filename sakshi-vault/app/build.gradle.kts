@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.coroutines.android)
 }
 
-room {
+
+room3 {
     schemaDirectory("$projectDir/schemas")
 }

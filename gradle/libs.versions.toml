@@ -1,8 +1,8 @@
 [versions]
-room = "2.6.1"
+room = "3.0.1"
 agp = "9.3.1"
-kotlin = "2.1.0"
-ksp = "2.1.0-1.0.29"
+kotlin = "2.4.10"
+ksp = "2.3.11"
 
 appcompat = "1.7.1"
 camerax = "1.6.1"
@@ -89,15 +89,15 @@ module = "androidx.lifecycle:lifecycle-service"
 version.ref = "lifecycleVersion"
 
 [libraries.room-runtime]
-module = "androidx.room:room-runtime"
+module = "androidx.room3:room3-runtime"
 version.ref = "room"
 
 [libraries.room-ktx]
-module = "androidx.room:room-ktx"
+module = "androidx.room3:room3-runtime"
 version.ref = "room"
 
 [libraries.room-compiler]
-module = "androidx.room:room-compiler"
+module = "androidx.room3:room3-compiler"
 version.ref = "room"
 
 [plugins.ksp]
@@ -109,5 +109,5 @@ id = "org.jetbrains.kotlin.jvm"
 version.ref = "kotlin"
 
 [plugins.room]
-id = "androidx.room"
+id = "androidx.room3"
 version.ref = "room"
