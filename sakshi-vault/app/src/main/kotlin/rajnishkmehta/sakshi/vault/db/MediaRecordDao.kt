@@ -1,10 +1,10 @@
 package rajnishkmehta.sakshi.vault.db
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Update
 
 /**
  * Data Access Object (DAO) for accessing and modifying [MediaRecord] database records.

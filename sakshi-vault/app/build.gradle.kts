@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 
 }
 
@@ -70,9 +71,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
 
     // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    val room_version = "3.0.1"
+    implementation("androidx.room3:room3-runtime:$room_version")
+
+    ksp("androidx.room3:room3-compiler:$room_version")
 
 
     // Sakshi SDK
@@ -81,4 +83,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.coroutines.android)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

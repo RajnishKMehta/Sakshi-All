@@ -1,8 +1,8 @@
 [versions]
 room = "2.6.1"
 agp = "9.3.1"
-kotlin = "2.4.10"
-ksp = "2.3.10"
+kotlin = "2.1.0"
+ksp = "2.1.0-1.0.29"
 
 appcompat = "1.7.1"
 camerax = "1.6.1"
@@ -104,6 +104,10 @@ version.ref = "room"
 id = "com.google.devtools.ksp"
 version.ref = "ksp"
 
-[plugins.kotlin-kapt]
-id = "org.jetbrains.kotlin.kapt"
+[plugins.kotlin-jvm]
+id = "org.jetbrains.kotlin.jvm"
 version.ref = "kotlin"
+
+[plugins.room]
+id = "androidx.room"
+version.ref = "room"
