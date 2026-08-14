@@ -4095,7 +4095,8 @@ public class ExifInterface {
         if (file == null) {
             throw new NullPointerException("file cannot be null");
         }
-        initForFilename(file.getAbsolutePath());
+        String absPath = file.getAbsolutePath();
+        initForFilename(absPath);
     }
 
     /**
@@ -4110,7 +4111,8 @@ public class ExifInterface {
         if (filename == null) {
             throw new NullPointerException("filename cannot be null");
         }
-        initForFilename(filename);
+        String name = filename;
+        initForFilename(name);
     }
 
     /**
@@ -4775,7 +4777,7 @@ public class ExifInterface {
      * This function decides which parser to read the image data according to the given input stream
      * type and the content of the input stream.
      */
-    private void loadAttributes(@NonNull InputStream in) {
+    private final void loadAttributes(@NonNull InputStream in) {
         try {
             // Initialize mAttributes.
             for (int i = 0; i < EXIF_TAGS.length; ++i) {
@@ -5496,7 +5498,7 @@ public class ExifInterface {
         }
     }
 
-    private void initForFilename(String filename) throws IOException {
+    private final void initForFilename(String filename) throws IOException {
         if (filename == null) {
             throw new NullPointerException("filename cannot be null");
         }
@@ -5510,7 +5512,7 @@ public class ExifInterface {
             } else {
                 mSeekableFileDescriptor = null;
             }
-            loadAttributes(in);
+            this.loadAttributes(in);
         } finally {
             closeQuietly(in);
         }
@@ -5798,7 +5800,7 @@ public class ExifInterface {
      *                   IFD_TYPE_THUMBNAIL for thumbnail image.
      * @throws IOException If the data contains invalid JPEG markers, offsets, or length values.
      */
-    private void getJpegAttributes(ByteOrderedDataInputStream in, int offsetToJpeg, int imageType)
+    private final void getJpegAttributes(ByteOrderedDataInputStream in, int offsetToJpeg, int imageType)
             throws IOException {
         // See JPEG File Interchange Format Specification, "JFIF Specification"
         if (DEBUG) {
@@ -5928,7 +5930,7 @@ public class ExifInterface {
         in.setByteOrder(mExifByteOrder);
     }
 
-    private void getRawAttributes(SeekableByteOrderedDataInputStream in) throws IOException {
+    private final void getRawAttributes(SeekableByteOrderedDataInputStream in) throws IOException {
         // Parse TIFF Headers. See JEITA CP-3451C Section 4.5.2. Table 1.
         parseTiffHeaders(in);
 
@@ -6247,10 +6249,10 @@ public class ExifInterface {
      * http://fileformats.archiveteam.org/wiki/Olympus_ORF
      * https://libopenraw.freedesktop.org/wiki/Olympus_ORF
      */
-    private void getOrfAttributes(SeekableByteOrderedDataInputStream in) throws IOException {
+    private final void getOrfAttributes(SeekableByteOrderedDataInputStream in) throws IOException {
         // Retrieve primary image data
         // Other Exif data will be located in the Makernote.
-        getRawAttributes(in);
+        this.getRawAttributes(in);
 
         // Additionally retrieve preview/thumbnail information from MakerNote tag, which contains
         // proprietary tags and therefore does not have offical documentation
@@ -7348,7 +7350,7 @@ public class ExifInterface {
      * to locate SOF(Start of Frame) marker and update the image length & width values.
      * See JEITA CP-3451C Table 5 and Section 4.8.1. B.
      */
-    private void retrieveJpegImageSize(SeekableByteOrderedDataInputStream in, int imageType)
+    private final void retrieveJpegImageSize(SeekableByteOrderedDataInputStream in, int imageType)
             throws IOException {
         // Check if image already has IMAGE_LENGTH & IMAGE_WIDTH values
         ExifAttribute imageLengthAttribute =
@@ -7640,7 +7642,7 @@ public class ExifInterface {
      * If image is a RW2 file, valid image sizes are stored in SensorBorder tags.
      * See tiff_parser.cc GetFullDimension32()
      * */
-    private void updateImageSizeValues(SeekableByteOrderedDataInputStream in, int imageType)
+    private final void updateImageSizeValues(SeekableByteOrderedDataInputStream in, int imageType)
             throws IOException {
         // Uncompressed image valid image size values
         ExifAttribute defaultCropSizeAttribute =
