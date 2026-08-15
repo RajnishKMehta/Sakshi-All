@@ -9,7 +9,7 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 /**
  * The Room database that stores all media sync metadata for Sakshi Vault.
  */
-@Database(entities = [MediaRecord::class], version = 1, exportSchema = true)
+@Database(entities = [MediaRecord::class], version = 1, exportSchema = false)
 abstract class VaultDatabase : RoomDatabase() {
 
     abstract fun mediaRecordDao(): MediaRecordDao
