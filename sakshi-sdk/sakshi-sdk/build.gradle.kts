@@ -8,6 +8,7 @@ plugins {
 }
 
 android {
+    buildToolsVersion = "37.0.0"
     namespace = "rajnishkmehta.sakshi.sdk"
     compileSdk = 37
 

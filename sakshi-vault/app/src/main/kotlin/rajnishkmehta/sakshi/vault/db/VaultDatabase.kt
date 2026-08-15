@@ -1,9 +1,10 @@
 package rajnishkmehta.sakshi.vault.db
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room3.Database
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.sqlite.driver.AndroidSQLiteDriver
 
 /**
  * The Room database that stores all media sync metadata for Sakshi Vault.
@@ -24,6 +25,7 @@ abstract class VaultDatabase : RoomDatabase() {
                     VaultDatabase::class.java,
                     "sakshi_vault_database"
                 )
+                .setDriver(AndroidSQLiteDriver())
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
