@@ -4312,6 +4312,10 @@ public class ExifInterface {
      * @param tag the name of the tag.
      */
     public @Nullable String getAttribute(@NonNull String tag) {
+        return getAttributeInternal(tag);
+    }
+
+    private @Nullable String getAttributeInternal(@NonNull String tag) {
         if (tag == null) {
             throw new NullPointerException("tag shouldn't be null");
         }
@@ -4356,6 +4360,10 @@ public class ExifInterface {
      * @param defaultValue the value to return if the tag is not available.
      */
     public int getAttributeInt(@NonNull String tag, int defaultValue) {
+        return getAttributeIntInternal(tag, defaultValue);
+    }
+
+    private int getAttributeIntInternal(@NonNull String tag, int defaultValue) {
         if (tag == null) {
             throw new NullPointerException("tag shouldn't be null");
         }
@@ -4380,6 +4388,10 @@ public class ExifInterface {
      * @param defaultValue the value to return if the tag is not available.
      */
     public double getAttributeDouble(@NonNull String tag, double defaultValue) {
+        return getAttributeDoubleInternal(tag, defaultValue);
+    }
+
+    private double getAttributeDoubleInternal(@NonNull String tag, double defaultValue) {
         if (tag == null) {
             throw new NullPointerException("tag shouldn't be null");
         }
@@ -4613,7 +4625,7 @@ public class ExifInterface {
             throw new IllegalArgumentException("degree should be a multiple of 90");
         }
 
-        int currentOrientation = getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL);
+        int currentOrientation = getAttributeIntInternal(TAG_ORIENTATION, ORIENTATION_NORMAL);
         int currentIndex, newIndex;
         int resultOrientation;
         if (ROTATION_ORDER.contains(currentOrientation)) {
@@ -4637,7 +4649,7 @@ public class ExifInterface {
      * Flips the image vertically.
      */
     public void flipVertically() {
-        int currentOrientation = getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL);
+        int currentOrientation = getAttributeIntInternal(TAG_ORIENTATION, ORIENTATION_NORMAL);
         int resultOrientation;
         switch (currentOrientation) {
             case ORIENTATION_FLIP_HORIZONTAL:
@@ -4676,7 +4688,7 @@ public class ExifInterface {
      * Flips the image horizontally.
      */
     public void flipHorizontally() {
-        int currentOrientation = getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL);
+        int currentOrientation = getAttributeIntInternal(TAG_ORIENTATION, ORIENTATION_NORMAL);
         int resultOrientation;
         switch (currentOrientation) {
             case ORIENTATION_FLIP_HORIZONTAL:
@@ -4717,7 +4729,7 @@ public class ExifInterface {
      * @see #getRotationDegrees()
      */
     public boolean isFlipped() {
-        int orientation = getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL);
+        int orientation = getAttributeIntInternal(TAG_ORIENTATION, ORIENTATION_NORMAL);
         switch (orientation) {
             case ORIENTATION_FLIP_HORIZONTAL:
             case ORIENTATION_TRANSVERSE:
@@ -4741,7 +4753,7 @@ public class ExifInterface {
      * @see #isFlipped()
      */
     public int getRotationDegrees() {
-        int orientation = getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL);
+        int orientation = getAttributeIntInternal(TAG_ORIENTATION, ORIENTATION_NORMAL);
         switch (orientation) {
             case ORIENTATION_ROTATE_90:
             case ORIENTATION_TRANSVERSE:
@@ -5256,10 +5268,10 @@ public class ExifInterface {
      * Otherwise, it returns null.
      */
     public double @Nullable [] getLatLong() {
-        String latValue = getAttribute(TAG_GPS_LATITUDE);
-        String latRef = getAttribute(TAG_GPS_LATITUDE_REF);
-        String lngValue = getAttribute(TAG_GPS_LONGITUDE);
-        String lngRef = getAttribute(TAG_GPS_LONGITUDE_REF);
+        String latValue = getAttributeInternal(TAG_GPS_LATITUDE);
+        String latRef = getAttributeInternal(TAG_GPS_LATITUDE_REF);
+        String lngValue = getAttributeInternal(TAG_GPS_LONGITUDE);
+        String lngRef = getAttributeInternal(TAG_GPS_LONGITUDE_REF);
 
         if (latValue != null && latRef != null && lngValue != null && lngRef != null) {
             try {
@@ -5332,8 +5344,8 @@ public class ExifInterface {
      * @param defaultValue the value to return if the tag is not available.
      */
     public double getAltitude(double defaultValue) {
-        double altitude = getAttributeDouble(TAG_GPS_ALTITUDE, -1);
-        int ref = getAttributeInt(TAG_GPS_ALTITUDE_REF, -1);
+        double altitude = getAttributeDoubleInternal(TAG_GPS_ALTITUDE, -1);
+        int ref = getAttributeIntInternal(TAG_GPS_ALTITUDE_REF, -1);
 
         if (altitude >= 0 && ref >= 0) {
             return (altitude * ((ref == 1) ? -1 : 1));
@@ -5387,9 +5399,9 @@ public class ExifInterface {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     public @Nullable Long getDateTime() {
-        return parseDateTime(getAttribute(TAG_DATETIME),
-                getAttribute(TAG_SUBSEC_TIME),
-                getAttribute(TAG_OFFSET_TIME));
+        return parseDateTime(getAttributeInternal(TAG_DATETIME),
+                getAttributeInternal(TAG_SUBSEC_TIME),
+                getAttributeInternal(TAG_OFFSET_TIME));
     }
 
     /**
@@ -5404,9 +5416,9 @@ public class ExifInterface {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     public @Nullable Long getDateTimeDigitized() {
-        return parseDateTime(getAttribute(TAG_DATETIME_DIGITIZED),
-                getAttribute(TAG_SUBSEC_TIME_DIGITIZED),
-                getAttribute(TAG_OFFSET_TIME_DIGITIZED));
+        return parseDateTime(getAttributeInternal(TAG_DATETIME_DIGITIZED),
+                getAttributeInternal(TAG_SUBSEC_TIME_DIGITIZED),
+                getAttributeInternal(TAG_OFFSET_TIME_DIGITIZED));
     }
 
     /**
@@ -5421,9 +5433,9 @@ public class ExifInterface {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     public @Nullable Long getDateTimeOriginal() {
-        return parseDateTime(getAttribute(TAG_DATETIME_ORIGINAL),
-                getAttribute(TAG_SUBSEC_TIME_ORIGINAL),
-                getAttribute(TAG_OFFSET_TIME_ORIGINAL));
+        return parseDateTime(getAttributeInternal(TAG_DATETIME_ORIGINAL),
+                getAttributeInternal(TAG_SUBSEC_TIME_ORIGINAL),
+                getAttributeInternal(TAG_OFFSET_TIME_ORIGINAL));
     }
 
     private static Long parseDateTime(@Nullable String dateTimeString, @Nullable String subSecs,
@@ -5471,8 +5483,8 @@ public class ExifInterface {
      */
     @SuppressLint("AutoBoxing") /* Not a performance-critical call, thus not a big concern. */
     public @Nullable Long getGpsDateTime() {
-        String date = getAttribute(TAG_GPS_DATESTAMP);
-        String time = getAttribute(TAG_GPS_TIMESTAMP);
+        String date = getAttributeInternal(TAG_GPS_DATESTAMP);
+        String time = getAttributeInternal(TAG_GPS_TIMESTAMP);
         if (date == null || time == null
                 || (!NON_ZERO_TIME_PATTERN.matcher(date).matches()
                 && !NON_ZERO_TIME_PATTERN.matcher(time).matches())) {
@@ -5883,7 +5895,7 @@ public class ExifInterface {
                     byte[] bytes = new byte[length];
                     in.readFully(bytes);
                     length = 0;
-                    if (getAttribute(TAG_USER_COMMENT) == null) {
+                    if (getAttributeInternal(TAG_USER_COMMENT) == null) {
                         mAttributes[IFD_TYPE_EXIF].put(TAG_USER_COMMENT, ExifAttribute.createString(
                                 new String(bytes, ASCII)));
                     }
@@ -7046,26 +7058,26 @@ public class ExifInterface {
 
     private void addDefaultValuesForCompatibility() {
         // If DATETIME tag has no value, then set the value to DATETIME_ORIGINAL tag's.
-        String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
-        if (valueOfDateTimeOriginal != null && getAttribute(TAG_DATETIME) == null) {
+        String valueOfDateTimeOriginal = getAttributeInternal(TAG_DATETIME_ORIGINAL);
+        if (valueOfDateTimeOriginal != null && getAttributeInternal(TAG_DATETIME) == null) {
             mAttributes[IFD_TYPE_PRIMARY].put(TAG_DATETIME,
                     ExifAttribute.createString(valueOfDateTimeOriginal));
         }
 
         // Add the default value.
-        if (getAttribute(TAG_IMAGE_WIDTH) == null) {
+        if (getAttributeInternal(TAG_IMAGE_WIDTH) == null) {
             mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
-        if (getAttribute(TAG_IMAGE_LENGTH) == null) {
+        if (getAttributeInternal(TAG_IMAGE_LENGTH) == null) {
             mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
-        if (getAttribute(TAG_ORIENTATION) == null) {
+        if (getAttributeInternal(TAG_ORIENTATION) == null) {
             mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
-        if (getAttribute(TAG_LIGHT_SOURCE) == null) {
+        if (getAttributeInternal(TAG_LIGHT_SOURCE) == null) {
             mAttributes[IFD_TYPE_EXIF].put(TAG_LIGHT_SOURCE,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
