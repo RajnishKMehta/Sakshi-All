@@ -123,6 +123,8 @@ class CopyEngine(
                 } else {
                     throw IOException("ContentResolver returned null InputStream for $uri")
                 }
+            } catch (e: SecurityException) {
+                throw IOException("Permission denied for URI: $uri", e)
             } catch (e: Exception) {
                 lastException = e
                 if (attempt < maxRetries) {

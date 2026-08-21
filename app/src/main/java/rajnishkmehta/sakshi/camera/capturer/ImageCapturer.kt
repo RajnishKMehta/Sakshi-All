@@ -190,6 +190,7 @@ class ImageCapturer(val mActivity: MainActivity) {
             uri = item.uri,
             mimeType = mimeType
         )
+        mActivity.grantVaultUriPermission(fileId, item.uri)
         mActivity.lifecycleScope.launch {
             val result = mActivity.sakshiClient.sendPhoto(photoRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
