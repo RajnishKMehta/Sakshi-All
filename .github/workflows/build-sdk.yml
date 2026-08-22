@@ -6,6 +6,9 @@ on:
     branches: [master]
   pull_request:
 
+permissions:
+ contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -16,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -35,3 +40,4 @@ jobs:
         with:
           name: AARs
           path: "**/*.aar"
+          if-no-files-found: error
