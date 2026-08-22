@@ -1,4 +1,4 @@
-name: Build application
+name: Build Vault
 
 on:
   workflow_dispatch: 
