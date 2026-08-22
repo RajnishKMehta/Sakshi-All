@@ -1,12 +1,12 @@
 [versions]
 agp = "9.3.0"
-kotlin = "2.1.0"
+kotlin = "2.4.10"
 room = "3.0.1"
 coroutines = "1.10.1"
 sakshi = "1.0.0-beta.4"
 androidx-core = "1.15.0"
 androidx-lifecycle = "2.8.7"
-ksp = "2.1.0-1.0.29"
+ksp = "2.3.11"
 androidx-annotation = "1.10.0"
 
 [libraries]
@@ -25,6 +25,7 @@ sakshi-sdk = { group = "io.github.rajnishkmehta.sakshi", name = "sakshi-sdk", ve
 # Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 
 [plugins]
