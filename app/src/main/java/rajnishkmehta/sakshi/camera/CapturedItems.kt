@@ -35,6 +35,14 @@ class CapturedItem(
     val dateString: String,
     val uri: Uri
 ): Parcelable {
+
+    fun fileName(): String {
+        return if (type == ITEM_TYPE_IMAGE) {
+            IMAGE_NAME_PREFIX + dateString
+        } else {
+            VIDEO_NAME_PREFIX + dateString
+        }
+    }
     fun mimeType(): String {
         return if (type == ITEM_TYPE_IMAGE) {
             "image/*"

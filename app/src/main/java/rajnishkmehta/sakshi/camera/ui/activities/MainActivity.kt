@@ -30,6 +30,12 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.OnScaleGestureListener
 import android.view.Surface
+import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
+import rajnishkmehta.sakshi.sdk.api.SakshiClient
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
@@ -615,6 +621,7 @@ open class MainActivity : AppCompatActivity(),
         gestureDetector = GestureDetector(this, this)
 
         camConfig = CamConfig(this)
+        checkVault()
         cameraControl = CameraControl(camConfig)
         mainOverlay = binding.mainOverlay
         imageCapturer = ImageCapturer(this)
@@ -1344,6 +1351,8 @@ open class MainActivity : AppCompatActivity(),
     }
 
     lateinit var camConfig: CamConfig
+
+    lateinit var sakshiClient: SakshiClient
     private lateinit var cameraControl: CameraControl
 
     companion object {
@@ -1876,6 +1885,70 @@ open class MainActivity : AppCompatActivity(),
         if (shouldRestartRecording) {
             shouldRestartRecording = false
             videoCapturer.startRecording()
+        }
+    }
+
+
+    private fun checkVault() {
+        val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
+            vaultPackageName = camConfig.vaultPackage,
+            connectionTimeoutMs = 5000L
+        )
+        sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
+
+
+        lifecycleScope.launch {
+            val pingResult = sakshiClient.pingVault()
+            if (!pingResult.isSuccess) {
+                val msg = pingResult.errorOrNull()?.message ?: "Unknown error"
+                // Let user know the Vault connection failed
+                android.widget.Toast.makeText(this@MainActivity, "Vault connection failed: $msg", android.widget.Toast.LENGTH_LONG).show()
+                // Force selection dialog whenever vault ping fails
+                if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
+            }
+
+            // Dummy call removed
+        }
+    }
+
+    private fun showVaultUnavailableDialog() {
+        val dialog = rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog()
+        dialog.isMandatory = true
+        dialog.show(supportFragmentManager, rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog.TAG)
+
+        supportFragmentManager.setFragmentResultListener("vault_selection", this) { _, bundle ->
+            val newPackage = bundle.getString("package_name")
+            if (newPackage != null) {
+                // The dialog already updated camConfig.vaultPackage
+                // We just need to re-create our SakshiClient to point to the new package
+                val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
+                    vaultPackageName = newPackage,
+                    connectionTimeoutMs = 5000L
+                )
+                sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
+            }
+        }
+    }
+
+    fun grantVaultUriPermission(fileId: String, uri: android.net.Uri) {
+        grantUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    fun handleCopyDone(fileId: String) {
+        lifecycleScope.launch {
+            sakshiClient.observeCopyDone(fileId).collect { result ->
+                when (result) {
+                    is SakshiResult.Success -> {
+                        val ack = result.data
+                        // TODO: Implement post-copy behavior later
+                        // We received the callback correctly, but we won't implement the functionality yet.
+                    }
+                    is SakshiResult.Failure -> {
+                        // Implement proper error handling for SDK interaction
+                        // Log the error or handle it
+                    }
+                }
+            }
         }
     }
 }

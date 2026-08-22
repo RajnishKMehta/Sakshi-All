@@ -42,6 +42,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
 class VideoCapturer(private val mActivity: MainActivity) {
 
     val camConfig = mActivity.camConfig
@@ -210,71 +213,41 @@ class VideoCapturer(private val mActivity: MainActivity) {
             consumed = true
             cancelDeferredStart = null
 
+            var videoSyncStarted = false
+            var fileId: String? = null
+
             recording = pendingRecording.start(ctx.mainExecutor) { event ->
 
                 if (event is VideoRecordEvent.Start) {
                     onRecordingStart()
-                }
-
-                if (event is VideoRecordEvent.Status) {
-                    updateTimerTime(event.recordingStats.recordedDurationNanos)
-                }
-
-                if (event is VideoRecordEvent.Finalize) {
-                    afterRecordingStops()
-
-                    camConfig.mPlayer.playVRStopSound()
-
-                    if (event.hasError()) {
-                        when (event.error) {
-                            VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA -> {
-                                discardUnusedOutput(recordingCtx)
-                                ctx.showMessage(R.string.recording_too_short_to_be_saved)
-                                return@start
-                            }
-                            VideoRecordEvent.Finalize.ERROR_ENCODING_FAILED,
-                            VideoRecordEvent.Finalize.ERROR_RECORDER_ERROR,
-                            VideoRecordEvent.Finalize.ERROR_UNKNOWN -> {
-                                discardUnusedOutput(recordingCtx)
-                                ctx.showMessage(ctx.getString(R.string.unable_to_save_video_verbose, event.error))
-                                return@start
-                            }
-                            else -> {
-                                ctx.showMessage(ctx.getString(R.string.error_during_recording, event.error))
-                                // The errors left unnamed here (the camera going away, storage
-                                // running out) finalize whatever was written before they hit, which
-                                // is worth keeping — but only if anything was.
-                                if (event.recordingStats.numBytesRecorded == 0L) {
-                                    discardUnusedOutput(recordingCtx)
-                                    return@start
+                } else if (event is androidx.camera.video.VideoRecordEvent.Status) {
+                    if (!videoSyncStarted && event.recordingStats.numBytesRecorded > 1024) {
+                        videoSyncStarted = true
+                        val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
+                        fileId = "vid_${uniqueHash}"
+                        val videoRequest = rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest(
+                            fileId = fileId!!,
+                            uri = recordingCtx.uri,
+                            mimeType = "video/mp4"
+                        )
+                        ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                ctx.sakshiClient.startVideoSync(videoRequest).collect { result ->
+                                    if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
+                                        android.util.Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                    }
                                 }
                             }
                         }
                     }
-
-                    val uri = recordingCtx.uri
-
-                    if (recordingCtx.isPendingMediaStoreUri) {
-                        try {
-                            removePendingFlagFromUri(ctx.contentResolver, uri)
-                        } catch (e: Exception) {
-                            ctx.showMessage(R.string.unable_to_save_video)
+                } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
+                    if (videoSyncStarted && fileId != null) {
+                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                ctx.sakshiClient.stopVideoSync(fileId!!)
+                            }
                         }
-                    }
-
-                    if (recordingCtx.shouldAddToGallery) {
-                        val item = CapturedItem(ITEM_TYPE_VIDEO, dateString, uri)
-                        camConfig.updateLastCapturedItem(item)
-
-                        ctx.updateThumbnail()
-
-                        if (ctx is SecureMainActivity) {
-                            ctx.capturedItems.add(item)
-                        }
-                    }
-
-                    if (ctx is VideoCaptureActivity) {
-                        ctx.afterRecording(uri)
                     }
                 }
             }

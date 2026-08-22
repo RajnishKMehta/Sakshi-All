@@ -120,6 +120,8 @@ class CamConfig(private val mActivity: MainActivity) {
 
             const val GYROSCOPE_SUGGESTIONS = "gyroscope_suggestions"
 
+            const val VAULT_PACKAGE = "vault_package"
+
             const val CAMERA_SOUNDS = "camera_sounds"
 
             const val ENABLE_ZSL = "enable_zsl"
@@ -160,17 +162,19 @@ class CamConfig(private val mActivity: MainActivity) {
 
             const val STORAGE_LOCATION = ""
 
-            const val PHOTO_QUALITY = 95
+            const val PHOTO_QUALITY = 100
 
-            const val REMOVE_EXIF_AFTER_CAPTURE = true
+            const val REMOVE_EXIF_AFTER_CAPTURE = false
 
             const val GYROSCOPE_SUGGESTIONS = false
 
-            const val CAMERA_SOUNDS = true
+            const val CAMERA_SOUNDS = false
 
-            const val ENABLE_ZSL = false
+            const val ENABLE_ZSL = true
 
             const val SELECT_HIGHEST_RESOLUTION = false
+
+            const val VAULT_PACKAGE = "rajnishkmehta.sakshi.vault"
 
             const val WAIT_FOR_FOCUS_LOCK = false
 
@@ -794,6 +798,10 @@ class CamConfig(private val mActivity: MainActivity) {
             editor.putBoolean(SettingValues.Key.CAMERA_SOUNDS, SettingValues.Default.CAMERA_SOUNDS)
         }
 
+        if (!commonPref.contains(SettingValues.Key.VAULT_PACKAGE)) {
+            editor.putString(SettingValues.Key.VAULT_PACKAGE, SettingValues.Default.VAULT_PACKAGE)
+        }
+
         // Note: This is a workaround to keep save image/video as previewed 'on' by 
         // default starting from v73 and 'off' by default for versions before that
         //
@@ -999,6 +1007,17 @@ class CamConfig(private val mActivity: MainActivity) {
     fun toggleTorchState() {
         isTorchOn = !isTorchOn
     }
+
+    var vaultPackage: String
+        get() {
+            return commonPref.getString(
+                SettingValues.Key.VAULT_PACKAGE,
+                SettingValues.Default.VAULT_PACKAGE
+            ) ?: SettingValues.Default.VAULT_PACKAGE
+        }
+        set(value) {
+            commonPref.edit { putString(SettingValues.Key.VAULT_PACKAGE, value) }
+        }
 
     fun toggleFlashMode() {
         if (isFlashAvailable) {
