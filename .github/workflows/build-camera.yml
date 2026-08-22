@@ -1,4 +1,4 @@
-name: Build application
+name: Build Camera
 
 on:
   workflow_dispatch: 
