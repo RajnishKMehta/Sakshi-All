@@ -1,11 +1,13 @@
 [versions]
 agp = "9.3.0"
 kotlin = "2.1.0"
-room = "2.6.1"
+room = "3.0.1"
 coroutines = "1.10.1"
 sakshi = "1.0.0-beta.4"
 androidx-core = "1.15.0"
 androidx-lifecycle = "2.8.7"
+ksp = "2.1.0-1.0.29"
+androidx-annotation = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
@@ -23,7 +25,12 @@ sakshi-sdk = { group = "io.github.rajnishkmehta.sakshi", name = "sakshi-sdk", ve
 # Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+maven-publish = { id = "com.vanniktech.maven.publish", version = "0.37.0" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room3", version.ref = "room" }

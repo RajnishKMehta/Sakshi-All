@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
-
 }
 
 android {
@@ -82,9 +81,8 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.coroutines.android)
+    implementation(libs.kotlinx.coroutines.android)
 }
-
 
 room3 {
     schemaDirectory("$projectDir/schemas")

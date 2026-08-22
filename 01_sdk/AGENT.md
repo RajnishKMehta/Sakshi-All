@@ -131,3 +131,6 @@ When implementing or modifying code in this repository:
 2. Maintain strict separation of public API (`api/`) and internal details (`internal/`).
 3. Ensure no UI code, activities, fragments, or demo apps are introduced into the project.
 4. Verify Kotlin syntax, KDoc comments, and modern Android standards before finishing tasks.
+
+**STRICT RULE:**
+Do not downgrade any dependency, plugin, library, SDK, Gradle version, Kotlin version, Android version, GitHub Action version, or other project/tooling version without explicit permission from the user. Never downgrade a version merely to solve a compatibility issue, build error, warning, or test failure. Ask the user first if a downgrade is genuinely required.
