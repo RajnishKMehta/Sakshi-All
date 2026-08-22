@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Sakshi SDK is a headless library.
+        Queries element enables binding to the external Vault service on Android 11+ (API 30+).
+    -->
+    <queries>
+        <intent>
+            <action android:name="rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE" />
+        </intent>
+    </queries>
+
+</manifest>

@@ -1,0 +1,91 @@
+= Sakshi SDK Architecture & Design Specification
+Rajnish Kumar <RajnishKMehta@proton.me>
+v1.0.0-beta.4, 2026-07-30
+:description: System architecture and design specification for the Sakshi SDK.
+:keywords: sakshi, sdk, architecture, design, ipc, android, binder, aidl
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: highlight.js
+
+== 1. System Overview
+
+Sakshi SDK (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as *Sakshi Camera* or *Sakshi Audio*) and the *Sakshi Vault* application.
+
+```
++-------------------------------------------------------------------------+
+|                        Client Application                               |
+|              (e.g., Sakshi Camera / Sakshi Audio)                       |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                           Sakshi SDK                                    |
+|                                                                         |
+|  +-------------------------------------------------------------------+  |
+|  |                       Public API Layer                            |  |
+|  |     SakshiClient, SakshiResult, SakshiError, Data Models          |  |
+|  +-------------------------------------------------------------------+  |
+|                                    |                                    |
+|  +-------------------------------------------------------------------+  |
+|  |                     IPC & Serialization Layer                     |  |
+|  |     SakshiClientImpl, AidlMappers, VaultResponder                 |  |
+|  +-------------------------------------------------------------------+  |
+|                                    |                                    |
+|  +-------------------------------------------------------------------+  |
+|  |                     Service Connection Layer                      |  |
+|  |     VaultServiceConnection, ISakshiVaultService, Callback         |  |
+|  +-------------------------------------------------------------------+  |
++-------------------------------------------------------------------------+
+                                     |
+                          Android AIDL / Binder
+                                     v
++-------------------------------------------------------------------------+
+|                         Sakshi Vault App                                |
+|                        (External Service)                               |
+|                                                                         |
+|  +---------------------------+       +-------------------------------+  |
+|  | Incremental Copy Engine   |       | Copy Done Ack & Database      |  |
+|  +---------------------------+       +-------------------------------+  |
++-------------------------------------------------------------------------+
+```
+
+== 2. Dual-Side Architecture Roles
+
+=== 2.1 Client Application Side (e.g., Camera / Audio)
+Client applications initiate requests to transfer media or start incremental synchronization sessions:
+* Initiates ping health checks.
+* Submits photo requests (`PhotoRequest`).
+* Signals start/stop of video recordings (`VideoSyncRequest`).
+* Observes status updates and copy completion acknowledgements (`CopyDoneAck`).
+
+=== 2.2 Vault Application Side (External Service)
+Vault receives IPC requests, manages background tasks, and responds back via callbacks:
+* Implements remote service binding (`ISakshiVaultService`).
+* Manages incremental file copy passes reading newly written bytes.
+* Maintains its own non-overlapping timer scheduler.
+* Uses `VaultResponder` to emit `CopyDoneAck` upon completing file transfers.
+
+== 3. Copy Done Acknowledgement Protocol
+
+When Vault completes copying a recording or file pass:
+1. Vault determines that all bytes have been copied and the recording is finalized.
+2. Vault constructs a `CopyDoneAck` payload containing:
+   * `fileId`: Unique recording identifier.
+   * `originalUri` (Optional): The original source URI provided by the client for copying.
+   * `totalCopiedBytes`: Total byte count transferred.
+   * `timestampEpochMs`: Timestamp of copy completion.
+3. Vault invokes `callback.onCopyDone(bundle)` using `VaultResponder.sendCopyDone(...)`.
+4. Client application receives `CopyDoneAck` via `observeCopyDone(fileId)` or `startVideoSync()` flow stream.
+
+== 4. Architectural Boundaries
+
+[cols="1,2,2", options="header"]
+|===
+| Feature Domain | Sakshi SDK Responsibility | Vault App Responsibility
+| **IPC Communication** | Encapsulates Binder disconnections, AIDL serialization, and coroutine bridges. | Exposes remote service stub and processes incoming transactions.
+| **File Storage** | None (Does NOT store files). | Manages local storage, destination directory structure, and persistence.
+| **File Copying** | None (Does NOT copy files). | Reads source URI/file descriptor, writes to destination, tracks byte offsets.
+| **Scheduling** | None (Does NOT run timers). | Maintains periodic interval timer, guarantees non-overlapping copy execution.
+| **Database** | None (No database). | Manages media records database (File ID, Original URI, Vault URI, Status, Offset).
+|===
