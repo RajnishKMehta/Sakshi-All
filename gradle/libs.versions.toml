@@ -1,8 +1,6 @@
 [versions]
-room = "3.0.1"
 agp = "9.3.1"
 kotlin = "2.4.10"
-ksp = "2.3.11"
 
 appcompat = "1.7.1"
 camerax = "1.6.1"
@@ -45,7 +43,6 @@ androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxT
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 
 [bundles]
 camerax = [
@@ -64,50 +61,11 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 id = "com.android.library"
 version.ref = "agp"
 
-[plugins.maven-publish]
-id = "com.vanniktech.maven.publish"
-version = "0.37.0"
-
-[libraries.androidx-annotation]
-module = "androidx.annotation:annotation"
-version = "1.10.0"
-
-[libraries.kotlinx-coroutines-core]
-module = "org.jetbrains.kotlinx:kotlinx-coroutines-core"
-version = "1.11.0"
-
-[versions.lifecycle-temp]
-
-[versions.room-temp]
-
 [libraries.androidx-lifecycle-runtime-ktx]
 module = "androidx.lifecycle:lifecycle-runtime-ktx"
 version.ref = "lifecycleVersion"
-
-[libraries.androidx-lifecycle-service]
-module = "androidx.lifecycle:lifecycle-service"
-version.ref = "lifecycleVersion"
-
-[libraries.room-runtime]
-module = "androidx.room3:room3-runtime"
-version.ref = "room"
-
-[libraries.room-ktx]
-module = "androidx.room3:room3-runtime"
-version.ref = "room"
-
-[libraries.room-compiler]
-module = "androidx.room3:room3-compiler"
-version.ref = "room"
-
-[plugins.ksp]
-id = "com.google.devtools.ksp"
-version.ref = "ksp"
 
 [plugins.kotlin-jvm]
 id = "org.jetbrains.kotlin.jvm"
 version.ref = "kotlin"
 
-[plugins.room]
-id = "androidx.room3"
-version.ref = "room"
