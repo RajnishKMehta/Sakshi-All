@@ -25,7 +25,7 @@ jobs:
           cache: gradle
 
       - name: Make gradlew executable
-        run: chmod +x 01_sdk/gradlew 02_vault/gradlew 03_camera/gradlew
+        run: chmod +x gradlew 01_sdk/gradlew 02_vault/gradlew 03_camera/gradlew
 
       - name: Build SDK
         run: cd 01_sdk && ./gradlew assembleDebug --no-daemon

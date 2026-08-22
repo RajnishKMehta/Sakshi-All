@@ -1,7 +1,6 @@
 # Built application & library files
 *.apk
 *.aar
-*.jar
 *.war
 *.ear
 *.bundle
