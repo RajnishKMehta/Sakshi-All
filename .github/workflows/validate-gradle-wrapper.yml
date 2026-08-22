@@ -4,12 +4,11 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
 
 jobs:
   validation:
     name: "Validation"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: gradle/wrapper-validation-action@v2
+      - uses: actions/checkout@v7
+      - uses: gradle/actions/wrapper-validation@v6
