@@ -100,7 +100,7 @@ dependencies {
 
     implementation(libs.zxing.core)
 
-    implementation(project(":sakshi-sdk"))
+    // implementation(project(":sakshi-sdk"))
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)
     implementation(libs.fragment.ktx)
