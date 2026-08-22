@@ -213,10 +213,42 @@ class VideoCapturer(private val mActivity: MainActivity) {
             consumed = true
             cancelDeferredStart = null
 
+            var videoSyncStarted = false
+            var fileId: String? = null
+
             recording = pendingRecording.start(ctx.mainExecutor) { event ->
 
                 if (event is VideoRecordEvent.Start) {
                     onRecordingStart()
+                } else if (event is androidx.camera.video.VideoRecordEvent.Status) {
+                    if (!videoSyncStarted && event.recordingStats.numBytesRecorded > 1024) {
+                        videoSyncStarted = true
+                        val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
+                        fileId = "vid_${uniqueHash}"
+                        val videoRequest = rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest(
+                            fileId = fileId!!,
+                            uri = recordingCtx.uri,
+                            mimeType = "video/mp4"
+                        )
+                        ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                ctx.sakshiClient.startVideoSync(videoRequest).collect { result ->
+                                    if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
+                                        android.util.Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
+                    if (videoSyncStarted && fileId != null) {
+                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                ctx.sakshiClient.stopVideoSync(fileId!!)
+                            }
+                        }
+                    }
                 }
             }
 

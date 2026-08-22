@@ -190,8 +190,8 @@ class ImageCapturer(val mActivity: MainActivity) {
             uri = item.uri,
             mimeType = mimeType
         )
-        mActivity.grantVaultUriPermission(fileId, item.uri)
-        mActivity.lifecycleScope.launch {
+        mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             val result = mActivity.sakshiClient.sendPhoto(photoRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
                 android.util.Log.e("SakshiSDK", "Photo ingestion failed: " + result.error.message)

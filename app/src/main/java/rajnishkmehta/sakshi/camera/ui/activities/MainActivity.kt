@@ -1907,9 +1907,7 @@ open class MainActivity : AppCompatActivity(),
                 if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
             }
 
-            // Dummy call to register observation handling for CopyDoneAck
-            // In actual workflow, this could be triggered when copy begins
-            handleCopyDone("dummy_file_id")
+            // Dummy call removed
         }
     }
 
@@ -1932,18 +1930,8 @@ open class MainActivity : AppCompatActivity(),
         }
     }
 
-    val activeSyncUris = java.util.concurrent.ConcurrentHashMap<String, android.net.Uri>()
-
     fun grantVaultUriPermission(fileId: String, uri: android.net.Uri) {
         grantUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        activeSyncUris[fileId] = uri
-    }
-
-    fun revokeVaultUriPermission(fileId: String) {
-        val uri = activeSyncUris.remove(fileId)
-        if (uri != null) {
-            revokeUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
     }
 
     fun handleCopyDone(fileId: String) {
@@ -1951,13 +1939,11 @@ open class MainActivity : AppCompatActivity(),
             sakshiClient.observeCopyDone(fileId).collect { result ->
                 when (result) {
                     is SakshiResult.Success -> {
-                        revokeVaultUriPermission(fileId)
                         val ack = result.data
                         // TODO: Implement post-copy behavior later
                         // We received the callback correctly, but we won't implement the functionality yet.
                     }
                     is SakshiResult.Failure -> {
-                        revokeVaultUriPermission(fileId)
                         // Implement proper error handling for SDK interaction
                         // Log the error or handle it
                     }
