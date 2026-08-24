@@ -22,4 +22,12 @@ dependencyResolutionManagement {
 rootProject.name = "Sakshi-Vault"
 include(":app")
 
-includeBuild("../01_sdk")
+includeBuild("../01_sdk") {
+    dependencySubstitution {
+        substitute(
+            module("io.github.rajnishkmehta.sakshi:sakshi-sdk")
+        ).using(
+            project(":sakshi-sdk")
+        )
+    }
+}
