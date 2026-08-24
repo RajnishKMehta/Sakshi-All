@@ -2,8 +2,10 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -11,7 +13,17 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
 rootProject.name = "Sakshi-Camera"
+
 include(":app")
-include(":sakshi-sdk")
-project(":sakshi-sdk").projectDir = file("../01_sdk/sakshi-sdk")
+
+includeBuild("../01_sdk") {
+    dependencySubstitution {
+        substitute(
+            module("io.github.rajnishkmehta.sakshi:sakshi-sdk")
+        ).using(
+            project(":sakshi-sdk")
+        )
+    }
+}
