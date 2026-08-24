@@ -13,5 +13,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Sakshi-Camera"
 include(":app")
-
-includeBuild("../01_sdk")
+include(":sakshi-sdk")
+project(":sakshi-sdk").projectDir = file("../01_sdk/sakshi-sdk")
