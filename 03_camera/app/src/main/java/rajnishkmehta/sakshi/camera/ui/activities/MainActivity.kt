@@ -557,6 +557,10 @@ open class MainActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
         resumeOrientationSensor()
+        if (lastVaultPackage != camConfig.vaultPackage) {
+            lastVaultPackage = camConfig.vaultPackage
+            checkVault()
+        }
         // Check camera permission again if the user switches back to the app (maybe
         // after enabling/disabling the camera permission in Settings)
         // Will also be called by Android Lifecycle when the app starts up
@@ -622,6 +626,7 @@ open class MainActivity : AppCompatActivity(),
 
         camConfig = CamConfig(this)
         checkVault()
+        lastVaultPackage = camConfig.vaultPackage
         cameraControl = CameraControl(camConfig)
         mainOverlay = binding.mainOverlay
         imageCapturer = ImageCapturer(this)
@@ -1352,6 +1357,7 @@ open class MainActivity : AppCompatActivity(),
 
     lateinit var camConfig: CamConfig
 
+    private var lastVaultPackage: String = ""
     lateinit var sakshiClient: SakshiClient
     private lateinit var cameraControl: CameraControl
 
@@ -1890,6 +1896,9 @@ open class MainActivity : AppCompatActivity(),
 
 
     private fun checkVault() {
+        if (this::sakshiClient.isInitialized) {
+            sakshiClient.disconnect()
+        }
         val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
             vaultPackageName = camConfig.vaultPackage,
             connectionTimeoutMs = 5000L
@@ -1921,11 +1930,8 @@ open class MainActivity : AppCompatActivity(),
             if (newPackage != null) {
                 camConfig.vaultPackage = newPackage
                 // We just need to re-create our SakshiClient to point to the new package
-                val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
-                    vaultPackageName = newPackage,
-                    connectionTimeoutMs = 5000L
-                )
-                sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
+                lastVaultPackage = newPackage
+                checkVault()
             }
         }
     }
