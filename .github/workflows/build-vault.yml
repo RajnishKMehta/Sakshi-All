@@ -33,7 +33,7 @@ jobs:
         run: chmod +x gradlew 02_vault/gradlew
 
       - name: Build Vault
-        run: ./gradlew --no-daemon :03_vault:assembleDebug
+        run: cd 02_vault && ./gradlew check assembleDebug
 
       - name: Upload APKs
         uses: actions/upload-artifact@v7
