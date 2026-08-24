@@ -87,8 +87,7 @@ dependencies {
     implementation(libs.bundles.camerax)
     implementation(libs.zxing.core)
 
-    implementation(project(":sakshi-sdk"))
-    // implementation(libs.sakshi.sdk)
+    implementation(libs.sakshi.sdk)
 
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)
