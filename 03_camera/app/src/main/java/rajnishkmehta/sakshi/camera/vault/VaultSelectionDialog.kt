@@ -134,11 +134,6 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
         viewModel.verifyVaultApp(appInfo.packageName) { isCompatible, errorMsg ->
             if (!isAdded) return@verifyVaultApp
             if (isCompatible) {
-                if (requireActivity() is MainActivity) {
-                    val camConfig = CamConfig(requireActivity() as MainActivity)
-                    camConfig.vaultPackage = appInfo.packageName
-                }
-
                 Toast.makeText(requireContext(), "Vault updated successfully", Toast.LENGTH_SHORT).show()
 
                 parentFragmentManager.setFragmentResult("vault_selection", Bundle().apply {

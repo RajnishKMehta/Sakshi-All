@@ -1919,7 +1919,7 @@ open class MainActivity : AppCompatActivity(),
         supportFragmentManager.setFragmentResultListener("vault_selection", this) { _, bundle ->
             val newPackage = bundle.getString("package_name")
             if (newPackage != null) {
-                // The dialog already updated camConfig.vaultPackage
+                camConfig.vaultPackage = newPackage
                 // We just need to re-create our SakshiClient to point to the new package
                 val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
                     vaultPackageName = newPackage,

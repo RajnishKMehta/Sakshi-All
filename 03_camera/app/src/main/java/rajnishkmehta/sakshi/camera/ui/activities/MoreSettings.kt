@@ -219,6 +219,7 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
             val newPackage = bundle.getString("package_name")
             if (newPackage != null) {
                 binding.vaultPackageSubtitle.text = newPackage
+                camConfig.vaultPackage = newPackage
             }
         }
         binding.vaultPackageSubtitle.text = camConfig.vaultPackage
