@@ -3,7 +3,7 @@ name: Build Camera
 on:
   workflow_dispatch: 
   push:
-    branches: [master]
+    branches: main
   pull_request:
 
 concurrency:
@@ -30,7 +30,7 @@ jobs:
           cache: gradle
 
       - name: Make gradlew executable
-        run: chmod +x gradlew 01_sdk/gradlew 02_vault/gradlew 03_camera/gradlew
+        run: chmod +x gradlew 03_camera/gradlew
 
       - name: Build Camera
         run: cd 03_camera && ./gradlew assembleDebug --no-daemon
