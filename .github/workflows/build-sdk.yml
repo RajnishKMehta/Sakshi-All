@@ -33,7 +33,7 @@ jobs:
         run: chmod +x 01_sdk/gradlew
 
       - name: Build SDK
-        run: cd 01_sdk && ./gradlew assembleDebug --no-daemon
+        run: ./gradlew --no-daemon :sakshi-sdk:assembleDebug
 
       - name: Upload AARs
         uses: actions/upload-artifact@v7
