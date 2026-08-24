@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "sakshi-vault"
+rootProject.name = "Sakshi-Vault"
 include(":app")
 
 includeBuild("../01_sdk")
