@@ -1,0 +1,32 @@
+= Sakshi SDK Development & Contribution Guide
+Rajnish Kumar <RajnishKMehta@proton.me>
+v1.0.0-beta.5, 2026-08-22
+:description: Development and contribution guidelines for the Sakshi SDK.
+:keywords: sakshi, sdk, development, build, gradle, contribution, guidelines
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: highlight.js
+
+== 1. Prerequisites
+
+* **Java JDK**: 21 (OpenJDK 21 LTS)
+* **Android SDK**: Compile SDK 37, Min SDK 29
+* **Gradle**: 9.6.1
+
+== 2. Building the Project
+
+[source,bash]
+----
+# Clean and assemble release library
+./gradlew clean :sakshi-sdk:assembleRelease
+
+# Run lint and checks
+./gradlew :sakshi-sdk:check
+----
+
+== 3. Coding Guidelines
+
+* **Kotlin Only**: All source files must be written in idiomatic Kotlin.
+* **Strict Explicit API Mode**: Requires `public`, `internal`, or `private` on all classes and functions.
+* **KDoc Requirement**: Comprehensive KDoc documentation must accompany all public symbols.

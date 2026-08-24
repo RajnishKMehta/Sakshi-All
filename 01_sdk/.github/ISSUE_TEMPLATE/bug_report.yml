@@ -1,0 +1,41 @@
+name: Bug Report
+description: Create a report to help us fix a bug or unexpected behavior in Sakshi SDK.
+title: "[BUG]: "
+labels: ["bug"]
+assignees: [RajnishKMehta]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Code snippets or steps to reproduce the issue.
+      placeholder: |
+        1. Initialize SakshiClient
+        2. Call startVideoSync(...)
+        3. See error
+    validations:
+      required: true
+  - type: input
+    id: sdk-version
+    attributes:
+      label: Sakshi SDK Version
+      placeholder: "e.g., 1.0.0-beta.2"
+    validations:
+      required: true
+  - type: input
+    id: android-version
+    attributes:
+      label: Android Version / API Level
+      placeholder: "e.g., Android 14 (API 34)"
+    validations:
+      required: true
