@@ -33,7 +33,7 @@ jobs:
         run: chmod +x gradlew 03_camera/gradlew
 
       - name: Build Camera
-        run: cd 03_camera && ./gradlew assembleDebug --no-daemon
+        run: cd 03_camera && ./gradlew check assembleDebug
 
       - name: Upload APKs
         uses: actions/upload-artifact@v7

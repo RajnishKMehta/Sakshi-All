@@ -1,5 +1,3 @@
-import org.gradle.api.GradleException
-
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -11,32 +9,6 @@ java {
 }
 
 android {
-    signingConfigs {
-        create("release") {
-            val keystoreFile = System.getenv("KEYSTORE_FILE")
-            val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
-            val keyAlias = System.getenv("KEY_ALIAS")
-            val keyPassword = System.getenv("KEY_PASSWORD")
-
-            if (
-                keystoreFile.isNullOrBlank() ||
-                keystorePassword.isNullOrBlank() ||
-                keyAlias.isNullOrBlank() ||
-                keyPassword.isNullOrBlank()
-            ) {
-                throw GradleException(
-                    "Release signing configuration is missing. " +
-                    "Set KEYSTORE_FILE, KEYSTORE_PASSWORD, KEY_ALIAS, and KEY_PASSWORD."
-                )
-            }
-
-            storeFile = file(keystoreFile)
-            storePassword = keystorePassword
-            this.keyAlias = keyAlias
-            this.keyPassword = keyPassword
-            enableV4Signing = true
-        }
-    }
     compileSdk = 37
     buildToolsVersion = "37.0.0"
     ndkVersion = "29.0.14206865"
@@ -53,12 +25,42 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val keystoreFile = System.getenv("KEYSTORE_FILE")
+    val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+    val keyAlias = System.getenv("KEY_ALIAS")
+    val keyPassword = System.getenv("KEY_PASSWORD")
+
+    val hasReleaseSigning =
+        !keystoreFile.isNullOrBlank() &&
+        !keystorePassword.isNullOrBlank() &&
+        !keyAlias.isNullOrBlank() &&
+        !keyPassword.isNullOrBlank()
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(keystoreFile!!)
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias!!
+                this.keyPassword = keyPassword
+                enableV4Signing = true
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isShrinkResources = true
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
 
         getByName("debug") {
@@ -86,11 +88,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     implementation(libs.bundles.camerax)
-
     implementation(libs.zxing.core)
 
-    implementation(project(":sakshi-sdk"))
-    // implementation(libs.sakshi.sdk)
+    implementation(libs.sakshi.sdk)
+
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)
     implementation(libs.fragment.ktx)

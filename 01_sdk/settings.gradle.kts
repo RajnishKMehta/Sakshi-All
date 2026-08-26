@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SakshiSDK"
+rootProject.name = "Sakshi-SDK"
 include(":sakshi-sdk")
