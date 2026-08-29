@@ -60,7 +60,7 @@ mavenPublishing {
     coordinates("io.github.rajnishkmehta.sakshi", "sakshi-sdk", libs.versions.sakshi.sdk.get())
 
     publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
+    // signAllPublications()
 
     configure(AndroidSingleVariantLibrary(
         javadocJar = JavadocJar.Empty(),

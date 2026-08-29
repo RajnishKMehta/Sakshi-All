@@ -4,7 +4,11 @@ on:
   workflow_dispatch: 
   push:
     branches: main
+    paths:
+      - '02_vault/**'
   pull_request:
+   paths:
+     - '02_vault/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

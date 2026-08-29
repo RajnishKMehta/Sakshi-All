@@ -8,7 +8,7 @@ import rajnishkmehta.sakshi.vault.db.MediaRecord
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import java.io.File
@@ -94,11 +94,11 @@ class SyncScheduler(
 
                         if (storedCallback != null) {
                             val uriParsed = finalRecord.vaultUri?.let { Uri.parse(it) }
-                            VaultResponder.sendVideoSyncStatus(
+                            VaultResponder.sendAVSyncStatus(
                                 storedCallback,
-                                VideoSyncStatus(
+                                AVSyncStatus(
                                     fileId = fileId,
-                                    state = VideoSyncStatus.State.COMPLETED,
+                                    state = AVSyncStatus.State.COMPLETED,
                                     lastCopiedOffsetBytes = finalRecord.lastCopiedOffset,
                                     totalBytes = finalRecord.lastCopiedOffset,
                                     isCompleted = true,
@@ -203,11 +203,11 @@ class SyncScheduler(
             if (callback != null && !isProbingCompletion) {
                 val currentRecord = dao.getRecord(fileId)
                 val offset = currentRecord?.lastCopiedOffset ?: 0L
-                VaultResponder.sendVideoSyncStatus(
+                VaultResponder.sendAVSyncStatus(
                     callback,
-                    VideoSyncStatus(
+                    AVSyncStatus(
                         fileId = fileId,
-                        state = VideoSyncStatus.State.SYNCING,
+                        state = AVSyncStatus.State.SYNCING,
                         lastCopiedOffsetBytes = offset,
                         totalBytes = offset,
                         isCompleted = false,
@@ -276,11 +276,11 @@ class SyncScheduler(
 
             if (callback != null) {
                 val uriParsed = finalRecord.vaultUri?.let { Uri.parse(it) }
-                VaultResponder.sendVideoSyncStatus(
+                VaultResponder.sendAVSyncStatus(
                     callback,
-                    VideoSyncStatus(
+                    AVSyncStatus(
                         fileId = fileId,
-                        state = VideoSyncStatus.State.COMPLETED,
+                        state = AVSyncStatus.State.COMPLETED,
                         lastCopiedOffsetBytes = finalRecord.lastCopiedOffset,
                         totalBytes = finalRecord.lastCopiedOffset,
                         isCompleted = true,

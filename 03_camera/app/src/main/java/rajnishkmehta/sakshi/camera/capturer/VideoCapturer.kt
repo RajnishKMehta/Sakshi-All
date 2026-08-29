@@ -225,7 +225,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         videoSyncStarted = true
                         val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
                         fileId = "vid_${uniqueHash}"
-                        val videoRequest = rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest(
+                        val avSyncRequest = rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest(
                             fileId = fileId!!,
                             uri = recordingCtx.uri,
                             mimeType = "video/mp4"
@@ -233,7 +233,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
                             kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                                ctx.sakshiClient.startVideoSync(videoRequest).collect { result ->
+                                ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
                                     if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
                                         android.util.Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
                                     }
@@ -245,7 +245,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     if (videoSyncStarted && fileId != null) {
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
                             kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                                ctx.sakshiClient.stopVideoSync(fileId!!)
+                                ctx.sakshiClient.stopAVSync(fileId!!)
                             }
                         }
                     }
