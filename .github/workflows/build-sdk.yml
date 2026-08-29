@@ -4,7 +4,11 @@ on:
   workflow_dispatch: 
   push:
     branches: main
+    paths:
+      - '01_sdk/**'
   pull_request:
+   paths:
+     - '01_sdk/**'
 
 permissions:
  contents: read
