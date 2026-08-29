@@ -1,12 +1,12 @@
 [versions]
-agp = "9.3.1"
+agp = "9.3.2"
 kotlin = "2.4.10"
 
-appcompat = "1.7.1"
-camerax = "1.6.1"
+appcompat = "1.8.0"
+camerax = "1.6.2"
 constraintlayout = "2.2.2"
 coreKtx = "1.19.0"
-material = "1.14.0"
+material = "1.14.2"
 zxing = "3.5.4"
 sakshiSdk = "1.0.0-beta.5"
 lifecycleVersion = "2.6.2"
