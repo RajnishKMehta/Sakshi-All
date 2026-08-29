@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 /**
  * Asynchronous callback interface provided by Sakshi SDK to Vault application
- * to receive execution results, video sync status updates, copy completion acknowledgements, and error events.
+ * to receive execution results, audio/video sync status updates, copy completion acknowledgements, and error events.
  */
 interface ISakshiVaultCallback {
     /**
@@ -15,11 +15,11 @@ interface ISakshiVaultCallback {
     void onPhotoAck(in Bundle responseBundle);
 
     /**
-     * Called when video synchronization status changes.
+     * Called when audio/video synchronization status changes.
      *
-     * @param syncStatusBundle Bundle containing video sync status updates.
+     * @param syncStatusBundle Bundle containing audio/video sync status updates.
      */
-    void onVideoSyncStatus(in Bundle syncStatusBundle);
+    void onAVSyncStatus(in Bundle syncStatusBundle);
 
     /**
      * Called when Vault completes copying a recording or file pass.
