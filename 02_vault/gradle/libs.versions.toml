@@ -1,9 +1,9 @@
 [versions]
-agp = "9.3.1"
-kotlin = "2.4.10"
+agp = "9.3.2"
 room = "3.0.1"
-coroutines = "1.11.0"
 sakshi = "1.0.0-beta.5"
+kotlin = "2.4.10"
+coroutines = "1.11.0"
 androidx-core = "1.19.0"
 ksp = "2.3.11"
 
