@@ -139,7 +139,9 @@ class SakshiVaultRemoteService : Service() {
                 VaultResponder.sendError(callback, error)
                 return
             }
-            // Implementation pending: temporarily pause sync logic
+            serviceScope?.launch {
+                scheduler?.pauseSync(fileId, callback)
+            }
         }
 
         override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
@@ -149,7 +151,9 @@ class SakshiVaultRemoteService : Service() {
                 VaultResponder.sendError(callback, error)
                 return
             }
-            // Implementation pending: resume paused sync logic
+            serviceScope?.launch {
+                scheduler?.resumeSync(fileId, callback)
+            }
         }
 
         override fun isAVSynced(fileId: String): Bundle {

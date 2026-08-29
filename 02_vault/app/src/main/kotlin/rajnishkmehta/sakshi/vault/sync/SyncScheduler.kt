@@ -161,6 +161,61 @@ class SyncScheduler(
     /**
      * Cancels all active synchronization loops immediately.
      */
+
+    suspend fun pauseSync(fileId: String, callback: ISakshiVaultCallback?) {
+        Log.d(tag, "Pausing sync for file: $fileId")
+        if (callback != null) {
+            activeCallbacks[fileId] = callback
+        }
+
+        val record = database.mediaRecordDao().getRecord(fileId)
+        if (record != null && record.completionState != "COMPLETED") {
+            updateDatabaseState(fileId, "PAUSED")
+
+            val storedCallback = activeCallbacks[fileId]
+            if (storedCallback != null) {
+                VaultResponder.sendAVSyncStatus(
+                    storedCallback,
+                    AVSyncStatus(
+                        fileId = fileId,
+                        state = AVSyncStatus.State.PAUSED,
+                        lastCopiedOffsetBytes = record.lastCopiedOffset,
+                        totalBytes = record.lastCopiedOffset,
+                        isCompleted = false,
+                        message = "Recording paused."
+                    )
+                )
+            }
+        }
+    }
+
+    suspend fun resumeSync(fileId: String, callback: ISakshiVaultCallback?) {
+        Log.d(tag, "Resuming sync for file: $fileId")
+        if (callback != null) {
+            activeCallbacks[fileId] = callback
+        }
+
+        val record = database.mediaRecordDao().getRecord(fileId)
+        if (record != null && record.completionState == "PAUSED") {
+            updateDatabaseState(fileId, "SYNCING")
+
+            val storedCallback = activeCallbacks[fileId]
+            if (storedCallback != null) {
+                VaultResponder.sendAVSyncStatus(
+                    storedCallback,
+                    AVSyncStatus(
+                        fileId = fileId,
+                        state = AVSyncStatus.State.SYNCING,
+                        lastCopiedOffsetBytes = record.lastCopiedOffset,
+                        totalBytes = record.lastCopiedOffset,
+                        isCompleted = false,
+                        message = "Recording resumed."
+                    )
+                )
+            }
+        }
+    }
+
     fun cancelAll() {
         coroutineScope.cancel()
     }
@@ -239,6 +294,12 @@ class SyncScheduler(
             }
 
             // 3. Heuristic: Check if recording has finished due to inactivity
+            val currentRecordCheck = dao.getRecord(fileId)
+            if (currentRecordCheck?.completionState == "PAUSED") {
+                consecutiveZeroBytePasses = 0
+                isProbingCompletion = false
+                additionalChecksRemaining = additionalChecksLimit
+            } else
             if (consecutiveZeroBytePasses >= consecutiveNoBytesLimit) {
                 if (!isProbingCompletion) {
                     Log.d(tag, "No new bytes for $fileId. Entering probing completion mode.")
