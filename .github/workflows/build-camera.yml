@@ -6,11 +6,9 @@ on:
     branches: main
     paths:
       - '03_camera/**'
-      - '01_sdk/**'
   pull_request:
    paths:
      - '03_camera/**'
-     - '01_sdk/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
