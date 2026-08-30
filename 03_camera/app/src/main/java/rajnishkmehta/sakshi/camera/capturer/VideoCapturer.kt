@@ -90,11 +90,12 @@ class VideoCapturer(private val mActivity: MainActivity) {
         val fileDescriptor: ParcelFileDescriptor,
         val shouldAddToGallery: Boolean,
         val isPendingMediaStoreUri: Boolean,
+        val mimeType: String,
     )
 
     private fun createRecordingContext(recorder: Recorder, fileName: String): RecordingContext? {
         val mimeType =
-            MimeTypeMap.getSingleton().getMimeTypeFromExtension(videoFileFormat) ?: "video/mp4"
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(videoFileFormat.removePrefix(".")) ?: "video/mp4"
 
         val ctx = mActivity
         val contentResolver = ctx.contentResolver
@@ -142,7 +143,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 .setLocation(location)
                 .build()
             val pendingRecording = recorder.prepareRecording(ctx, outputOptions)
-            return RecordingContext(pendingRecording, uri, it, shouldAddToGallery, isPendingMediaStoreUri)
+            return RecordingContext(pendingRecording, uri, it, shouldAddToGallery, isPendingMediaStoreUri, mimeType)
         }
         return null
     }
@@ -228,7 +229,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         val avSyncRequest = rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest(
                             fileId = fileId!!,
                             uri = recordingCtx.uri,
-                            mimeType = "video/mp4"
+                            mimeType = recordingCtx.mimeType
                         )
                         ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {

@@ -14,7 +14,7 @@ import android.net.Uri
 public data class AVSyncRequest(
     public val fileId: String,
     public val uri: Uri,
-    public val mimeType: String = "video/mp4",
+    public val mimeType: String,
     public val startTimestampEpochMs: Long = System.currentTimeMillis(),
     public val metadata: Map<String, String> = emptyMap()
 )
