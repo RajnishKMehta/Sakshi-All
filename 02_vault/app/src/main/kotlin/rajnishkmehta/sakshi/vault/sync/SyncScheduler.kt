@@ -251,12 +251,17 @@ class SyncScheduler(
         }
 
         while (currentCoroutineContext().isActive) {
+            val currentRecord = dao.getRecord(fileId)
+            if (currentRecord?.completionState == "PAUSED") {
+                delay(syncIntervalMs)
+                continue
+            }
+
             val startTime = System.currentTimeMillis()
 
             // Notify client that we are active
             val callback = activeCallbacks[fileId]
             if (callback != null && !isProbingCompletion) {
-                val currentRecord = dao.getRecord(fileId)
                 val offset = currentRecord?.lastCopiedOffset ?: 0L
                 VaultResponder.sendAVSyncStatus(
                     callback,
