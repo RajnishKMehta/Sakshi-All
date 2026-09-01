@@ -1950,8 +1950,9 @@ open class MainActivity : AppCompatActivity(),
                 when (result) {
                     is SakshiResult.Success -> {
                         val ack = result.data
-                        // TODO: Implement post-copy behavior later
-                        // We received the callback correctly, but we won't implement the functionality yet.
+                        if (ack.originalUri != null) {
+                            revokeVaultUriPermission(ack.fileId, ack.originalUri!!)
+                        }
                     }
                     is SakshiResult.Failure -> {
                         // Implement proper error handling for SDK interaction

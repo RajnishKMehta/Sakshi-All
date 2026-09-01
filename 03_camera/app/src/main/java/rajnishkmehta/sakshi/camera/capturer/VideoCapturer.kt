@@ -269,7 +269,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                             ctx.lifecycleScope.launch {
                                 ctx.sakshiClient.stopAVSync(fileId!!)
                             }
-                            ctx.revokeVaultUriPermission(fileId!!, recordingCtx.uri)
+                            ctx.handleCopyDone(fileId!!)
                         }
                     }
                     currentFileId = null
