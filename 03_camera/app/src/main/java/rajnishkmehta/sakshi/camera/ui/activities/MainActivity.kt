@@ -1940,6 +1940,10 @@ open class MainActivity : AppCompatActivity(),
         grantUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
+    fun revokeVaultUriPermission(fileId: String, uri: android.net.Uri) {
+        revokeUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
     fun handleCopyDone(fileId: String) {
         lifecycleScope.launch {
             sakshiClient.observeCopyDone(fileId).collect { result ->
