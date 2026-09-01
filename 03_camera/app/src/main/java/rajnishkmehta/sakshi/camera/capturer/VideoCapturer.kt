@@ -52,6 +52,8 @@ class VideoCapturer(private val mActivity: MainActivity) {
     var isRecording = false
         private set
 
+    private var currentFileId: String? = null
+
     private val videoFileFormat = ".mp4"
 
     private var recording: Recording? = null
@@ -70,9 +72,19 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 if (value) {
                     recording?.pause()
                     mActivity.setFlipCameraIcon(R.drawable.play, R.string.resume_recording)
+                    currentFileId?.let { id ->
+                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                            mActivity.sakshiClient.pauseAVSync(id)
+                        }
+                    }
                 } else {
                     recording?.resume()
                     mActivity.setFlipCameraIcon(R.drawable.pause, R.string.pause_recording)
+                    currentFileId?.let { id ->
+                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                            mActivity.sakshiClient.resumeAVSync(id)
+                        }
+                    }
                 }
             }
             field = value
@@ -229,10 +241,12 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 if (event is VideoRecordEvent.Start) {
                     onRecordingStart()
                 } else if (event is androidx.camera.video.VideoRecordEvent.Status) {
+                    updateTimerTime(event.recordingStats.recordedDurationNanos)
                     if (!videoSyncStarted && event.recordingStats.numBytesRecorded > 1024) {
                         videoSyncStarted = true
                         val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
                         fileId = "vid_${uniqueHash}"
+                        currentFileId = fileId
                         val avSyncRequest = rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest(
                             fileId = fileId!!,
                             uri = recordingCtx.uri,
@@ -257,6 +271,9 @@ class VideoCapturer(private val mActivity: MainActivity) {
                             }
                         }
                     }
+                    ctx.revokeUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    currentFileId = null
+                    afterRecordingStops()
                 }
             }
 
