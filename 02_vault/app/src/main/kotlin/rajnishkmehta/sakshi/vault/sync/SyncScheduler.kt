@@ -52,13 +52,15 @@ class SyncScheduler(
             try {
                 runSyncLoop(fileId, sourceUri, mimeType)
             } catch (e: Exception) {
-                Log.e(tag, "Error in sync loop for $fileId", e)
-                val sakshiError = SakshiError.Unknown(
-                    "Sync loop failed: ${e.message}",
-                    e
-                )
-                VaultResponder.sendError(callback, sakshiError)
-                updateDatabaseState(fileId, "FAILED")
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    Log.e(tag, "Error in sync loop for $fileId", e)
+                    val sakshiError = SakshiError.Unknown(
+                        "Sync loop failed: ${e.message}",
+                        e
+                    )
+                    VaultResponder.sendError(callback, sakshiError)
+                    updateDatabaseState(fileId, "FAILED")
+                }
             } finally {
                 activeJobs.remove(fileId)
             }
@@ -118,12 +120,14 @@ class SyncScheduler(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(tag, "Failed to perform final sync pass for $fileId", e)
-                if (storedCallback != null) {
-                    VaultResponder.sendError(
-                        storedCallback,
-                        SakshiError.Unknown("Final sync pass failed: ${e.message}", e)
-                    )
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    Log.e(tag, "Failed to perform final sync pass for $fileId", e)
+                    if (storedCallback != null) {
+                        VaultResponder.sendError(
+                            storedCallback,
+                            SakshiError.Unknown("Final sync pass failed: ${e.message}", e)
+                        )
+                    }
                 }
             } finally {
                 activeCallbacks.remove(fileId)

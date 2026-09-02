@@ -39,10 +39,10 @@ import rajnishkmehta.sakshi.camera.util.formatVideoDuration
 import rajnishkmehta.sakshi.camera.util.getTreeDocumentUri
 import rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri
 import java.text.SimpleDateFormat
+import androidx.lifecycle.lifecycleScope
 import java.util.Date
 import java.util.Locale
 
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 class VideoCapturer(private val mActivity: MainActivity) {
@@ -51,6 +51,8 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
     var isRecording = false
         private set
+
+    private var currentFileId: String? = null
 
     private val videoFileFormat = ".mp4"
 
@@ -70,9 +72,19 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 if (value) {
                     recording?.pause()
                     mActivity.setFlipCameraIcon(R.drawable.play, R.string.resume_recording)
+                    currentFileId?.let { id ->
+                        mActivity.lifecycleScope.launch {
+                            mActivity.sakshiClient.pauseAVSync(id)
+                        }
+                    }
                 } else {
                     recording?.resume()
                     mActivity.setFlipCameraIcon(R.drawable.pause, R.string.pause_recording)
+                    currentFileId?.let { id ->
+                        mActivity.lifecycleScope.launch {
+                            mActivity.sakshiClient.resumeAVSync(id)
+                        }
+                    }
                 }
             }
             field = value
@@ -122,7 +134,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     put(MediaColumns.DISPLAY_NAME, fileName)
                     put(MediaColumns.MIME_TYPE, resolvedMimeType)
                     put(MediaColumns.RELATIVE_PATH, DEFAULT_MEDIA_STORE_CAPTURE_PATH)
-                    put(MediaColumns.IS_PENDING, 1)
+                    put(MediaColumns.IS_PENDING, 0)
                 }
                 uri = contentResolver.insert(CamConfig.videoCollectionUri, contentValues)
                 isPendingMediaStoreUri = true
@@ -229,10 +241,12 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 if (event is VideoRecordEvent.Start) {
                     onRecordingStart()
                 } else if (event is androidx.camera.video.VideoRecordEvent.Status) {
+                    updateTimerTime(event.recordingStats.recordedDurationNanos)
                     if (!videoSyncStarted && event.recordingStats.numBytesRecorded > 1024) {
                         videoSyncStarted = true
                         val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
                         fileId = "vid_${uniqueHash}"
+                        currentFileId = fileId
                         val avSyncRequest = rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest(
                             fileId = fileId!!,
                             uri = recordingCtx.uri,
@@ -252,11 +266,14 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     if (videoSyncStarted && fileId != null) {
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                            ctx.lifecycleScope.launch {
                                 ctx.sakshiClient.stopAVSync(fileId!!)
                             }
+                            ctx.handleCopyDone(fileId!!)
                         }
                     }
+                    currentFileId = null
+                    afterRecordingStops()
                 }
             }
 
