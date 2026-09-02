@@ -6,8 +6,8 @@ import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.internal.SakshiClientImpl
 
 /**
@@ -34,39 +34,55 @@ public interface SakshiClient {
     public suspend fun sendPhoto(request: PhotoRequest): SakshiResult<CopyDoneAck>
 
     /**
-     * Initiates video synchronization for a recording in Vault.
+     * Initiates audio/video synchronization for a recording in Vault.
      *
-     * Returns a cold [Flow] that emits real-time [VideoSyncStatus] updates until synchronization
+     * Returns a cold [Flow] that emits real-time [AVSyncStatus] updates until synchronization
      * completes, fails, or is stopped.
      *
-     * @param request [VideoSyncRequest] detailing unique file ID, Uri, and metadata.
-     * @return A [Flow] emitting [SakshiResult] containing [VideoSyncStatus] updates.
+     * @param request [AVSyncRequest] detailing unique file ID, Uri, and metadata.
+     * @return A [Flow] emitting [SakshiResult] containing [AVSyncStatus] updates.
      */
-    public fun startVideoSync(request: VideoSyncRequest): Flow<SakshiResult<VideoSyncStatus>>
+    public fun startAVSync(request: AVSyncRequest): Flow<SakshiResult<AVSyncStatus>>
 
     /**
      * Observes completion acknowledgements ([CopyDoneAck]) sent by Vault when a file copy operation finishes.
      *
-     * @param fileId Unique identifier of video recording to observe.
+     * @param fileId Unique identifier of audio/video recording to observe.
      * @return A [Flow] emitting [SakshiResult] containing [CopyDoneAck].
      */
     public fun observeCopyDone(fileId: String): Flow<SakshiResult<CopyDoneAck>>
 
     /**
-     * Requests Vault to stop video synchronization for a specific file ID.
+     * Requests Vault to stop audio/video synchronization for a specific file ID.
      *
-     * @param fileId Unique identifier of video recording.
+     * @param fileId Unique identifier of audio/video recording.
      * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
      */
-    public suspend fun stopVideoSync(fileId: String): SakshiResult<Unit>
+    public suspend fun stopAVSync(fileId: String): SakshiResult<Unit>
 
     /**
      * Queries Vault to check whether a recording with [fileId] exists or is syncing.
      *
-     * @param fileId Unique identifier of video recording.
+     * @param fileId Unique identifier of audio/video recording.
      * @return [SakshiResult] containing [RecordingQueryResponse] or [SakshiError] on failure.
      */
-    public suspend fun isRecordingSynced(fileId: String): SakshiResult<RecordingQueryResponse>
+    /**
+     * Requests Vault to temporarily pause audio/video synchronization for a specific file ID.
+     *
+     * @param fileId Unique identifier of audio/video recording.
+     * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     */
+    public suspend fun pauseAVSync(fileId: String): SakshiResult<Unit>
+
+    /**
+     * Requests Vault to resume audio/video synchronization for a specific file ID.
+     *
+     * @param fileId Unique identifier of audio/video recording.
+     * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     */
+    public suspend fun resumeAVSync(fileId: String): SakshiResult<Unit>
+
+    public suspend fun isAVSynced(fileId: String): SakshiResult<RecordingQueryResponse>
 
     /**
      * Explicitly disconnects from Vault IPC service and releases internal resources.

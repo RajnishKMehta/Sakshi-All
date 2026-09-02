@@ -8,7 +8,7 @@ import rajnishkmehta.sakshi.vault.db.MediaRecord
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import java.io.File
@@ -52,13 +52,15 @@ class SyncScheduler(
             try {
                 runSyncLoop(fileId, sourceUri, mimeType)
             } catch (e: Exception) {
-                Log.e(tag, "Error in sync loop for $fileId", e)
-                val sakshiError = SakshiError.Unknown(
-                    "Sync loop failed: ${e.message}",
-                    e
-                )
-                VaultResponder.sendError(callback, sakshiError)
-                updateDatabaseState(fileId, "FAILED")
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    Log.e(tag, "Error in sync loop for $fileId", e)
+                    val sakshiError = SakshiError.Unknown(
+                        "Sync loop failed: ${e.message}",
+                        e
+                    )
+                    VaultResponder.sendError(callback, sakshiError)
+                    updateDatabaseState(fileId, "FAILED")
+                }
             } finally {
                 activeJobs.remove(fileId)
             }
@@ -94,11 +96,11 @@ class SyncScheduler(
 
                         if (storedCallback != null) {
                             val uriParsed = finalRecord.vaultUri?.let { Uri.parse(it) }
-                            VaultResponder.sendVideoSyncStatus(
+                            VaultResponder.sendAVSyncStatus(
                                 storedCallback,
-                                VideoSyncStatus(
+                                AVSyncStatus(
                                     fileId = fileId,
-                                    state = VideoSyncStatus.State.COMPLETED,
+                                    state = AVSyncStatus.State.COMPLETED,
                                     lastCopiedOffsetBytes = finalRecord.lastCopiedOffset,
                                     totalBytes = finalRecord.lastCopiedOffset,
                                     isCompleted = true,
@@ -118,12 +120,14 @@ class SyncScheduler(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(tag, "Failed to perform final sync pass for $fileId", e)
-                if (storedCallback != null) {
-                    VaultResponder.sendError(
-                        storedCallback,
-                        SakshiError.Unknown("Final sync pass failed: ${e.message}", e)
-                    )
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    Log.e(tag, "Failed to perform final sync pass for $fileId", e)
+                    if (storedCallback != null) {
+                        VaultResponder.sendError(
+                            storedCallback,
+                            SakshiError.Unknown("Final sync pass failed: ${e.message}", e)
+                        )
+                    }
                 }
             } finally {
                 activeCallbacks.remove(fileId)
@@ -161,6 +165,61 @@ class SyncScheduler(
     /**
      * Cancels all active synchronization loops immediately.
      */
+
+    suspend fun pauseSync(fileId: String, callback: ISakshiVaultCallback?) {
+        Log.d(tag, "Pausing sync for file: $fileId")
+        if (callback != null) {
+            activeCallbacks[fileId] = callback
+        }
+
+        val record = database.mediaRecordDao().getRecord(fileId)
+        if (record != null && record.completionState != "COMPLETED") {
+            updateDatabaseState(fileId, "PAUSED")
+
+            val storedCallback = activeCallbacks[fileId]
+            if (storedCallback != null) {
+                VaultResponder.sendAVSyncStatus(
+                    storedCallback,
+                    AVSyncStatus(
+                        fileId = fileId,
+                        state = AVSyncStatus.State.PAUSED,
+                        lastCopiedOffsetBytes = record.lastCopiedOffset,
+                        totalBytes = record.lastCopiedOffset,
+                        isCompleted = false,
+                        message = "Recording paused."
+                    )
+                )
+            }
+        }
+    }
+
+    suspend fun resumeSync(fileId: String, callback: ISakshiVaultCallback?) {
+        Log.d(tag, "Resuming sync for file: $fileId")
+        if (callback != null) {
+            activeCallbacks[fileId] = callback
+        }
+
+        val record = database.mediaRecordDao().getRecord(fileId)
+        if (record != null && record.completionState == "PAUSED") {
+            updateDatabaseState(fileId, "SYNCING")
+
+            val storedCallback = activeCallbacks[fileId]
+            if (storedCallback != null) {
+                VaultResponder.sendAVSyncStatus(
+                    storedCallback,
+                    AVSyncStatus(
+                        fileId = fileId,
+                        state = AVSyncStatus.State.SYNCING,
+                        lastCopiedOffsetBytes = record.lastCopiedOffset,
+                        totalBytes = record.lastCopiedOffset,
+                        isCompleted = false,
+                        message = "Recording resumed."
+                    )
+                )
+            }
+        }
+    }
+
     fun cancelAll() {
         coroutineScope.cancel()
     }
@@ -196,18 +255,23 @@ class SyncScheduler(
         }
 
         while (currentCoroutineContext().isActive) {
+            val currentRecord = dao.getRecord(fileId)
+            if (currentRecord?.completionState == "PAUSED") {
+                delay(syncIntervalMs)
+                continue
+            }
+
             val startTime = System.currentTimeMillis()
 
             // Notify client that we are active
             val callback = activeCallbacks[fileId]
             if (callback != null && !isProbingCompletion) {
-                val currentRecord = dao.getRecord(fileId)
                 val offset = currentRecord?.lastCopiedOffset ?: 0L
-                VaultResponder.sendVideoSyncStatus(
+                VaultResponder.sendAVSyncStatus(
                     callback,
-                    VideoSyncStatus(
+                    AVSyncStatus(
                         fileId = fileId,
-                        state = VideoSyncStatus.State.SYNCING,
+                        state = AVSyncStatus.State.SYNCING,
                         lastCopiedOffsetBytes = offset,
                         totalBytes = offset,
                         isCompleted = false,
@@ -239,6 +303,12 @@ class SyncScheduler(
             }
 
             // 3. Heuristic: Check if recording has finished due to inactivity
+            val currentRecordCheck = dao.getRecord(fileId)
+            if (currentRecordCheck?.completionState == "PAUSED") {
+                consecutiveZeroBytePasses = 0
+                isProbingCompletion = false
+                additionalChecksRemaining = additionalChecksLimit
+            } else
             if (consecutiveZeroBytePasses >= consecutiveNoBytesLimit) {
                 if (!isProbingCompletion) {
                     Log.d(tag, "No new bytes for $fileId. Entering probing completion mode.")
@@ -276,11 +346,11 @@ class SyncScheduler(
 
             if (callback != null) {
                 val uriParsed = finalRecord.vaultUri?.let { Uri.parse(it) }
-                VaultResponder.sendVideoSyncStatus(
+                VaultResponder.sendAVSyncStatus(
                     callback,
-                    VideoSyncStatus(
+                    AVSyncStatus(
                         fileId = fileId,
-                        state = VideoSyncStatus.State.COMPLETED,
+                        state = AVSyncStatus.State.COMPLETED,
                         lastCopiedOffsetBytes = finalRecord.lastCopiedOffset,
                         totalBytes = finalRecord.lastCopiedOffset,
                         isCompleted = true,

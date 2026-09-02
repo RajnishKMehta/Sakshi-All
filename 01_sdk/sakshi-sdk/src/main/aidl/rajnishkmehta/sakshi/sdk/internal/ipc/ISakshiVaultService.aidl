@@ -25,26 +25,42 @@ interface ISakshiVaultService {
     void sendPhoto(in Bundle photoBundle, in ISakshiVaultCallback callback);
 
     /**
-     * Notifies Vault to start video synchronization for a recording.
+     * Notifies Vault to start audio/video synchronization for a recording.
      *
-     * @param videoSyncBundle Payload bundle containing unique file ID and recording details.
+     * @param avSyncBundle Payload bundle containing unique file ID and recording details.
      * @param callback Callback to receive progress updates, acknowledgements, or errors.
      */
-    void startVideoSync(in Bundle videoSyncBundle, in ISakshiVaultCallback callback);
+    void startAVSync(in Bundle avSyncBundle, in ISakshiVaultCallback callback);
 
     /**
-     * Notifies Vault to stop video synchronization for a specific file ID.
+     * Notifies Vault to stop audio/video synchronization for a specific file ID.
      *
      * @param fileId Unique identifier of recording to stop.
      * @param callback Callback to receive confirmation or errors.
      */
-    void stopVideoSync(in String fileId, in ISakshiVaultCallback callback);
+    void stopAVSync(in String fileId, in ISakshiVaultCallback callback);
 
     /**
-     * Queries Vault to determine whether a recording exists or is actively syncing.
+     * Notifies Vault to pause audio/video synchronization for a specific file ID.
+     *
+     * @param fileId Unique identifier of recording to pause.
+     * @param callback Callback to receive confirmation or errors.
+     */
+    void pauseAVSync(in String fileId, in ISakshiVaultCallback callback);
+
+    /**
+     * Notifies Vault to resume audio/video synchronization for a specific file ID.
+     *
+     * @param fileId Unique identifier of recording to resume.
+     * @param callback Callback to receive confirmation or errors.
+     */
+    void resumeAVSync(in String fileId, in ISakshiVaultCallback callback);
+
+    /**
+     * Queries Vault to determine whether an audio/video recording exists or is actively syncing.
      *
      * @param fileId Unique identifier of recording to query.
      * @return Bundle containing query response (existence status, progress, last offset).
      */
-    Bundle isRecordingSynced(in String fileId);
+    Bundle isAVSynced(in String fileId);
 }

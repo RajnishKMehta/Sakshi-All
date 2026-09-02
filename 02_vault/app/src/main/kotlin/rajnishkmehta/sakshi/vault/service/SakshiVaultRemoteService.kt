@@ -94,11 +94,11 @@ class SakshiVaultRemoteService : Service() {
         /**
          * Registers a video file and schedules an adaptive, non-overlapping periodic synchronization loop.
          */
-        override fun startVideoSync(videoSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = videoSyncBundle.getString("file_id") ?: ""
-            val sourceUriStr = videoSyncBundle.getString("uri") ?: ""
-            val mimeType = videoSyncBundle.getString("mime_type")
-            Log.d(tag, "Received startVideoSync request: fileId=$fileId, uri=$sourceUriStr, mimeType=$mimeType")
+        override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
+            val fileId = avSyncBundle.getString("file_id") ?: ""
+            val sourceUriStr = avSyncBundle.getString("uri") ?: ""
+            val mimeType = avSyncBundle.getString("mime_type")
+            Log.d(tag, "Received startAVSync request: fileId=$fileId, uri=$sourceUriStr, mimeType=$mimeType")
 
             if (fileId.isEmpty() || sourceUriStr.isEmpty()) {
                 val error = SakshiError.Unknown("Invalid video sync payload: empty file_id or uri", null)
@@ -115,10 +115,10 @@ class SakshiVaultRemoteService : Service() {
          * Cancels the active sync loop for the video and schedules a final incremental copy
          * to sync any remaining trailing bytes before marking as complete.
          */
-        override fun stopVideoSync(fileId: String, callback: ISakshiVaultCallback) {
-            Log.d(tag, "Received stopVideoSync request: fileId=$fileId")
+        override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            Log.d(tag, "Received stopAVSync request: fileId=$fileId")
             if (fileId.isEmpty()) {
-                val error = SakshiError.Unknown("Invalid stopVideoSync payload: empty file_id", null)
+                val error = SakshiError.Unknown("Invalid stopAVSync payload: empty file_id", null)
                 VaultResponder.sendError(callback, error)
                 return
             }
@@ -131,8 +131,33 @@ class SakshiVaultRemoteService : Service() {
         /**
          * Synchronously queries the database to report the current synchronization progress and state.
          */
-        override fun isRecordingSynced(fileId: String): Bundle {
-            Log.d(tag, "Received isRecordingSynced query: fileId=$fileId")
+
+        override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            Log.d(tag, "Received pauseAVSync request: fileId=${fileId}")
+            if (fileId.isEmpty()) {
+                val error = SakshiError.Unknown("Invalid pauseAVSync payload: empty file_id", null)
+                VaultResponder.sendError(callback, error)
+                return
+            }
+            serviceScope?.launch {
+                scheduler?.pauseSync(fileId, callback)
+            }
+        }
+
+        override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            Log.d(tag, "Received resumeAVSync request: fileId=${fileId}")
+            if (fileId.isEmpty()) {
+                val error = SakshiError.Unknown("Invalid resumeAVSync payload: empty file_id", null)
+                VaultResponder.sendError(callback, error)
+                return
+            }
+            serviceScope?.launch {
+                scheduler?.resumeSync(fileId, callback)
+            }
+        }
+
+        override fun isAVSynced(fileId: String): Bundle {
+            Log.d(tag, "Received isAVSynced query: fileId=$fileId")
             val record = runBlocking {
                 database?.mediaRecordDao()?.getRecord(fileId)
             }

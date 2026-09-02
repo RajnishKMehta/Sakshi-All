@@ -14,8 +14,8 @@ import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.internal.ipc.AidlMappers
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.VaultServiceConnection
@@ -75,7 +75,7 @@ internal class SakshiClientImpl(
                     }
                 }
 
-                override fun onVideoSyncStatus(syncStatusBundle: Bundle) {}
+                override fun onAVSyncStatus(syncStatusBundle: Bundle) {}
                 override fun onCopyDone(copyDoneBundle: Bundle) {}
 
                 override fun onError(errorBundle: Bundle) {
@@ -101,7 +101,7 @@ internal class SakshiClientImpl(
         }
     }
 
-    override fun startVideoSync(request: VideoSyncRequest): Flow<SakshiResult<VideoSyncStatus>> = callbackFlow {
+    override fun startAVSync(request: AVSyncRequest): Flow<SakshiResult<AVSyncStatus>> = callbackFlow {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
             trySend(SakshiResult.Failure(serviceResult.errorOrNull()!!))
@@ -114,19 +114,19 @@ internal class SakshiClientImpl(
         val callback = object : ISakshiVaultCallback.Stub() {
             override fun onPhotoAck(responseBundle: Bundle) {}
 
-            override fun onVideoSyncStatus(syncStatusBundle: Bundle) {
-                val status = AidlMappers.toVideoSyncStatus(syncStatusBundle)
+            override fun onAVSyncStatus(syncStatusBundle: Bundle) {
+                val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                 trySend(SakshiResult.Success(status))
-                if (status.isCompleted || status.state == VideoSyncStatus.State.FAILED || status.state == VideoSyncStatus.State.STOPPED) {
+                if (status.isCompleted || status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
                     close()
                 }
             }
 
             override fun onCopyDone(copyDoneBundle: Bundle) {
                 val copyDone = AidlMappers.toCopyDoneAck(copyDoneBundle)
-                val status = VideoSyncStatus(
+                val status = AVSyncStatus(
                     fileId = copyDone.fileId,
-                    state = VideoSyncStatus.State.COMPLETED,
+                    state = AVSyncStatus.State.COMPLETED,
                     lastCopiedOffsetBytes = copyDone.totalCopiedBytes,
                     totalBytes = copyDone.totalCopiedBytes,
                     isCompleted = true,
@@ -145,11 +145,11 @@ internal class SakshiClientImpl(
 
         try {
             val syncBundle = AidlMappers.toBundle(request)
-            service.startVideoSync(syncBundle, callback)
+            service.startAVSync(syncBundle, callback)
         } catch (e: Throwable) {
             trySend(
                 SakshiResult.Failure(
-                    SakshiError.IpcError(message = e.message ?: "Failed to start video sync", cause = e)
+                    SakshiError.IpcError(message = e.message ?: "Failed to start audio/video sync", cause = e)
                 )
             )
             close()
@@ -170,7 +170,7 @@ internal class SakshiClientImpl(
 
         val callback = object : ISakshiVaultCallback.Stub() {
             override fun onPhotoAck(responseBundle: Bundle) {}
-            override fun onVideoSyncStatus(syncStatusBundle: Bundle) {}
+            override fun onAVSyncStatus(syncStatusBundle: Bundle) {}
 
             override fun onCopyDone(copyDoneBundle: Bundle) {
                 val copyDone = AidlMappers.toCopyDoneAck(copyDoneBundle)
@@ -189,7 +189,7 @@ internal class SakshiClientImpl(
 
         try {
             val queryBundle = Bundle().apply { putString("file_id", fileId) }
-            service.startVideoSync(queryBundle, callback)
+            service.startAVSync(queryBundle, callback)
         } catch (e: Throwable) {
             trySend(
                 SakshiResult.Failure(
@@ -202,7 +202,7 @@ internal class SakshiClientImpl(
         awaitClose {}
     }
 
-    override suspend fun stopVideoSync(fileId: String): SakshiResult<Unit> {
+    override suspend fun stopAVSync(fileId: String): SakshiResult<Unit> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
             return SakshiResult.Failure(serviceResult.errorOrNull()!!)
@@ -213,7 +213,61 @@ internal class SakshiClientImpl(
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
                 override fun onPhotoAck(responseBundle: Bundle) {}
-                override fun onVideoSyncStatus(syncStatusBundle: Bundle) {}
+                override fun onAVSyncStatus(syncStatusBundle: Bundle) {
+                    val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
+                    if (status.state == AVSyncStatus.State.COMPLETED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Success(Unit))
+                        }
+                    }
+                }
+                override fun onCopyDone(copyDoneBundle: Bundle) {
+                    if (continuation.isActive) {
+                        continuation.resume(SakshiResult.Success(Unit))
+                    }
+                }
+
+                override fun onError(errorBundle: Bundle) {
+                    val error = AidlMappers.toSakshiError(errorBundle)
+                    if (continuation.isActive) {
+                        continuation.resume(SakshiResult.Failure(error))
+                    }
+                }
+            }
+
+            try {
+                service.stopAVSync(fileId, callback)
+            } catch (e: Throwable) {
+                if (continuation.isActive) {
+                    continuation.resume(
+                        SakshiResult.Failure(
+                            SakshiError.IpcError(message = e.message ?: "Failed to stop audio/video sync", cause = e)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun pauseAVSync(fileId: String): SakshiResult<Unit> {
+        val serviceResult = serviceConnection.getService()
+        if (serviceResult.isFailure) {
+            return SakshiResult.Failure(serviceResult.errorOrNull()!!)
+        }
+
+        val service = serviceResult.getOrNull()!!
+
+        return suspendCancellableCoroutine { continuation ->
+            val callback = object : ISakshiVaultCallback.Stub() {
+                override fun onPhotoAck(responseBundle: Bundle) {}
+                override fun onAVSyncStatus(syncStatusBundle: Bundle) {
+                    val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
+                    if (status.state == AVSyncStatus.State.PAUSED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Success(Unit))
+                        }
+                    }
+                }
                 override fun onCopyDone(copyDoneBundle: Bundle) {}
 
                 override fun onError(errorBundle: Bundle) {
@@ -225,12 +279,12 @@ internal class SakshiClientImpl(
             }
 
             try {
-                service.stopVideoSync(fileId, callback)
+                service.pauseAVSync(fileId, callback)
             } catch (e: Throwable) {
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            SakshiError.IpcError(message = e.message ?: "Failed to stop video sync", cause = e)
+                            SakshiError.IpcError(message = e.message ?: "Failed to pause audio/video sync", cause = e)
                         )
                     )
                 }
@@ -238,7 +292,50 @@ internal class SakshiClientImpl(
         }
     }
 
-    override suspend fun isRecordingSynced(fileId: String): SakshiResult<RecordingQueryResponse> {
+    override suspend fun resumeAVSync(fileId: String): SakshiResult<Unit> {
+        val serviceResult = serviceConnection.getService()
+        if (serviceResult.isFailure) {
+            return SakshiResult.Failure(serviceResult.errorOrNull()!!)
+        }
+
+        val service = serviceResult.getOrNull()!!
+
+        return suspendCancellableCoroutine { continuation ->
+            val callback = object : ISakshiVaultCallback.Stub() {
+                override fun onPhotoAck(responseBundle: Bundle) {}
+                override fun onAVSyncStatus(syncStatusBundle: Bundle) {
+                    val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
+                    if (status.state == AVSyncStatus.State.SYNCING) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Success(Unit))
+                        }
+                    }
+                }
+                override fun onCopyDone(copyDoneBundle: Bundle) {}
+
+                override fun onError(errorBundle: Bundle) {
+                    val error = AidlMappers.toSakshiError(errorBundle)
+                    if (continuation.isActive) {
+                        continuation.resume(SakshiResult.Failure(error))
+                    }
+                }
+            }
+
+            try {
+                service.resumeAVSync(fileId, callback)
+            } catch (e: Throwable) {
+                if (continuation.isActive) {
+                    continuation.resume(
+                        SakshiResult.Failure(
+                            SakshiError.IpcError(message = e.message ?: "Failed to resume audio/video sync", cause = e)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun isAVSynced(fileId: String): SakshiResult<RecordingQueryResponse> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
             return SakshiResult.Failure(serviceResult.errorOrNull()!!)
@@ -247,7 +344,7 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         return try {
-            val resBundle = service.isRecordingSynced(fileId)
+            val resBundle = service.isAVSynced(fileId)
             val queryResponse = AidlMappers.toRecordingQueryResponse(fileId, resBundle)
             SakshiResult.Success(queryResponse)
         } catch (e: Throwable) {

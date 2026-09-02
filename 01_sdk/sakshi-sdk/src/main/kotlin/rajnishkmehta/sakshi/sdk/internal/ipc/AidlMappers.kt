@@ -7,8 +7,8 @@ import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 
 /**
  * Internal mapping utilities for serializing and deserializing IPC Bundles.
@@ -49,7 +49,7 @@ internal object AidlMappers {
     }
 
 
-    internal fun toBundle(request: VideoSyncRequest): Bundle {
+    internal fun toBundle(request: AVSyncRequest): Bundle {
         return Bundle().apply {
             putString(KEY_FILE_ID, request.fileId)
             putString(KEY_URI, request.uri.toString())
@@ -61,17 +61,17 @@ internal object AidlMappers {
         }
     }
 
-    internal fun toVideoSyncStatus(bundle: Bundle): VideoSyncStatus {
+    internal fun toAVSyncStatus(bundle: Bundle): AVSyncStatus {
         val fileId = bundle.getString(KEY_FILE_ID, "")
-        val stateStr = bundle.getString(KEY_SYNC_STATE, VideoSyncStatus.State.INITIALIZING.name)
-        val state = runCatching { VideoSyncStatus.State.valueOf(stateStr) }
-            .getOrDefault(VideoSyncStatus.State.INITIALIZING)
+        val stateStr = bundle.getString(KEY_SYNC_STATE, AVSyncStatus.State.INITIALIZING.name)
+        val state = runCatching { AVSyncStatus.State.valueOf(stateStr) }
+            .getOrDefault(AVSyncStatus.State.INITIALIZING)
         val offset = bundle.getLong(KEY_OFFSET_BYTES, 0L)
         val total = bundle.getLong(KEY_TOTAL_BYTES, -1L)
         val isCompleted = bundle.getBoolean(KEY_IS_COMPLETED, false)
         val msg = bundle.getString(KEY_MESSAGE)
 
-        return VideoSyncStatus(
+        return AVSyncStatus(
             fileId = fileId,
             state = state,
             lastCopiedOffsetBytes = offset,
@@ -81,7 +81,7 @@ internal object AidlMappers {
         )
     }
 
-    internal fun toBundle(status: VideoSyncStatus): Bundle {
+    internal fun toBundle(status: AVSyncStatus): Bundle {
         return Bundle().apply {
             putString(KEY_FILE_ID, status.fileId)
             putString(KEY_SYNC_STATE, status.state.name)
@@ -120,7 +120,7 @@ internal object AidlMappers {
         val exists = bundle.getBoolean(KEY_EXISTS, false)
         val stateStr = bundle.getString(KEY_SYNC_STATE)
         val state = stateStr?.let {
-            runCatching { VideoSyncStatus.State.valueOf(it) }.getOrNull()
+            runCatching { AVSyncStatus.State.valueOf(it) }.getOrNull()
         }
         val offset = bundle.getLong(KEY_OFFSET_BYTES, 0L)
         val isCompleted = bundle.getBoolean(KEY_IS_COMPLETED, false)
