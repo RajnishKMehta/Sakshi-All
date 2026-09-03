@@ -188,8 +188,7 @@ internal class SakshiClientImpl(
         }
 
         try {
-            val queryBundle = Bundle().apply { putString("file_id", fileId) }
-            service.startAVSync(queryBundle, callback)
+            service.stopAVSync(fileId, callback)
         } catch (e: Throwable) {
             trySend(
                 SakshiResult.Failure(

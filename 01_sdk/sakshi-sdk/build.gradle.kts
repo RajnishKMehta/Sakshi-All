@@ -1,3 +1,4 @@
+import org.gradle.plugins.signing.Sign
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.SourcesJar
@@ -60,7 +61,11 @@ mavenPublishing {
     coordinates("io.github.rajnishkmehta.sakshi", "sakshi-sdk", libs.versions.sakshi.sdk.get())
 
     publishToMavenCentral(automaticRelease = true)
-    // signAllPublications()
+    signAllPublications()
+
+    tasks.withType<Sign>().configureEach {
+        onlyIf { !gradle.startParameter.taskNames.any { it.contains("publishToMavenLocal", ignoreCase = true) } }
+    }
 
     configure(AndroidSingleVariantLibrary(
         javadocJar = JavadocJar.Empty(),

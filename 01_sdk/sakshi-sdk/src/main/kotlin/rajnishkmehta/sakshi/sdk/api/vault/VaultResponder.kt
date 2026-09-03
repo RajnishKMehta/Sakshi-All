@@ -26,9 +26,9 @@ public object VaultResponder {
     }
 
     /**
-     * Sends a real-time video synchronization status update back to the client application.
+     * Sends a real-time audio/video synchronization status update back to the client application.
      *
-     * @param callback The [ISakshiVaultCallback] received in `startVideoSync`.
+     * @param callback The [ISakshiVaultCallback] received in `startAVSync`.
      * @param status The [AVSyncStatus] state and byte progress.
      */
     @JvmStatic

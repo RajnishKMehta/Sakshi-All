@@ -61,12 +61,6 @@ public interface SakshiClient {
     public suspend fun stopAVSync(fileId: String): SakshiResult<Unit>
 
     /**
-     * Queries Vault to check whether a recording with [fileId] exists or is syncing.
-     *
-     * @param fileId Unique identifier of audio/video recording.
-     * @return [SakshiResult] containing [RecordingQueryResponse] or [SakshiError] on failure.
-     */
-    /**
      * Requests Vault to temporarily pause audio/video synchronization for a specific file ID.
      *
      * @param fileId Unique identifier of audio/video recording.
@@ -82,6 +76,12 @@ public interface SakshiClient {
      */
     public suspend fun resumeAVSync(fileId: String): SakshiResult<Unit>
 
+    /**
+     * Queries Vault to check whether a recording with [fileId] exists or is syncing.
+     *
+     * @param fileId Unique identifier of audio/video recording.
+     * @return [SakshiResult] containing [RecordingQueryResponse] or [SakshiError] on failure.
+     */
     public suspend fun isAVSynced(fileId: String): SakshiResult<RecordingQueryResponse>
 
     /**
