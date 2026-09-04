@@ -100,7 +100,7 @@ class SyncScheduler(
                         database.mediaRecordDao().insertRecord(finalRecord)
 
                         if (storedCallback != null) {
-                            val uriParsed = finalRecord.vaultUri?.let { Uri.parse(it) }
+                            val uriParsed = Uri.parse(finalRecord.originalUri)
                             VaultResponder.sendAVSyncStatus(
                                 storedCallback,
                                 AVSyncStatus(
@@ -375,7 +375,7 @@ class SyncScheduler(
             dao.insertRecord(finalRecord)
 
             if (callback != null) {
-                val uriParsed = finalRecord.vaultUri?.let { Uri.parse(it) }
+                val uriParsed = Uri.parse(finalRecord.originalUri)
                 VaultResponder.sendAVSyncStatus(
                     callback,
                     AVSyncStatus(
