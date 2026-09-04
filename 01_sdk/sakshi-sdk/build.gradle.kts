@@ -71,9 +71,10 @@ mavenPublishing {
 
     tasks.withType<Sign>().configureEach {
         onlyIf {
-            !gradle.startParameter.taskNames.any {
-                it.contains("publishToMavenLocal", ignoreCase = true)
-            }
+            val graph = gradle.taskGraph.allTasks
+            val hasLocal = graph.any { it.name.contains("publishToMavenLocal", ignoreCase = true) }
+            val hasCentral = graph.any { it.name.contains("publishToMavenCentral", ignoreCase = true) }
+            !(hasLocal && !hasCentral)
         }
     }
 

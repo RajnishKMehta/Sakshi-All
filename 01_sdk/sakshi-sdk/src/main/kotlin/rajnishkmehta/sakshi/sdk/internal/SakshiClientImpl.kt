@@ -75,8 +75,8 @@ internal class SakshiClientImpl(
                     }
                 }
 
-                override fun onAVSyncStatus(syncStatusBundle: Bundle) {}
-                override fun onCopyDone(copyDoneBundle: Bundle) {}
+                override fun onAVSyncStatus(syncStatusBundle: Bundle) = Unit
+                override fun onCopyDone(copyDoneBundle: Bundle) = Unit
 
                 override fun onError(errorBundle: Bundle) {
                     val error = AidlMappers.toSakshiError(errorBundle)
@@ -112,7 +112,7 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         val callback = object : ISakshiVaultCallback.Stub() {
-            override fun onPhotoAck(responseBundle: Bundle) {}
+            override fun onPhotoAck(responseBundle: Bundle) = Unit
 
             override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                 val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
@@ -168,7 +168,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) {}
+                override fun onPhotoAck(responseBundle: Bundle) = Unit
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                     if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
@@ -216,7 +216,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) {}
+                override fun onPhotoAck(responseBundle: Bundle) = Unit
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                     if (status.state == AVSyncStatus.State.PAUSED) {
@@ -229,7 +229,7 @@ internal class SakshiClientImpl(
                         }
                     }
                 }
-                override fun onCopyDone(copyDoneBundle: Bundle) {}
+                override fun onCopyDone(copyDoneBundle: Bundle) = Unit
 
                 override fun onError(errorBundle: Bundle) {
                     val error = AidlMappers.toSakshiError(errorBundle)
@@ -263,7 +263,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) {}
+                override fun onPhotoAck(responseBundle: Bundle) = Unit
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                     if (status.state == AVSyncStatus.State.SYNCING) {
@@ -276,7 +276,7 @@ internal class SakshiClientImpl(
                         }
                     }
                 }
-                override fun onCopyDone(copyDoneBundle: Bundle) {}
+                override fun onCopyDone(copyDoneBundle: Bundle) = Unit
 
                 override fun onError(errorBundle: Bundle) {
                     val error = AidlMappers.toSakshiError(errorBundle)
