@@ -1,0 +1,17 @@
+[versions]
+sakshi-sdk = "1.0.0-beta.6"
+agp = "9.3.2"
+kotlin = "2.4.10"
+coroutines = "1.11.0"
+androidx-core = "1.19.0"
+androidx-annotation = "1.10.0"
+
+[libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+maven-publish = { id = "com.vanniktech.maven.publish", version = "0.37.0" }

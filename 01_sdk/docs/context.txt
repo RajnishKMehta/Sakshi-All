@@ -1,0 +1,93 @@
+# Sakshi SDK Master Context & System Architecture
+
+This file is the authoritative context document for the Sakshi SDK project. Read this file completely before working on any code or documentation.
+
+================================================================================
+1. Project Vision
+================================================================================
+
+The Sakshi ecosystem provides local-first, high-performance inter-process communication (IPC) between trusted Android applications:
+
+- Sakshi Camera (Client App)
+- Sakshi Audio (Client App)
+- Sakshi Viewer (Client App)
+- Sakshi Vault (Service App)
+
+Sakshi SDK (`rajnishkmehta.sakshi.sdk`) is the official lightweight client and IPC library used by all applications in the ecosystem.
+
+================================================================================
+2. Why This SDK Exists
+================================================================================
+
+Android sandboxing prevents applications from calling methods in other processes directly. Traditional IPC requires managing Binder transactions, ServiceConnections, AIDL stubs, death recipients, and thread synchronization.
+
+Sakshi SDK hides all IPC and Binder complexity behind simple, clean Kotlin APIs using Kotlin Coroutines (`suspend`) and reactive `Flow` streams.
+
+================================================================================
+3. Dual-Side Architecture
+================================================================================
+
+The SDK supports TWO types of developers and applications:
+
+A) CLIENT APPLICATIONS (e.g. Sakshi Camera, Sakshi Audio)
+   - Use `SakshiClient` to send photos, start/stop video sync, ping Vault, query recording status, and observe copy completion.
+
+B) VAULT APPLICATION (Service Provider)
+   - Implements `ISakshiVaultService.Stub` in an Android Service.
+   - Uses `VaultResponder` to send structured photo responses (`PhotoResponse`), sync status updates (`VideoSyncStatus`), copy done acknowledgements (`CopyDoneAck`), and error codes (`SakshiError`).
+
+================================================================================
+4. Responsibility Boundaries
+================================================================================
+
+A) SDK RESPONSIBILITIES:
+   - Provide clean public APIs for developers.
+   - Manage IPC service binding, unbinding, and disconnections safely.
+   - Marshall and unmarshall requests and responses across process boundaries.
+   - Deliver coroutine suspensions and reactive Flow progress updates.
+
+B) VAULT RESPONSIBILITIES (External Application):
+   - Receive photos and video sync requests.
+   - Perform incremental byte copying from source file descriptors/URIs to Vault destination storage.
+   - Maintain its own interval timer scheduler.
+   - Prevent overlapping copy operations.
+   - Track copied byte offsets.
+   - Send `CopyDoneAck` (with File ID, optional original source URI, and total copied byte count) back to the calling client app.
+   - Maintain media records database.
+
+The SDK MUST NEVER copy files, run timers, store media files, or maintain a database.
+
+================================================================================
+5. Copy Done Acknowledgement Protocol
+================================================================================
+
+When Vault finishes copying a file or recording session:
+1. Vault creates a `CopyDoneAck` payload containing:
+   - `fileId`: Unique recording identifier.
+   - `originalUri`: Optional original source URI provided by the client for copying.
+   - `totalCopiedBytes`: Total number of bytes copied.
+   - `timestampEpochMs`: Timestamp when copy completed.
+2. Vault calls `VaultResponder.sendCopyDone(callback, ack)`.
+3. Client app receives `CopyDoneAck` via `stopAVSync(fileId)` and receives `AVSyncStatus` updates from the `startAVSync()` flow stream.
+
+================================================================================
+6. Video Synchronization & Scheduler Rules
+================================================================================
+
+1. Camera generates a unique File ID and calls `startAVSync()`.
+2. SDK forwards request to Vault.
+3. Vault owns the copy scheduler:
+   - Starts copy immediately.
+   - Starts interval timer immediately.
+   - If timer expires while copy is running: waits for copy completion, then immediately starts next pass.
+   - Never allows overlapping copy operations.
+4. When finished, Vault emits `CopyDoneAck`.
+
+================================================================================
+7. Repository Scope & Rules
+================================================================================
+
+- Repository contains ONLY the SDK (`rajnishkmehta.sakshi.sdk`).
+- NO UI, Activities, Fragments, Compose, XML layouts, or sample apps inside SDK repository.
+- Min Android SDK: Android 10 (API 29). Compile SDK: 37. Java 21 toolchain.
+- Standard: Kotlin only, explicit API mode enabled, full KDoc documentation.
