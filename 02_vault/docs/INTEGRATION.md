@@ -17,10 +17,10 @@ Add the following to your client app's `AndroidManifest.xml`:
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.your.client.app">
 
-    <!-- 1. Declare that your app uses the Sakshi Vault binding permission -->
+    <!-- Note: For Vault integration, the app requires android.permission.QUERY_ALL_PACKAGES
+         to discover installed Vault applications and the appropriate <queries> configuration -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
-    <!-- 2. (Optional but recommended) If targeting Android 11+ (API 30+),
-            declare the Vault package in the queries element so the SDK can discover it -->
     <queries>
         <package android:name="rajnishkmehta.sakshi.vault" />
     </queries>

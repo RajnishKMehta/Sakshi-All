@@ -76,7 +76,7 @@ When Vault completes copying a recording or file pass:
    * `totalCopiedBytes`: Total byte count transferred.
    * `timestampEpochMs`: Timestamp of copy completion.
 3. Vault invokes `callback.onCopyDone(bundle)` using `VaultResponder.sendCopyDone(...)`.
-4. Client application receives `CopyDoneAck` via `observeCopyDone(fileId)` or `startAVSync()` flow stream.
+4. Client application receives `CopyDoneAck` via `stopAVSync(fileId)` or `startAVSync()` flow stream.
 
 == 4. Architectural Boundaries
 
