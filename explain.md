@@ -32,7 +32,7 @@ This document explains the comprehensive flow for capturing photos and recording
    - The Camera calls `client.stopAVSync(fileId)`.
    - The Vault halts the periodic scheduler. This safely interrupts the copy loop. It then runs one final pass to ensure any remaining uncopied bytes are fully synchronized.
 7. **Final Acknowledgement**: Once the final bytes are copied and verified, the Vault emits a `CopyDoneAck`.
-8. **Client Observation**: The Camera, which has been observing via `observeCopyDone(fileId)`, receives the acknowledgement, revokes any temporary URI permissions it granted for the Vault, and considers the process entirely finished.
+8. **Client Observation**: The Camera, which has been observing via `stopAVSync(fileId)`, receives the acknowledgement, revokes any temporary URI permissions it granted for the Vault, and considers the process entirely finished.
 
 ### Special Case: Stopping while Paused
 If a recording is paused (via `pauseAVSync`) and the user decides to stop the recording without resuming:

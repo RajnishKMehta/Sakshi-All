@@ -112,27 +112,25 @@ lifecycleScope.launch {
 }
 ----
 
-== 6. Observing Copy Done Acknowledgement
+== 6. Stopping AVSync and Receiving Copy Done Acknowledgement
 
-Client applications can explicitly observe when Vault finishes copying a file:
+Client applications must explicitly stop the sync to halt synchronization and receive the final acknowledgement:
 
 [source,kotlin]
 ----
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 
 lifecycleScope.launch {
-    client.observeCopyDone("av_rec_999").collect { result ->
-        when (result) {
-            is SakshiResult.Success -> {
-                val ack: CopyDoneAck = result.data
-                println("Copy Done! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
-            }
-            is SakshiResult.Failure -> {
-                println("Copy observation error: ${result.error.message}")
-            }
+    val result: SakshiResult<CopyDoneAck> = client.stopAVSync("av_rec_999")
+    when (result) {
+        is SakshiResult.Success -> {
+            val ack: CopyDoneAck = result.data
+            println("Copy Done! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
+        }
+        is SakshiResult.Failure -> {
+            println("Stop AVSync error: ${result.error.message}")
         }
     }
 }

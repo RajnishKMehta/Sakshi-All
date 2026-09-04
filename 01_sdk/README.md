@@ -126,11 +126,17 @@ coroutineScope.launch {
     }
 }
 
-// 3. Observe Copy Completion Acknowledgement (returns Flow<SakshiResult<CopyDoneAck>>)
+// 3. Stop AVSync and Receive Copy Completion Acknowledgement (returns SakshiResult<CopyDoneAck>)
 coroutineScope.launch {
-    client.observeCopyDone("rec_999").collect { result ->
-        val ack = result.getOrNull()
-        println("Copy Completed! File ID: ${ack?.fileId}, Original URI: ${ack?.originalUri}, Copied Bytes: ${ack?.totalCopiedBytes}")
+    val result: SakshiResult<CopyDoneAck> = client.stopAVSync("rec_999")
+    when (result) {
+        is SakshiResult.Success -> {
+            val ack = result.data
+            println("Copy Completed! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
+        }
+        is SakshiResult.Failure -> {
+            println("Stop AVSync error: ${result.error.message}")
+        }
     }
 }
 ```
