@@ -12,7 +12,7 @@
 </div>
 
 > [!WARNING]
-> **Early Beta:** Sakshi Camera currently supports **photo capture and transfer only**. Video and audio functionality are not implemented yet. APIs and behavior may change in future releases.
+> **Early Beta:** Sakshi Camera currently supports **photo and video capture and transfer**. Audio functionality is not implemented yet. APIs and behavior may change in future releases.
 
 **Sakshi Camera** ("Sakshi (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sakshi Android ecosystem.
 
@@ -30,12 +30,12 @@ Keeping these responsibilities separate lets the capture app focus on the camera
 
 ## Features
 
-- **Photo Capture:** Capture photos using the device camera.
-- **Photo Transfer:** Send captured photos to Sakshi Vault through the Sakshi SDK.
+- **Photo & Video Capture:** Capture photos and videos using the device camera.
+- **Photo & Video Transfer:** Send captured photos and videos to Sakshi Vault through the Sakshi SDK.
 - **Local-First:** The capture and transfer flow does not depend on an internet connection.
 - **Sakshi Integration:** Works with the Sakshi SDK and Sakshi Vault as part of the Sakshi ecosystem.
 
-> **Currently unavailable:** Video and audio capture/transfer are not implemented yet.
+> **Currently unavailable:** Audio capture/transfer is not implemented yet.
 
 ---
 
@@ -61,7 +61,7 @@ Sakshi Vault
 Local storage
 ```
 
-For the current beta, this flow supports photos only.
+For the current beta, this flow supports photos and videos.
 
 ---
 
