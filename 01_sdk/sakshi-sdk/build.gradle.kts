@@ -64,7 +64,7 @@ mavenPublishing {
     signAllPublications()
 
     tasks.withType<Sign>().configureEach {
-        onlyIf { !gradle.startParameter.taskNames.any { it.contains("publishToMavenLocal", ignoreCase = true) } }
+        onlyIf { project.hasProperty("signing.keyId") || project.hasProperty("signing.key") || System.getenv("ORG_GRADLE_PROJECT_signingKey") != null || System.getenv("SIGNING_KEY") != null }
     }
 
     configure(AndroidSingleVariantLibrary(
