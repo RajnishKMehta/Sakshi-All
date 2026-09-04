@@ -68,7 +68,7 @@ When Vault finishes copying a file or recording session:
    - `totalCopiedBytes`: Total number of bytes copied.
    - `timestampEpochMs`: Timestamp when copy completed.
 2. Vault calls `VaultResponder.sendCopyDone(callback, ack)`.
-3. Client app receives `CopyDoneAck` via `observeCopyDone(fileId)` or the `startVideoSync()` flow stream.
+3. Client app receives `CopyDoneAck` via `stopAVSync(fileId)` or the `startVideoSync()` flow stream.
 
 ================================================================================
 6. Video Synchronization & Scheduler Rules
