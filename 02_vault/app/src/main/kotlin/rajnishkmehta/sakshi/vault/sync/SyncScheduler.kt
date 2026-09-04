@@ -86,41 +86,43 @@ class SyncScheduler(
 
             // Run one final sync pass to copy any last bytes written by the camera
             try {
-                val record = database.mediaRecordDao().getRecord(fileId)
-                if (record != null && record.completionState != "COMPLETED") {
-                    Log.d(tag, "Performing final sync pass for $fileId")
-                    copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mimeType)
+                getMutex(fileId).withLock {
+                    val record = database.mediaRecordDao().getRecord(fileId)
+                    if (record != null && record.completionState != "COMPLETED") {
+                        Log.d(tag, "Performing final sync pass for $fileId")
+                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mimeType)
 
-                    val updatedRecord = database.mediaRecordDao().getRecord(fileId)
-                    if (updatedRecord != null) {
-                        val finalRecord = updatedRecord.copy(
-                            completionState = "COMPLETED",
-                            updatedTime = System.currentTimeMillis()
-                        )
-                        database.mediaRecordDao().insertRecord(finalRecord)
+                        val updatedRecord = database.mediaRecordDao().getRecord(fileId)
+                        if (updatedRecord != null) {
+                            val finalRecord = updatedRecord.copy(
+                                completionState = "COMPLETED",
+                                updatedTime = System.currentTimeMillis()
+                            )
+                            database.mediaRecordDao().insertRecord(finalRecord)
 
-                        if (storedCallback != null) {
-                            val uriParsed = Uri.parse(finalRecord.originalUri)
-                            VaultResponder.sendAVSyncStatus(
-                                storedCallback,
-                                AVSyncStatus(
-                                    fileId = fileId,
-                                    state = AVSyncStatus.State.COMPLETED,
-                                    lastCopiedOffsetBytes = finalRecord.lastCopiedOffset,
-                                    totalBytes = finalRecord.lastCopiedOffset,
-                                    isCompleted = true,
-                                    message = "Recording stopped. Sync completed."
+                            if (storedCallback != null) {
+                                val uriParsed = Uri.parse(finalRecord.originalUri)
+                                VaultResponder.sendAVSyncStatus(
+                                    storedCallback,
+                                    AVSyncStatus(
+                                        fileId = fileId,
+                                        state = AVSyncStatus.State.COMPLETED,
+                                        lastCopiedOffsetBytes = finalRecord.lastCopiedOffset,
+                                        totalBytes = finalRecord.lastCopiedOffset,
+                                        isCompleted = true,
+                                        message = "Recording stopped. Sync completed."
+                                    )
                                 )
-                            )
-                            VaultResponder.sendCopyDone(
-                                storedCallback,
-                                CopyDoneAck(
-                                    fileId,
-                                    uriParsed,
-                                    finalRecord.lastCopiedOffset,
-                                    System.currentTimeMillis()
+                                VaultResponder.sendCopyDone(
+                                    storedCallback,
+                                    CopyDoneAck(
+                                        fileId,
+                                        uriParsed,
+                                        finalRecord.lastCopiedOffset,
+                                        System.currentTimeMillis()
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -191,23 +193,32 @@ class SyncScheduler(
 
         getMutex(fileId).withLock {
             val currentRecord = database.mediaRecordDao().getRecord(fileId)
-            if (currentRecord != null && currentRecord.completionState != "COMPLETED") {
-                updateDatabaseState(fileId, "PAUSED")
-
+            if (currentRecord == null || currentRecord.completionState == "COMPLETED") {
                 val storedCallback = activeCallbacks[fileId]
                 if (storedCallback != null) {
-                    VaultResponder.sendAVSyncStatus(
+                    VaultResponder.sendError(
                         storedCallback,
-                        AVSyncStatus(
-                            fileId = fileId,
-                            state = AVSyncStatus.State.PAUSED,
-                            lastCopiedOffsetBytes = currentRecord.lastCopiedOffset,
-                            totalBytes = -1L,
-                            isCompleted = false,
-                            message = "Recording paused."
-                        )
+                        SakshiError.Unknown("Cannot pause: record not found or already completed", null)
                     )
                 }
+                return@withLock
+            }
+
+            updateDatabaseState(fileId, "PAUSED")
+
+            val storedCallback = activeCallbacks[fileId]
+            if (storedCallback != null) {
+                VaultResponder.sendAVSyncStatus(
+                    storedCallback,
+                    AVSyncStatus(
+                        fileId = fileId,
+                        state = AVSyncStatus.State.PAUSED,
+                        lastCopiedOffsetBytes = currentRecord.lastCopiedOffset,
+                        totalBytes = -1L,
+                        isCompleted = false,
+                        message = "Recording paused."
+                    )
+                )
             }
         }
     }
@@ -230,21 +241,35 @@ class SyncScheduler(
             return
         }
 
-        updateDatabaseState(fileId, "SYNCING")
+        getMutex(fileId).withLock {
+            val currentRecord = database.mediaRecordDao().getRecord(fileId)
+            if (currentRecord == null || currentRecord.completionState != "PAUSED") {
+                val storedCallback = activeCallbacks[fileId]
+                if (storedCallback != null) {
+                    VaultResponder.sendError(
+                        storedCallback,
+                        SakshiError.Unknown("Cannot resume: record not found or not paused", null)
+                    )
+                }
+                return@withLock
+            }
 
-        val storedCallback = activeCallbacks[fileId]
-        if (storedCallback != null) {
-            VaultResponder.sendAVSyncStatus(
-                storedCallback,
-                AVSyncStatus(
-                    fileId = fileId,
-                    state = AVSyncStatus.State.SYNCING,
-                    lastCopiedOffsetBytes = record.lastCopiedOffset,
-                    totalBytes = -1L,
-                    isCompleted = false,
-                    message = "Recording resumed."
+            updateDatabaseState(fileId, "SYNCING")
+
+            val storedCallback = activeCallbacks[fileId]
+            if (storedCallback != null) {
+                VaultResponder.sendAVSyncStatus(
+                    storedCallback,
+                    AVSyncStatus(
+                        fileId = fileId,
+                        state = AVSyncStatus.State.SYNCING,
+                        lastCopiedOffsetBytes = currentRecord.lastCopiedOffset,
+                        totalBytes = -1L,
+                        isCompleted = false,
+                        message = "Recording resumed."
+                    )
                 )
-            )
+            }
         }
     }
 
