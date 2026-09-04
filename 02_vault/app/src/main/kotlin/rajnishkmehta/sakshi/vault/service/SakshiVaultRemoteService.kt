@@ -75,7 +75,7 @@ class SakshiVaultRemoteService : Service() {
 
                     val response = CopyDoneAck(
                         fileId,
-                        Uri.parse(vaultUriStr),
+                        Uri.parse(uriStr),
                         fileLength,
                         System.currentTimeMillis()
                     )

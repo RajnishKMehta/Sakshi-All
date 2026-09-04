@@ -188,8 +188,7 @@ internal class SakshiClientImpl(
         }
 
         try {
-            val queryBundle = Bundle().apply { putString("file_id", fileId) }
-            service.startAVSync(queryBundle, callback)
+            service.stopAVSync(fileId, callback)
         } catch (e: Throwable) {
             trySend(
                 SakshiResult.Failure(
@@ -218,6 +217,10 @@ internal class SakshiClientImpl(
                     if (status.state == AVSyncStatus.State.COMPLETED) {
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
+                        }
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected terminal state: ${status.state}", null)))
                         }
                     }
                 }
@@ -266,6 +269,10 @@ internal class SakshiClientImpl(
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
                         }
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected sync state: ${status.state}", null)))
+                        }
                     }
                 }
                 override fun onCopyDone(copyDoneBundle: Bundle) {}
@@ -308,6 +315,10 @@ internal class SakshiClientImpl(
                     if (status.state == AVSyncStatus.State.SYNCING) {
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
+                        }
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected sync state: ${status.state}", null)))
                         }
                     }
                 }
