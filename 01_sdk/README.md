@@ -7,7 +7,7 @@
 **Sakshi SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sakshi Camera_ or _Sakshi Audio_) and the **Sakshi Vault** application.
 
 > [!WARNING]
-> **Early Beta:** The SDK currently supports **photo functionality only**. Video and audio functionality are not implemented yet. APIs and behavior may change in future releases.
+> **Early Beta:** The SDK supports photo functionality and incremental audio/video synchronization. APIs and behavior may change in future releases.
 
 ---
 
