@@ -204,7 +204,11 @@ class SyncScheduler(
                 return@withLock
             }
 
+            // Drain currently remaining bytes only once
+            copyEngine.copyMediaIncremental(fileId, currentRecord.originalUri, currentRecord.mimeType)
+
             updateDatabaseState(fileId, "PAUSED")
+            val updatedRecord = database.mediaRecordDao().getRecord(fileId)
 
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
@@ -213,7 +217,7 @@ class SyncScheduler(
                     AVSyncStatus(
                         fileId = fileId,
                         state = AVSyncStatus.State.PAUSED,
-                        lastCopiedOffsetBytes = currentRecord.lastCopiedOffset,
+                        lastCopiedOffsetBytes = updatedRecord?.lastCopiedOffset ?: currentRecord.lastCopiedOffset,
                         totalBytes = -1L,
                         isCompleted = false,
                         message = "Recording paused."
@@ -344,11 +348,8 @@ class SyncScheduler(
                     if (state == "COMPLETED") {
                         copiedBytes = 0L
                     } else if (state == "PAUSED") {
-                        var newlyCopied: Long
-                        do {
-                            newlyCopied = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
-                            copiedBytes += newlyCopied
-                        } while (newlyCopied > 0L)
+                        // Already drained during pauseSync, do not attempt to copy more bytes
+                        copiedBytes = 0L
                     } else {
                         copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
                     }
