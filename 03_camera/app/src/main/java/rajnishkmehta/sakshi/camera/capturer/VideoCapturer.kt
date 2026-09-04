@@ -266,9 +266,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     if (videoSyncStarted && fileId != null) {
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                            ctx.lifecycleScope.launch {
-                                ctx.sakshiClient.stopAVSync(fileId!!)
-                            }
                             ctx.handleCopyDone(fileId!!)
                         }
                     }

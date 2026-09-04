@@ -158,50 +158,7 @@ internal class SakshiClientImpl(
         awaitClose {}
     }
 
-    override fun observeCopyDone(fileId: String): Flow<SakshiResult<CopyDoneAck>> = callbackFlow {
-        val serviceResult = serviceConnection.getService()
-        if (serviceResult.isFailure) {
-            trySend(SakshiResult.Failure(serviceResult.errorOrNull()!!))
-            close()
-            return@callbackFlow
-        }
-
-        val service = serviceResult.getOrNull()!!
-
-        val callback = object : ISakshiVaultCallback.Stub() {
-            override fun onPhotoAck(responseBundle: Bundle) {}
-            override fun onAVSyncStatus(syncStatusBundle: Bundle) {}
-
-            override fun onCopyDone(copyDoneBundle: Bundle) {
-                val copyDone = AidlMappers.toCopyDoneAck(copyDoneBundle)
-                if (copyDone.fileId == fileId || fileId.isEmpty()) {
-                    trySend(SakshiResult.Success(copyDone))
-                    close()
-                }
-            }
-
-            override fun onError(errorBundle: Bundle) {
-                val error = AidlMappers.toSakshiError(errorBundle)
-                trySend(SakshiResult.Failure(error))
-                close()
-            }
-        }
-
-        try {
-            service.stopAVSync(fileId, callback)
-        } catch (e: Throwable) {
-            trySend(
-                SakshiResult.Failure(
-                    SakshiError.IpcError(message = e.message ?: "Failed to observe copy done event", cause = e)
-                )
-            )
-            close()
-        }
-
-        awaitClose {}
-    }
-
-    override suspend fun stopAVSync(fileId: String): SakshiResult<Unit> {
+    override suspend fun stopAVSync(fileId: String): SakshiResult<CopyDoneAck> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
             return SakshiResult.Failure(serviceResult.errorOrNull()!!)
@@ -214,19 +171,16 @@ internal class SakshiClientImpl(
                 override fun onPhotoAck(responseBundle: Bundle) {}
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
-                    if (status.state == AVSyncStatus.State.COMPLETED) {
-                        if (continuation.isActive) {
-                            continuation.resume(SakshiResult.Success(Unit))
-                        }
-                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
+                    if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected terminal state: ${status.state}", null)))
                         }
                     }
                 }
                 override fun onCopyDone(copyDoneBundle: Bundle) {
+                    val copyDone = AidlMappers.toCopyDoneAck(copyDoneBundle)
                     if (continuation.isActive) {
-                        continuation.resume(SakshiResult.Success(Unit))
+                        continuation.resume(SakshiResult.Success(copyDone))
                     }
                 }
 

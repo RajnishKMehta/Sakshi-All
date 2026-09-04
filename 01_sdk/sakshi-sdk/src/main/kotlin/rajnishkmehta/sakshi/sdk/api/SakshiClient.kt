@@ -45,20 +45,12 @@ public interface SakshiClient {
     public fun startAVSync(request: AVSyncRequest): Flow<SakshiResult<AVSyncStatus>>
 
     /**
-     * Observes completion acknowledgements ([CopyDoneAck]) sent by Vault when a file copy operation finishes.
-     *
-     * @param fileId Unique identifier of audio/video recording to observe.
-     * @return A [Flow] emitting [SakshiResult] containing [CopyDoneAck].
-     */
-    public fun observeCopyDone(fileId: String): Flow<SakshiResult<CopyDoneAck>>
-
-    /**
      * Requests Vault to stop audio/video synchronization for a specific file ID.
      *
      * @param fileId Unique identifier of audio/video recording.
-     * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     * @return [SakshiResult] containing [CopyDoneAck] on success or [SakshiError] on failure.
      */
-    public suspend fun stopAVSync(fileId: String): SakshiResult<Unit>
+    public suspend fun stopAVSync(fileId: String): SakshiResult<CopyDoneAck>
 
     /**
      * Requests Vault to temporarily pause audio/video synchronization for a specific file ID.

@@ -56,7 +56,7 @@ Sakshi SDK (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android clien
 Client applications initiate requests to transfer media or start incremental synchronization sessions:
 * Initiates ping health checks.
 * Submits photo requests (`PhotoRequest`).
-* Signals start/stop of audio/video recordings (`AVSyncRequest`).
+* Signals start of audio/video recordings (`SakshiClient.startAVSync` accepts `AVSyncRequest`) and stop (`SakshiClient.stopAVSync` accepts `fileId`).
 * Observes status updates and copy completion acknowledgements (`CopyDoneAck`).
 
 === 2.2 Vault Application Side (External Service)
@@ -76,7 +76,7 @@ When Vault completes copying a recording or file pass:
    * `totalCopiedBytes`: Total byte count transferred.
    * `timestampEpochMs`: Timestamp of copy completion.
 3. Vault invokes `callback.onCopyDone(bundle)` using `VaultResponder.sendCopyDone(...)`.
-4. Client application receives `CopyDoneAck` via `observeCopyDone(fileId)` or `startAVSync()` flow stream.
+4. Client application receives `CopyDoneAck` via `stopAVSync(fileId)` or `startAVSync()` flow stream.
 
 == 4. Architectural Boundaries
 
