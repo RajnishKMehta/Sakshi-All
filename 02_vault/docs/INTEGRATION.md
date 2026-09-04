@@ -17,11 +17,12 @@ Add the following to your client app's `AndroidManifest.xml`:
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.your.client.app">
 
-    <!------------------------------->
+    <!-- =========================================================== -->
 
     <!-- Required on Android 11+ (API 30+) for Vault integration
-         to discover installed Vault applications. Use either Option 1
-         or Option 2, depending on the required package visibility. -->
+         to discover installed Vault applications. Use either
+         Option 1 or Option 2, depending on the required
+         package visibility. -->
 
     <!-- Option 1: Broad package visibility -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
@@ -33,7 +34,7 @@ Add the following to your client app's `AndroidManifest.xml`:
         <package android:name="rajnishkmehta.sakshi.vault" />
     </queries>
 
-    <!------------------------------->
+    <!-- =========================================================== -->
 
     <application>
         ...
