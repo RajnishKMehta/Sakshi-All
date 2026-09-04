@@ -97,7 +97,7 @@ _Direction: vault → client_
 |===
 | Key | Type | Description
 | `file_id` | String | Unique recording file identifier.
-| `sync_state` | String | Name of the current synchronization state (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `STOPPED`, `COMPLETED`, `FAILED`).
+| `sync_state` | String | Name of the current synchronization state (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `PAUSED`, `STOPPED`, `COMPLETED`, `FAILED`).
 | `offset_bytes` | Long | Number of bytes copied to Vault so far.
 | `total_bytes` | Long | Optional total size of file if known, or `-1` if recording is ongoing.
 | `is_completed` | Boolean | True if audio/video recording has ended and synchronization is finalized.
@@ -127,7 +127,7 @@ _Direction: vault → client_
 |===
 | Key | Type | Description
 | `exists` | Boolean | True if Vault recognizes and has recorded entry for this file ID.
-| `sync_state` | String (Optional) | Sync state if recording exists (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `STOPPED`, `COMPLETED`, `FAILED`).
+| `sync_state` | String (Optional) | Sync state if recording exists (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `PAUSED`, `STOPPED`, `COMPLETED`, `FAILED`).
 | `offset_bytes` | Long | Last recorded byte offset stored by Vault.
 | `is_completed` | Boolean | True if Vault marks recording as fully copied and finalized.
 |===
