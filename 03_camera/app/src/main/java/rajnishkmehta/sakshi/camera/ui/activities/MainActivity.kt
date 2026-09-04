@@ -1955,6 +1955,7 @@ open class MainActivity : AppCompatActivity(),
                     }
                 }
                 is SakshiResult.Failure -> {
+                    // TODO
                     // Implement proper error handling for SDK interaction
                     // Log the error or handle it
                 }
