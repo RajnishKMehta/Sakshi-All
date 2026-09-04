@@ -218,6 +218,10 @@ internal class SakshiClientImpl(
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
                         }
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected terminal state: ${status.state}", null)))
+                        }
                     }
                 }
                 override fun onCopyDone(copyDoneBundle: Bundle) {
@@ -265,6 +269,10 @@ internal class SakshiClientImpl(
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
                         }
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected sync state: ${status.state}", null)))
+                        }
                     }
                 }
                 override fun onCopyDone(copyDoneBundle: Bundle) {}
@@ -307,6 +315,10 @@ internal class SakshiClientImpl(
                     if (status.state == AVSyncStatus.State.SYNCING) {
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
+                        }
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED) {
+                        if (continuation.isActive) {
+                            continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected sync state: ${status.state}", null)))
                         }
                     }
                 }
