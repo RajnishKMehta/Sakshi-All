@@ -1940,19 +1940,24 @@ open class MainActivity : AppCompatActivity(),
         grantUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
+    fun revokeVaultUriPermission(fileId: String, uri: android.net.Uri) {
+        revokeUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
     fun handleCopyDone(fileId: String) {
         lifecycleScope.launch {
-            sakshiClient.observeCopyDone(fileId).collect { result ->
-                when (result) {
-                    is SakshiResult.Success -> {
-                        val ack = result.data
-                        // TODO: Implement post-copy behavior later
-                        // We received the callback correctly, but we won't implement the functionality yet.
+            val result = sakshiClient.stopAVSync(fileId)
+            when (result) {
+                is SakshiResult.Success -> {
+                    val ack = result.data
+                    if (ack.originalUri != null) {
+                        revokeVaultUriPermission(ack.fileId, ack.originalUri!!)
                     }
-                    is SakshiResult.Failure -> {
-                        // Implement proper error handling for SDK interaction
-                        // Log the error or handle it
-                    }
+                }
+                is SakshiResult.Failure -> {
+                    // TODO
+                    // Implement proper error handling for SDK interaction
+                    // Log the error or handle it
                 }
             }
         }

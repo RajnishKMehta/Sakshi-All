@@ -7,7 +7,7 @@
 **Sakshi SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sakshi Camera_ or _Sakshi Audio_) and the **Sakshi Vault** application.
 
 > [!WARNING]
-> **Early Beta:** The SDK currently supports **photo functionality only**. Video and audio functionality are not implemented yet. APIs and behavior may change in future releases.
+> **Early Beta:** The SDK supports photo functionality and incremental audio/video synchronization. APIs and behavior may change in future releases.
 
 ---
 
@@ -15,7 +15,7 @@
 
 Sakshi SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
 
-1. **Client Developers (Camera, Audio, Viewer)**: Send photos, manage incremental video sync, ping Vault, query recording status, and observe file copy completion acknowledgements (`CopyDoneAck`).
+1. **Client Developers (Camera, Audio, Viewer)**: Send photos, manage incremental audio/video sync, ping Vault, query recording status, and observe file copy completion acknowledgements (`CopyDoneAck`).
 2. **Vault Developers**: Implement remote AIDL service binding and send structured responses, sync progress, copy completion acknowledgements, and error events using `VaultResponder`.
 
 ---
@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.5")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.6")
 }
 ```
 
@@ -78,7 +78,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.5")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.6")
 }
 ```
 
@@ -111,9 +111,9 @@ coroutineScope.launch {
     }
 }
 
-// 2. Start Video Sync (returns Flow<SakshiResult<VideoSyncStatus>>)
+// 2. Start AVSync (returns Flow<SakshiResult<AVSyncStatus>>)
 coroutineScope.launch {
-    client.startVideoSync(VideoSyncRequest(fileId = "rec_999", uri = videoUri)).collect { result ->
+    client.startAVSync(AVSyncRequest(fileId = "rec_999", uri = avUri)).collect { result ->
         when (result) {
             is SakshiResult.Success -> {
                 val status = result.data
@@ -126,11 +126,17 @@ coroutineScope.launch {
     }
 }
 
-// 3. Observe Copy Completion Acknowledgement (returns Flow<SakshiResult<CopyDoneAck>>)
+// 3. Stop AVSync and Receive Copy Completion Acknowledgement (returns SakshiResult<CopyDoneAck>)
 coroutineScope.launch {
-    client.observeCopyDone("rec_999").collect { result ->
-        val ack = result.getOrNull()
-        println("Copy Completed! File ID: ${ack?.fileId}, Original URI: ${ack?.originalUri}, Copied Bytes: ${ack?.totalCopiedBytes}")
+    val result: SakshiResult<CopyDoneAck> = client.stopAVSync("rec_999")
+    when (result) {
+        is SakshiResult.Success -> {
+            val ack = result.data
+            println("Copy Completed! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
+        }
+        is SakshiResult.Failure -> {
+            println("Stop AVSync error: ${result.error.message}")
+        }
     }
 }
 ```
@@ -150,9 +156,9 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 
 class SakshiVaultRemoteService : Service() {
     private val binder = object : ISakshiVaultService.Stub() {
-        override fun startVideoSync(videoSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = videoSyncBundle.getString("file_id", "")
-            val sourceUriStr = videoSyncBundle.getString("uri", "")
+        override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
+            val fileId = avSyncBundle.getString("file_id", "")
+            val sourceUriStr = avSyncBundle.getString("uri", "")
 
             // Vault copies bytes incrementally...
             val totalCopied = performVaultCopy(fileId)

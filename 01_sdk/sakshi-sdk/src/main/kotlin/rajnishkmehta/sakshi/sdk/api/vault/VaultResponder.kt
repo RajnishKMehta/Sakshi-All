@@ -2,7 +2,7 @@ package rajnishkmehta.sakshi.sdk.api.vault
 
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.internal.ipc.AidlMappers
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 
@@ -26,15 +26,15 @@ public object VaultResponder {
     }
 
     /**
-     * Sends a real-time video synchronization status update back to the client application.
+     * Sends a real-time audio/video synchronization status update back to the client application.
      *
-     * @param callback The [ISakshiVaultCallback] received in `startVideoSync`.
-     * @param status The [VideoSyncStatus] state and byte progress.
+     * @param callback The [ISakshiVaultCallback] received in `startAVSync`.
+     * @param status The [AVSyncStatus] state and byte progress.
      */
     @JvmStatic
-    public fun sendVideoSyncStatus(callback: ISakshiVaultCallback, status: VideoSyncStatus) {
+    public fun sendAVSyncStatus(callback: ISakshiVaultCallback, status: AVSyncStatus) {
         runCatching {
-            callback.onVideoSyncStatus(AidlMappers.toBundle(status))
+            callback.onAVSyncStatus(AidlMappers.toBundle(status))
         }
     }
 

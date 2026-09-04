@@ -1,7 +1,7 @@
 [versions]
 agp = "9.3.2"
 room = "3.0.1"
-sakshi = "1.0.0-beta.5"
+sakshi = "1.0.0-beta.6"
 kotlin = "2.4.10"
 coroutines = "1.11.0"
 androidx-core = "1.19.0"

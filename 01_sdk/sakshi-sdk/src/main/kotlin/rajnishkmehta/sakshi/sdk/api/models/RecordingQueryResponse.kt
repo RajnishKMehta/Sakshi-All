@@ -12,7 +12,7 @@ package rajnishkmehta.sakshi.sdk.api.models
 public data class RecordingQueryResponse(
     public val fileId: String,
     public val exists: Boolean,
-    public val state: VideoSyncStatus.State? = null,
+    public val state: AVSyncStatus.State? = null,
     public val lastCopiedOffsetBytes: Long = 0L,
     public val isCompleted: Boolean = false
 )

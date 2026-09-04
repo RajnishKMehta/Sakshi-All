@@ -1,3 +1,4 @@
+import org.gradle.plugins.signing.Sign
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.SourcesJar
@@ -61,6 +62,10 @@ mavenPublishing {
 
     publishToMavenCentral(automaticRelease = true)
     signAllPublications()
+
+    tasks.withType<Sign>().configureEach {
+        onlyIf { project.hasProperty("signing.keyId") || project.hasProperty("signing.key") || System.getenv("ORG_GRADLE_PROJECT_signingKey") != null || System.getenv("SIGNING_KEY") != null }
+    }
 
     configure(AndroidSingleVariantLibrary(
         javadocJar = JavadocJar.Empty(),

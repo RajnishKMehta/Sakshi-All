@@ -1,6 +1,6 @@
 = Sakshi SDK AIDL IPC Specification
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.5, 2026-08-22
+v1.0.0-beta.6, 2026-09-04
 :description: AIDL interface contracts and IPC specification for the Sakshi SDK.
 :keywords: sakshi, sdk, aidl, ipc, binder, bundle, serialization
 :toc: left
@@ -32,9 +32,11 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback;
 interface ISakshiVaultService {
     Bundle ping(in Bundle requestBundle);
     void sendPhoto(in Bundle photoBundle, in ISakshiVaultCallback callback);
-    void startVideoSync(in Bundle videoSyncBundle, in ISakshiVaultCallback callback);
-    void stopVideoSync(in String fileId, in ISakshiVaultCallback callback);
-    Bundle isRecordingSynced(in String fileId);
+        void startAVSync(in Bundle avSyncBundle, in ISakshiVaultCallback callback);
+    void pauseAVSync(in String fileId, in ISakshiVaultCallback callback);
+    void resumeAVSync(in String fileId, in ISakshiVaultCallback callback);
+    void stopAVSync(in String fileId, in ISakshiVaultCallback callback);
+    Bundle isAVSynced(in String fileId);
 }
 ----
 
@@ -48,7 +50,7 @@ import android.os.Bundle;
 
 interface ISakshiVaultCallback {
     void onPhotoAck(in Bundle responseBundle);
-    void onVideoSyncStatus(in Bundle syncStatusBundle);
+    void onAVSyncStatus(in Bundle syncStatusBundle);
     void onCopyDone(in Bundle copyDoneBundle);
     void onError(in Bundle errorBundle);
 }
@@ -71,10 +73,10 @@ _Direction: client → vault_
 | `meta_<key>` | String | Optional metadata entries, one key per entry prefixed with `meta_`.
 |===
 
-=== 3.2 `VideoSyncRequest` Bundle Keys
+=== 3.2 `AVSyncRequest` Bundle Keys
 _Direction: client → vault_
 
-**Description**: Sent by the client application to start real-time video synchronization for a newly initiated video recording session. This triggers Vault to begin incremental, non-overlapping background copies.
+**Description**: Sent by the client application to start real-time audio/video synchronization for a newly initiated audio/video recording session. This triggers Vault to begin incremental, non-overlapping background copies.
 
 [cols="1,1,2", options="header"]
 |===
@@ -86,19 +88,19 @@ _Direction: client → vault_
 | `meta_<key>` | String | Optional metadata entries, one key per entry prefixed with `meta_`.
 |===
 
-=== 3.3 `VideoSyncStatus` Bundle Keys
+=== 3.3 `AVSyncStatus` Bundle Keys
 _Direction: vault → client_
 
-**Description**: Emitted periodically by Vault to provide status updates on an active video synchronization process. It contains progress indicators, current states, and copied byte metrics.
+**Description**: Emitted periodically by Vault to provide status updates on an active audio/video synchronization process. It contains progress indicators, current states, and copied byte metrics.
 
 [cols="1,1,2", options="header"]
 |===
 | Key | Type | Description
 | `file_id` | String | Unique recording file identifier.
-| `sync_state` | String | Name of the current synchronization state (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `STOPPED`, `COMPLETED`, `FAILED`).
+| `sync_state` | String | Name of the current synchronization state (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `PAUSED`, `STOPPED`, `COMPLETED`, `FAILED`).
 | `offset_bytes` | Long | Number of bytes copied to Vault so far.
 | `total_bytes` | Long | Optional total size of file if known, or `-1` if recording is ongoing.
-| `is_completed` | Boolean | True if video recording has ended and synchronization is finalized.
+| `is_completed` | Boolean | True if audio/video recording has ended and synchronization is finalized.
 | `message` | String (Optional) | Additional informational message or error string.
 |===
 
@@ -125,7 +127,7 @@ _Direction: vault → client_
 |===
 | Key | Type | Description
 | `exists` | Boolean | True if Vault recognizes and has recorded entry for this file ID.
-| `sync_state` | String (Optional) | Sync state if recording exists (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `STOPPED`, `COMPLETED`, `FAILED`).
+| `sync_state` | String (Optional) | Sync state if recording exists (`INITIALIZING`, `SYNCING`, `IDLE_WAITING`, `PAUSED`, `STOPPED`, `COMPLETED`, `FAILED`).
 | `offset_bytes` | Long | Last recorded byte offset stored by Vault.
 | `is_completed` | Boolean | True if Vault marks recording as fully copied and finalized.
 |===
