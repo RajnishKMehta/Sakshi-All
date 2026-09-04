@@ -1946,18 +1946,18 @@ open class MainActivity : AppCompatActivity(),
 
     fun handleCopyDone(fileId: String) {
         lifecycleScope.launch {
-            sakshiClient.observeCopyDone(fileId).collect { result ->
-                when (result) {
-                    is SakshiResult.Success -> {
-                        val ack = result.data
-                        if (ack.originalUri != null) {
-                            revokeVaultUriPermission(ack.fileId, ack.originalUri!!)
-                        }
+            val result = sakshiClient.stopAVSync(fileId)
+            when (result) {
+                is SakshiResult.Success -> {
+                    val ack = result.data
+                    if (ack.originalUri != null) {
+                        revokeVaultUriPermission(ack.fileId, ack.originalUri!!)
                     }
-                    is SakshiResult.Failure -> {
-                        // Implement proper error handling for SDK interaction
-                        // Log the error or handle it
-                    }
+                }
+                is SakshiResult.Failure -> {
+                    // TODO
+                    // Implement proper error handling for SDK interaction
+                    // Log the error or handle it
                 }
             }
         }
