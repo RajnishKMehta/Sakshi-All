@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.Mutex
 import rajnishkmehta.sakshi.vault.db.MediaRecord
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
@@ -30,6 +32,9 @@ class SyncScheduler(
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
     private val activeJobs = ConcurrentHashMap<String, Job>()
     private val activeCallbacks = ConcurrentHashMap<String, ISakshiVaultCallback>()
+    private val fileMutexes = ConcurrentHashMap<String, kotlinx.coroutines.sync.Mutex>()
+
+    private fun getMutex(fileId: String) = fileMutexes.getOrPut(fileId) { kotlinx.coroutines.sync.Mutex() }
 
     private val syncIntervalMs = 2000L
     private val consecutiveNoBytesLimit = 5
@@ -173,22 +178,36 @@ class SyncScheduler(
         }
 
         val record = database.mediaRecordDao().getRecord(fileId)
-        if (record != null && record.completionState != "COMPLETED") {
-            updateDatabaseState(fileId, "PAUSED")
-
+        if (record == null || record.completionState == "COMPLETED") {
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
-                VaultResponder.sendAVSyncStatus(
+                VaultResponder.sendError(
                     storedCallback,
-                    AVSyncStatus(
-                        fileId = fileId,
-                        state = AVSyncStatus.State.PAUSED,
-                        lastCopiedOffsetBytes = record.lastCopiedOffset,
-                        totalBytes = record.lastCopiedOffset,
-                        isCompleted = false,
-                        message = "Recording paused."
-                    )
+                    SakshiError.Unknown("Cannot pause: record not found or already completed", null)
                 )
+            }
+            return
+        }
+
+        getMutex(fileId).withLock {
+            val currentRecord = database.mediaRecordDao().getRecord(fileId)
+            if (currentRecord != null && currentRecord.completionState != "COMPLETED") {
+                updateDatabaseState(fileId, "PAUSED")
+
+                val storedCallback = activeCallbacks[fileId]
+                if (storedCallback != null) {
+                    VaultResponder.sendAVSyncStatus(
+                        storedCallback,
+                        AVSyncStatus(
+                            fileId = fileId,
+                            state = AVSyncStatus.State.PAUSED,
+                            lastCopiedOffsetBytes = currentRecord.lastCopiedOffset,
+                            totalBytes = -1L,
+                            isCompleted = false,
+                            message = "Recording paused."
+                        )
+                    )
+                }
             }
         }
     }
@@ -200,23 +219,32 @@ class SyncScheduler(
         }
 
         val record = database.mediaRecordDao().getRecord(fileId)
-        if (record != null && record.completionState == "PAUSED") {
-            updateDatabaseState(fileId, "SYNCING")
-
+        if (record == null || record.completionState != "PAUSED") {
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
-                VaultResponder.sendAVSyncStatus(
+                VaultResponder.sendError(
                     storedCallback,
-                    AVSyncStatus(
-                        fileId = fileId,
-                        state = AVSyncStatus.State.SYNCING,
-                        lastCopiedOffsetBytes = record.lastCopiedOffset,
-                        totalBytes = record.lastCopiedOffset,
-                        isCompleted = false,
-                        message = "Recording resumed."
-                    )
+                    SakshiError.Unknown("Cannot resume: record not found or not paused", null)
                 )
             }
+            return
+        }
+
+        updateDatabaseState(fileId, "SYNCING")
+
+        val storedCallback = activeCallbacks[fileId]
+        if (storedCallback != null) {
+            VaultResponder.sendAVSyncStatus(
+                storedCallback,
+                AVSyncStatus(
+                    fileId = fileId,
+                    state = AVSyncStatus.State.SYNCING,
+                    lastCopiedOffsetBytes = record.lastCopiedOffset,
+                    totalBytes = -1L,
+                    isCompleted = false,
+                    message = "Recording resumed."
+                )
+            )
         }
     }
 
@@ -273,7 +301,7 @@ class SyncScheduler(
                         fileId = fileId,
                         state = AVSyncStatus.State.SYNCING,
                         lastCopiedOffsetBytes = offset,
-                        totalBytes = offset,
+                        totalBytes = -1L,
                         isCompleted = false,
                         message = "Synchronizing video bytes."
                     )
@@ -284,7 +312,9 @@ class SyncScheduler(
             var copiedBytes = 0L
             var copyError: Exception? = null
             try {
-                copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
+                getMutex(fileId).withLock {
+                    copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
+                }
             } catch (e: Exception) {
                 Log.e(tag, "Copy pass failed for $fileId on current attempt", e)
                 copyError = e
