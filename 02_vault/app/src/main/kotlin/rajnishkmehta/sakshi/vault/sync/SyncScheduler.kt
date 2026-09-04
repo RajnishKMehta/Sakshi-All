@@ -338,7 +338,20 @@ class SyncScheduler(
             var copyError: Exception? = null
             try {
                 getMutex(fileId).withLock {
-                    copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
+                    val checkRecord = dao.getRecord(fileId)
+                    val state = checkRecord?.completionState
+
+                    if (state == "COMPLETED") {
+                        copiedBytes = 0L
+                    } else if (state == "PAUSED") {
+                        var newlyCopied: Long
+                        do {
+                            newlyCopied = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
+                            copiedBytes += newlyCopied
+                        } while (newlyCopied > 0L)
+                    } else {
+                        copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Copy pass failed for $fileId on current attempt", e)
