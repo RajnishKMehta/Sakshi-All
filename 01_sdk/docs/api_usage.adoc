@@ -1,6 +1,6 @@
 = Sakshi SDK Client API Usage Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.5, 2026-08-22
+v1.0.0-beta.6, 2026-09-04
 :description: Guide for developers building client applications using the Sakshi SDK.
 :keywords: sakshi, sdk, client, api, android, camera, audio, integration
 :toc: left
@@ -77,9 +77,9 @@ when (result) {
 }
 ----
 
-== 5. Incremental Video Synchronization
+== 5. Incremental Audio/Video Synchronization
 
-Start video sync when a recording begins:
+start audio/video sync when a recording begins:
 
 [source,kotlin]
 ----
@@ -87,18 +87,18 @@ import android.net.Uri
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncRequest
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 
-val videoRequest = VideoSyncRequest(
-    fileId = "video_rec_999",
+val avRequest = AVSyncRequest(
+    fileId = "av_rec_999",
     uri = activeVideoRecordingUri, // android.net.Uri
     mimeType = "${mimeType}" // example video/mp4
 )
 
 // Collect real-time progress updates
 lifecycleScope.launch {
-    client.startVideoSync(videoRequest).collect { result ->
+    client.startAVSync(avRequest).collect { result ->
         when (result) {
             is SakshiResult.Success -> {
                 val status = result.data
@@ -124,7 +124,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 
 lifecycleScope.launch {
-    client.observeCopyDone("video_rec_999").collect { result ->
+    client.observeCopyDone("av_rec_999").collect { result ->
         when (result) {
             is SakshiResult.Success -> {
                 val ack: CopyDoneAck = result.data
@@ -147,7 +147,7 @@ Check if a recording exists in Vault database:
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 
-val queryResult: SakshiResult<RecordingQueryResponse> = client.isRecordingSynced("video_rec_999")
+val queryResult: SakshiResult<RecordingQueryResponse> = client.isAVSynced("av_rec_999")
 val response = queryResult.getOrNull()
 if (response != null && response.exists) {
     println("Recording exists in Vault! Completed: ${response.isCompleted}, Last Offset: ${response.lastCopiedOffsetBytes}")

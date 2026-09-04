@@ -1,6 +1,6 @@
 = Sakshi SDK Architecture & Design Specification
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.5, 2026-08-22
+v1.0.0-beta.6, 2026-09-04
 :description: System architecture and design specification for the Sakshi SDK.
 :keywords: sakshi, sdk, architecture, design, ipc, android, binder, aidl
 :toc: left
@@ -56,7 +56,7 @@ Sakshi SDK (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android clien
 Client applications initiate requests to transfer media or start incremental synchronization sessions:
 * Initiates ping health checks.
 * Submits photo requests (`PhotoRequest`).
-* Signals start/stop of video recordings (`VideoSyncRequest`).
+* Signals start/stop of audio/video recordings (`AVSyncRequest`).
 * Observes status updates and copy completion acknowledgements (`CopyDoneAck`).
 
 === 2.2 Vault Application Side (External Service)
@@ -76,7 +76,7 @@ When Vault completes copying a recording or file pass:
    * `totalCopiedBytes`: Total byte count transferred.
    * `timestampEpochMs`: Timestamp of copy completion.
 3. Vault invokes `callback.onCopyDone(bundle)` using `VaultResponder.sendCopyDone(...)`.
-4. Client application receives `CopyDoneAck` via `observeCopyDone(fileId)` or `startVideoSync()` flow stream.
+4. Client application receives `CopyDoneAck` via `observeCopyDone(fileId)` or `startAVSync()` flow stream.
 
 == 4. Architectural Boundaries
 

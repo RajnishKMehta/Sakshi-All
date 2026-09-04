@@ -1,6 +1,6 @@
 = Sakshi SDK Vault Integration & Developer Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.5, 2026-08-22
+v1.0.0-beta.6, 2026-09-04
 :description: Guide for Vault developers to integrate with the Sakshi SDK.
 :keywords: sakshi, sdk, vault, service, binder, integration, guide
 :toc: left
@@ -42,7 +42,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.VideoSyncStatus
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
@@ -81,19 +81,19 @@ class SakshiVaultRemoteService : Service() {
             VaultResponder.sendPhotoAck(callback, copyDoneAck)
         }
 
-        override fun startVideoSync(videoSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = videoSyncBundle.getString("file_id", "")
-            val sourceUriStr = videoSyncBundle.getString("uri", "")
-            val mimeType = videoSyncBundle.getString("mime_type", "") // example: video/mp4
-            val startTimestampEpochMs = videoSyncBundle.getLong("timestamp", System.currentTimeMillis())
-            val metadata = videoSyncBundle.keySet()
+        override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
+            val fileId = avSyncBundle.getString("file_id", "")
+            val sourceUriStr = avSyncBundle.getString("uri", "")
+            val mimeType = avSyncBundle.getString("mime_type", "") // example: video/mp4
+            val startTimestampEpochMs = avSyncBundle.getLong("timestamp", System.currentTimeMillis())
+            val metadata = avSyncBundle.keySet()
                 .filter { it.startsWith("meta_") }
-                .associate { it.removePrefix("meta_") to (videoSyncBundle.getString(it) ?: "") }
+                .associate { it.removePrefix("meta_") to (avSyncBundle.getString(it) ?: "") }
 
             // 1. Emit Initializing status
-            VaultResponder.sendVideoSyncStatus(
+            VaultResponder.sendAVSyncStatus(
                 callback,
-                VideoSyncStatus(fileId, VideoSyncStatus.State.INITIALIZING)
+                AVSyncStatus(fileId, AVSyncStatus.State.INITIALIZING)
             )
 
             // 2. Vault scheduler begins incremental copy pass
@@ -109,15 +109,32 @@ class SakshiVaultRemoteService : Service() {
             VaultResponder.sendCopyDone(callback, copyDoneAck)
         }
 
-        override fun stopVideoSync(fileId: String, callback: ISakshiVaultCallback) {
-            stopVaultSyncScheduler(fileId)
-            VaultResponder.sendVideoSyncStatus(
+
+        override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            pauseVaultAVSyncScheduler(fileId)
+            VaultResponder.sendAVSyncStatus(
                 callback,
-                VideoSyncStatus(fileId, VideoSyncStatus.State.STOPPED)
+                AVSyncStatus(fileId, AVSyncStatus.State.PAUSED)
             )
         }
 
-        override fun isRecordingSynced(fileId: String): Bundle {
+        override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            resumeVaultAVSyncScheduler(fileId)
+            VaultResponder.sendAVSyncStatus(
+                callback,
+                AVSyncStatus(fileId, AVSyncStatus.State.SYNCING)
+            )
+        }
+
+        override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            stopVaultAVSyncScheduler(fileId)
+            VaultResponder.sendAVSyncStatus(
+                callback,
+                AVSyncStatus(fileId, AVSyncStatus.State.STOPPED)
+            )
+        }
+
+        override fun isAVSynced(fileId: String): Bundle {
             val record = getMediaRecordFromDatabase(fileId)
             return Bundle().apply {
                 putBoolean("exists", record != null)
@@ -137,6 +154,6 @@ class SakshiVaultRemoteService : Service() {
 Vault developers use `VaultResponder` helpers to respond cleanly without handling raw Bundles:
 
 * `VaultResponder.sendPhotoAck(callback, copyDoneAck)`
-* `VaultResponder.sendVideoSyncStatus(callback, videoSyncStatus)`
+* `VaultResponder.sendAVSyncStatus(callback, avSyncStatus)`
 * `VaultResponder.sendCopyDone(callback, copyDoneAck)`
 * `VaultResponder.sendError(callback, sakshiError)`

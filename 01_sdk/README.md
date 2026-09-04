@@ -15,7 +15,7 @@
 
 Sakshi SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
 
-1. **Client Developers (Camera, Audio, Viewer)**: Send photos, manage incremental video sync, ping Vault, query recording status, and observe file copy completion acknowledgements (`CopyDoneAck`).
+1. **Client Developers (Camera, Audio, Viewer)**: Send photos, manage incremental audio/video sync, ping Vault, query recording status, and observe file copy completion acknowledgements (`CopyDoneAck`).
 2. **Vault Developers**: Implement remote AIDL service binding and send structured responses, sync progress, copy completion acknowledgements, and error events using `VaultResponder`.
 
 ---
@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.5")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.6")
 }
 ```
 
@@ -78,7 +78,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.5")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.6")
 }
 ```
 
@@ -111,9 +111,9 @@ coroutineScope.launch {
     }
 }
 
-// 2. Start Video Sync (returns Flow<SakshiResult<VideoSyncStatus>>)
+// 2. Start AVSync (returns Flow<SakshiResult<AVSyncStatus>>)
 coroutineScope.launch {
-    client.startVideoSync(VideoSyncRequest(fileId = "rec_999", uri = videoUri)).collect { result ->
+    client.startAVSync(AVSyncRequest(fileId = "rec_999", uri = avUri)).collect { result ->
         when (result) {
             is SakshiResult.Success -> {
                 val status = result.data
@@ -150,9 +150,9 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 
 class SakshiVaultRemoteService : Service() {
     private val binder = object : ISakshiVaultService.Stub() {
-        override fun startVideoSync(videoSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = videoSyncBundle.getString("file_id", "")
-            val sourceUriStr = videoSyncBundle.getString("uri", "")
+        override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
+            val fileId = avSyncBundle.getString("file_id", "")
+            val sourceUriStr = avSyncBundle.getString("uri", "")
 
             // Vault copies bytes incrementally...
             val totalCopied = performVaultCopy(fileId)
