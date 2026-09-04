@@ -12,7 +12,7 @@
 </div>
 
 > [!WARNING]
-> **Early Beta:** Sakshi Vault currently supports **photo transfer only**. Video and audio transfer are not implemented yet. APIs and behavior may change in future releases.
+> **Early Beta:** Sakshi Vault currently supports **photo, video, and audio transfer**. APIs and behavior may change in future releases.
 
 **Sakshi Vault** ("Sakshi (साक्षी)" = "Witness" in Sanskrit) is the secure storage application of the open-source Sakshi Android ecosystem.
 
@@ -30,13 +30,11 @@ Instead of keeping the only copy inside the camera or recorder, a client app can
 
 ## Features
 
-- **Photo Transfer:** Receives photos from client applications over Android Binder IPC (AIDL).
+- **Media Transfer:** Receives photos, videos, and audio from client applications over Android Binder IPC (AIDL).
 - **Secure Local Storage:** Stores received media privately on the device.
 - **Metadata Management:** Stores file metadata using Room.
 - **Independent Architecture:** Runs separately from the applications that capture the media.
 - **Offline Capable:** Does not require an internet connection.
-
-> **Currently unavailable:** Video and audio transfer are not implemented yet.
 
 ---
 
@@ -54,7 +52,7 @@ Vault exposes the `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE` service and re
 
 ## Integration
 
-If you want to build a client app that sends photos to Sakshi Vault, see the integration guide:
+If you want to build a client app that sends media to Sakshi Vault, see the integration guide:
 
 👉 [Integration & Developer Guide](docs/INTEGRATION.md)
 
