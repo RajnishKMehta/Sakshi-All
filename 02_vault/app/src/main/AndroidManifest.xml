@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <permission
+        android:name="rajnishkmehta.sakshi.permission.BIND_VAULT"
+        android:protectionLevel="normal" />
+
     <application
         android:allowBackup="true"
         android:icon="@android:drawable/ic_menu_save"
@@ -9,7 +13,8 @@
 
         <service
             android:name="rajnishkmehta.sakshi.vault.service.SakshiVaultRemoteService"
-            android:exported="true">
+            android:exported="true"
+            android:permission="rajnishkmehta.sakshi.permission.BIND_VAULT">
             <intent-filter>
                 <action android:name="rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE" />
             </intent-filter>
