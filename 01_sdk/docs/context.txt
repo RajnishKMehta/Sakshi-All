@@ -30,11 +30,11 @@ Sakshi SDK hides all IPC and Binder complexity behind simple, clean Kotlin APIs 
 The SDK supports TWO types of developers and applications:
 
 A) CLIENT APPLICATIONS (e.g. Sakshi Camera, Sakshi Audio)
-   - Use `SakshiClient` to send photos, start/stop video sync, ping Vault, query recording status, and observe copy completion.
+   - Use `SakshiClient` to send photos, start/stop audio/video sync, ping Vault, query recording status, and observe copy completion.
 
 B) VAULT APPLICATION (Service Provider)
    - Implements `ISakshiVaultService.Stub` in an Android Service.
-   - Uses `VaultResponder` to send structured photo responses (`PhotoResponse`), sync status updates (`VideoSyncStatus`), copy done acknowledgements (`CopyDoneAck`), and error codes (`SakshiError`).
+   - Uses `VaultResponder` to send structured photo responses (`PhotoResponse`), sync status updates (`AVSyncStatus`), copy done acknowledgements (`CopyDoneAck`), and error codes (`SakshiError`).
 
 ================================================================================
 4. Responsibility Boundaries
@@ -47,7 +47,7 @@ A) SDK RESPONSIBILITIES:
    - Deliver coroutine suspensions and reactive Flow progress updates.
 
 B) VAULT RESPONSIBILITIES (External Application):
-   - Receive photos and video sync requests.
+   - Receive photos and audio/video sync requests.
    - Perform incremental byte copying from source file descriptors/URIs to Vault destination storage.
    - Maintain its own interval timer scheduler.
    - Prevent overlapping copy operations.
@@ -71,7 +71,7 @@ When Vault finishes copying a file or recording session:
 3. Client app receives `CopyDoneAck` via `stopAVSync(fileId)` and receives `AVSyncStatus` updates from the `startAVSync()` flow stream.
 
 ================================================================================
-6. Video Synchronization & Scheduler Rules
+6. Audio/Video Synchronization & Scheduler Rules
 ================================================================================
 
 1. Camera generates a unique File ID and calls `startAVSync()`.
