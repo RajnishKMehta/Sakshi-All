@@ -111,7 +111,6 @@ class SakshiVaultRemoteService : Service() {
 
 
         override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
-            enforceCallerAuthorization()
             pauseVaultAVSyncScheduler(fileId)
             VaultResponder.sendAVSyncStatus(
                 callback,
@@ -120,7 +119,6 @@ class SakshiVaultRemoteService : Service() {
         }
 
         override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
-            enforceCallerAuthorization()
             resumeVaultAVSyncScheduler(fileId)
             VaultResponder.sendAVSyncStatus(
                 callback,
@@ -129,7 +127,6 @@ class SakshiVaultRemoteService : Service() {
         }
 
         override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
-            enforceCallerAuthorization()
             stopVaultAVSyncScheduler(fileId)
             VaultResponder.sendAVSyncStatus(
                 callback,
@@ -138,7 +135,6 @@ class SakshiVaultRemoteService : Service() {
         }
 
         override fun isAVSynced(fileId: String): Bundle {
-            enforceCallerAuthorization()
             val record = getMediaRecordFromDatabase(fileId)
             return Bundle().apply {
                 putBoolean("exists", record != null)
