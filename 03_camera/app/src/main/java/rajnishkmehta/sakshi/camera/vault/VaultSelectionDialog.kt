@@ -10,6 +10,9 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import android.content.Intent
+import android.net.Uri
+import android.widget.Button
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
@@ -50,6 +53,12 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val btnDownloadVault: Button = view.findViewById(R.id.btn_download_vault)
+        btnDownloadVault.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk"))
+            startActivity(intent)
+        }
 
         progressBar = view.findViewById(R.id.progress_bar)
         recyclerView = view.findViewById(R.id.recycler_view)

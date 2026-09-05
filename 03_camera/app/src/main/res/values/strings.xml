@@ -236,7 +236,7 @@
     <string name="wait_for_focus_lock">Wait for Focus Lock</string>
     <string name="invalid_photo_quality_value">Invalid value set for photo quality</string>
 
-    <string name="vault_package">Vault Application</string>
+    <string name="vault_package">Select Vault</string>
     <string name="vault_package_desc">Change the Vault app package for secure data storage</string>
 
 
