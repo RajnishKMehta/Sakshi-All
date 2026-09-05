@@ -17,7 +17,6 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
-    <uses-permission android:name="rajnishkmehta.sakshi.permission.BIND_VAULT" />
 
     <!--
       androidx.media3:media3-common declares this for ExoPlayer's network playback. We only pull
