@@ -47,6 +47,7 @@ import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
 import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
+import rajnishkmehta.sakshi.vault.BuildConfig
 
 class SakshiVaultRemoteService : Service() {
 
@@ -55,7 +56,7 @@ class SakshiVaultRemoteService : Service() {
         override fun ping(requestBundle: Bundle): Bundle {
             return Bundle().apply {
                 putBoolean("is_available", true)
-                putString("vault_version", "1.0.0")
+                putString("vault_version", BuildConfig.VERSION_NAME)
                 putLong("timestamp", System.currentTimeMillis())
             }
         }
