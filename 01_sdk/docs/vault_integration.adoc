@@ -21,6 +21,7 @@ In the Vault application's `AndroidManifest.xml`, declare the remote IPC service
 <service
     android:name=".service.SakshiVaultRemoteService"
     android:exported="true"
+    android:permission="rajnishkmehta.sakshi.permission.BIND_VAULT"
 
     <intent-filter>
         <action android:name="rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE" />
@@ -111,6 +112,7 @@ class SakshiVaultRemoteService : Service() {
 
 
         override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            enforceCallerAuthorization()
             pauseVaultAVSyncScheduler(fileId)
             VaultResponder.sendAVSyncStatus(
                 callback,
@@ -119,6 +121,7 @@ class SakshiVaultRemoteService : Service() {
         }
 
         override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            enforceCallerAuthorization()
             resumeVaultAVSyncScheduler(fileId)
             VaultResponder.sendAVSyncStatus(
                 callback,
@@ -127,6 +130,7 @@ class SakshiVaultRemoteService : Service() {
         }
 
         override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
+            enforceCallerAuthorization()
             stopVaultAVSyncScheduler(fileId)
             VaultResponder.sendAVSyncStatus(
                 callback,
@@ -135,6 +139,7 @@ class SakshiVaultRemoteService : Service() {
         }
 
         override fun isAVSynced(fileId: String): Bundle {
+            enforceCallerAuthorization()
             val record = getMediaRecordFromDatabase(fileId)
             return Bundle().apply {
                 putBoolean("exists", record != null)

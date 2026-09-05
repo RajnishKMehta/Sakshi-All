@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.IBinder
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import kotlinx.coroutines.*
-import rajnishkmehta.sakshi.vault.BuildConfig
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 import rajnishkmehta.sakshi.vault.storage.StorageManager
@@ -18,6 +17,7 @@ import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
+import rajnishkmehta.sakshi.vault.BuildConfig
 import java.io.File
 
 /**
@@ -47,7 +47,7 @@ class SakshiVaultRemoteService : Service() {
             Log.d(tag, "Received ping request")
             return Bundle().apply {
                 putBoolean("is_available", true)
-                putString("vault_version", BuildConfig.VERSION_CODE.toString())
+                putString("vault_version", BuildConfig.VERSION_NAME)
                 putLong("timestamp", System.currentTimeMillis())
             }
         }
