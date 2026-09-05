@@ -13,7 +13,7 @@ android {
         applicationId = "rajnishkmehta.sakshi.vault"
         minSdk = 29
         targetSdk = 37
-        versionCode = 1
+        versionCode = 2
         versionName = versionCode.toString() + "-beta"
     }
 
@@ -80,7 +80,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     // Room
-    val room_version = "3.0.1"
+    val room_version = "3.0.2"
     implementation("androidx.room3:room3-runtime:$room_version")
 
     ksp("androidx.room3:room3-compiler:$room_version")

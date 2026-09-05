@@ -19,7 +19,7 @@ android {
         applicationId = "rajnishkmehta.sakshi.camera"
         minSdk = 29
         targetSdk = 37
-        versionCode = 1
+        versionCode = 2
         versionName = versionCode.toString() + "-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

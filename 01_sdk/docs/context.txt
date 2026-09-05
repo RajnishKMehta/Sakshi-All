@@ -34,7 +34,7 @@ A) CLIENT APPLICATIONS (e.g. Sakshi Camera, Sakshi Audio)
 
 B) VAULT APPLICATION (Service Provider)
    - Implements `ISakshiVaultService.Stub` in an Android Service.
-   - Uses `VaultResponder` to send structured photo responses (`PhotoResponse`), sync status updates (`AVSyncStatus`), copy done acknowledgements (`CopyDoneAck`), and error codes (`SakshiError`).
+   - Uses `VaultResponder` to send structured photo responses (`PhotoResponse`), sync status updates (`AVSyncStatus`), copy-done acknowledgements (`CopyDoneAck`), and error codes (`SakshiError`).
 
 ================================================================================
 4. Responsibility Boundaries
@@ -74,7 +74,7 @@ When Vault finishes copying a file or recording session:
 6. Audio/Video Synchronization & Scheduler Rules
 ================================================================================
 
-1. Camera generates a unique File ID and calls `startAVSync()`.
+1. Sakshi Camera and Sakshi Audio generate a unique File ID and call `startAVSync()`.
 2. SDK forwards request to Vault.
 3. Vault owns the copy scheduler:
    - Starts copy immediately.

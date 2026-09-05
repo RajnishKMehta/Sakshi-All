@@ -16,6 +16,7 @@ Add the following to your client app's `AndroidManifest.xml`:
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.your.client.app">
+    <uses-permission android:name="rajnishkmehta.sakshi.permission.BIND_VAULT" />
 
     <!-- =========================================================== -->
 

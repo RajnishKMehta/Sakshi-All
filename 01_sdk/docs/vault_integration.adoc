@@ -130,10 +130,7 @@ class SakshiVaultRemoteService : Service() {
 
         override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
             stopVaultAVSyncScheduler(fileId)
-            VaultResponder.sendAVSyncStatus(
-                callback,
-                AVSyncStatus(fileId, AVSyncStatus.State.STOPPED)
-            )
+            VaultResponder.sendCopyDone(callback, copyDoneAck)
         }
 
         override fun isAVSynced(fileId: String): Bundle {
