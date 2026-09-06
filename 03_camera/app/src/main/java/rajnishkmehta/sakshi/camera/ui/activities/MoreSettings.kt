@@ -222,7 +222,7 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
                 camConfig.vaultPackage = newPackage
             }
         }
-        binding.vaultPackageSubtitle.text = camConfig.vaultPackage
+        binding.vaultPackageSubtitle.text = if (!camConfig.vaultPackage.isNullOrEmpty()) camConfig.vaultPackage else getString(R.string.vault_not_found_title)
 
         sLS.setOnClickListener {
             sLField.performClick()
