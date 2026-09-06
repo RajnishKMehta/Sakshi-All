@@ -32,10 +32,8 @@ Keeping these responsibilities separate lets the capture app focus on the camera
 
 - **Photo & Video Capture:** Capture photos and videos using the device camera.
 - **Photo & Video Transfer:** Send captured photos and videos to Sakshi Vault through the Sakshi SDK.
-- **Local-First:** The capture and transfer flow does not depend on an internet connection.
+- **Local-only:** No internet connection needed.
 - **Sakshi Integration:** Works with the Sakshi SDK and Sakshi Vault as part of the Sakshi ecosystem.
-
-> **Currently unavailable:** Audio capture/transfer is not implemented yet.
 
 ---
 

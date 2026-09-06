@@ -8,6 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.content.Intent
+import android.content.ActivityNotFoundException
+import android.net.Uri
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -54,6 +58,20 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
         progressBar = view.findViewById(R.id.progress_bar)
         recyclerView = view.findViewById(R.id.recycler_view)
         val searchBar: EditText = view.findViewById(R.id.search_bar)
+
+        val downloadBtn = view.findViewById<Button>(R.id.download_vault_btn)
+        downloadBtn.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.vault_download_url)))
+            try {
+                if (intent.resolveActivity(requireContext().packageManager) != null) {
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(requireContext(), getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+            }
+        }
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = VaultAppAdapter { appInfo ->

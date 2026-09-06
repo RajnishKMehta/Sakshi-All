@@ -222,7 +222,14 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
                 camConfig.vaultPackage = newPackage
             }
         }
-        binding.vaultPackageSubtitle.text = camConfig.vaultPackage
+                val isVaultAvailable = !camConfig.vaultPackage.isNullOrEmpty() && try {
+            packageManager.getPackageInfo(camConfig.vaultPackage!!, 0)
+            true
+        } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+            false
+        }
+
+        binding.vaultPackageSubtitle.text = if (isVaultAvailable) camConfig.vaultPackage else getString(R.string.vault_not_found_title)
 
         sLS.setOnClickListener {
             sLField.performClick()
