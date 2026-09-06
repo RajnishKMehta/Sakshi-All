@@ -244,5 +244,7 @@
     <string name="vault_not_found_title">Vault Unavailable</string>
     <string name="vault_not_found_desc">The configured Vault application is unavailable.</string>
     <string name="download_sakshi_vault">Download Official Vault</string>
+    <string name="vault_download_url">https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk</string>
+    <string name="vault_download_error">No browser app found to download the Vault APK</string>
     <string name="change_vault">Change Vault App</string>
 </resources>

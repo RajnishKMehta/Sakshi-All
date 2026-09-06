@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.net.Uri
 import android.widget.Button
 import android.widget.ProgressBar
@@ -60,8 +61,16 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
 
         val downloadBtn = view.findViewById<Button>(R.id.download_vault_btn)
         downloadBtn.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk"))
-            startActivity(intent)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.vault_download_url)))
+            try {
+                if (intent.resolveActivity(requireContext().packageManager) != null) {
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(requireContext(), getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+            }
         }
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
