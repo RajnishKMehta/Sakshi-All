@@ -4,6 +4,9 @@ build/
 
 # Local configuration file (sdk path, etc)
 local.properties
+Sakshi-SDK/
+Sakshi-Vault/
+Sakshi-Camera/
 
 # Log/OS Files
 *.log
@@ -32,5 +35,3 @@ google-services.json
 
 # Android Profiling
 *.hprof
-!.git
-**/.git/*
