@@ -4212,14 +4212,14 @@ public class ExifInterface {
      * Returns whether ExifInterface currently supports reading data from the specified mime type
      * or not.
      *
-     * @param mimeType the string value of mime type
+     * @param mediaFormatType the string value of mime type
      */
-    public static boolean isSupportedMimeType(@NonNull String mimeType) {
-        if (mimeType == null) {
-            throw new NullPointerException("mimeType shouldn't be null");
+    public static boolean isSupportedMediaFormatType(@NonNull String mediaFormatType) {
+        if (mediaFormatType == null) {
+            throw new NullPointerException("mediaFormatType shouldn't be null");
         }
 
-        switch (mimeType.toLowerCase(Locale.ROOT)) {
+        switch (mediaFormatType.toLowerCase(Locale.ROOT)) {
             case "image/jpeg":
             case "image/x-adobe-dng":
             case "image/x-canon-cr2":
@@ -8464,17 +8464,17 @@ public class ExifInterface {
      * length of the EXIF data and the EXIF data can be read from the file and wrapped with a
      * ByteArrayInputStream.
      */
-    private static boolean shouldSupportSeek(int mimeType) {
-        if (mimeType == IMAGE_TYPE_JPEG || mimeType == IMAGE_TYPE_RAF || mimeType == IMAGE_TYPE_PNG
-                || mimeType == IMAGE_TYPE_WEBP) {
+    private static boolean shouldSupportSeek(int mediaFormatType) {
+        if (mediaFormatType == IMAGE_TYPE_JPEG || mediaFormatType == IMAGE_TYPE_RAF || mediaFormatType == IMAGE_TYPE_PNG
+                || mediaFormatType == IMAGE_TYPE_WEBP) {
             return false;
         }
         return true;
     }
 
-    private static boolean isSupportedFormatForSavingAttributes(int mimeType) {
-        if (mimeType == IMAGE_TYPE_JPEG || mimeType == IMAGE_TYPE_PNG
-                || mimeType == IMAGE_TYPE_WEBP) {
+    private static boolean isSupportedFormatForSavingAttributes(int mediaFormatType) {
+        if (mediaFormatType == IMAGE_TYPE_JPEG || mediaFormatType == IMAGE_TYPE_PNG
+                || mediaFormatType == IMAGE_TYPE_WEBP) {
             return true;
         }
         return false;

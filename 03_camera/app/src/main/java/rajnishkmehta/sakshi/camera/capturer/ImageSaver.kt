@@ -294,14 +294,14 @@ class ImageSaver(
         return IMAGE_NAME_PREFIX + dateString() + imageFileFormat
     }
 
-    private fun mimeType() = MimeTypeMap.getSingleton().getMimeTypeFromExtension(imageFileFormat) ?: "image/*"
+    private fun getAndroidMediaType() = MimeTypeMap.getSingleton().getMimeTypeFromExtension(imageFileFormat) ?: "image/*"
 
     @Throws(Exception::class)
     fun obtainOutputUri(): Uri? {
         if (saveToMediaStore()) {
             val cv = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName())
-                put(MediaStore.MediaColumns.MIME_TYPE, mimeType())
+                put(MediaStore.MediaColumns.MIME_TYPE, getAndroidMediaType())
                 put(MediaStore.MediaColumns.RELATIVE_PATH, DEFAULT_MEDIA_STORE_CAPTURE_PATH)
                 put(MediaStore.MediaColumns.IS_PENDING, 1)
             }
@@ -311,7 +311,7 @@ class ImageSaver(
             try {
                 val treeUri = Uri.parse(storageLocation)
                 val treeDocumentUri = getTreeDocumentUri(treeUri)
-                return DocumentsContract.createDocument(contentResolver, treeDocumentUri, mimeType(), fileName())!!
+                return DocumentsContract.createDocument(contentResolver, treeDocumentUri, getAndroidMediaType(), fileName())!!
             } catch (e: Exception) {
                 appContext.mainExecutor.execute(imageCapturer::onStorageLocationNotFound)
                 skipErrorDialog = true

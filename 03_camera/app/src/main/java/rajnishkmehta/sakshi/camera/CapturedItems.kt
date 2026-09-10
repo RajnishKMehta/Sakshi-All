@@ -43,7 +43,7 @@ class CapturedItem(
             VIDEO_NAME_PREFIX + dateString
         }
     }
-    fun mimeType(): String {
+    fun getAndroidMediaType(): String {
         return if (type == ITEM_TYPE_IMAGE) {
             "image/*"
         } else {
@@ -127,7 +127,7 @@ class CapturedItem(
 internal fun shareCapturedItem(activity: Activity, item: CapturedItem): Int? {
     val intent = Intent(Intent.ACTION_SEND).apply {
         putExtra(Intent.EXTRA_STREAM, item.uri)
-        setDataAndType(item.uri, item.mimeType())
+        setDataAndType(item.uri, item.getAndroidMediaType())
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
@@ -146,7 +146,7 @@ internal fun shareCapturedItem(activity: Activity, item: CapturedItem): Int? {
 @StringRes
 internal fun editCapturedItem(activity: Activity, item: CapturedItem, useDefaultEditor: Boolean): Int? {
     val intent = Intent(Intent.ACTION_EDIT).apply {
-        setDataAndType(item.uri, item.mimeType())
+        setDataAndType(item.uri, item.getAndroidMediaType())
         putExtra(Intent.EXTRA_STREAM, item.uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
