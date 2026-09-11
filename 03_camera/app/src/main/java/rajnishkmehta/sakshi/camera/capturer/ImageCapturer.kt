@@ -180,7 +180,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         }
 
 
-        val mimeType = item.mimeType()
+        val androidMimeType = item.getAndroidMimeType()
         // Generate a better ID than just filename
         val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
         val fileId = "img_${uniqueHash}"
@@ -188,7 +188,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         val photoRequest = rajnishkmehta.sakshi.sdk.api.models.PhotoRequest(
             fileId = fileId,
             uri = item.uri,
-            mimeType = mimeType
+            mediaType = "PHOTO"
         )
         mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {

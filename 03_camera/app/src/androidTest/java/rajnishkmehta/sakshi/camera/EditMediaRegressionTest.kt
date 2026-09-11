@@ -80,7 +80,7 @@ class EditMediaRegressionTest {
         assertNotNull(edit)
         assertEquals(Intent.ACTION_EDIT, edit!!.action)
         assertEquals(staleItem.uri, edit.data)
-        assertEquals(staleItem.mimeType(), edit.type)
+        assertEquals(staleItem.getAndroidMimeType(), edit.type)
         assertEquals(staleItem.uri, getParcelableExtra<Uri>(edit, Intent.EXTRA_STREAM))
         assertTrue(edit.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
     }
@@ -100,7 +100,7 @@ class EditMediaRegressionTest {
         val edit = getParcelableExtra<Intent>(chooser, Intent.EXTRA_INTENT)!!
         assertEquals(Intent.ACTION_EDIT, edit.action)
         assertEquals(staleItem.uri, edit.data)
-        assertEquals(staleItem.mimeType(), edit.type)
+        assertEquals(staleItem.getAndroidMimeType(), edit.type)
         assertTrue(edit.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
     }
 

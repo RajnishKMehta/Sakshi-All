@@ -17,7 +17,7 @@ internal object AidlMappers {
 
     // Bundle Keys - Photo
     private const val KEY_URI: String = "uri"
-    private const val KEY_MIME_TYPE: String = "mime_type"
+    private const val KEY_MEDIA_TYPE: String = "media_type"
     private const val KEY_TIMESTAMP: String = "timestamp"
     private const val KEY_ORIGINAL_URI: String = "original_uri"
 
@@ -40,7 +40,7 @@ internal object AidlMappers {
         return Bundle().apply {
             putString(KEY_FILE_ID, request.fileId)
             putString(KEY_URI, request.uri.toString())
-            putString(KEY_MIME_TYPE, request.mimeType)
+            putString(KEY_MEDIA_TYPE, request.mediaType)
             putLong(KEY_TIMESTAMP, request.timestampEpochMs)
             for ((key, value) in request.metadata) {
                 putString("meta_$key", value)
@@ -53,7 +53,7 @@ internal object AidlMappers {
         return Bundle().apply {
             putString(KEY_FILE_ID, request.fileId)
             putString(KEY_URI, request.uri.toString())
-            putString(KEY_MIME_TYPE, request.mimeType)
+            putString(KEY_MEDIA_TYPE, request.mediaType)
             putLong(KEY_TIMESTAMP, request.startTimestampEpochMs)
             for ((key, value) in request.metadata) {
                 putString("meta_$key", value)

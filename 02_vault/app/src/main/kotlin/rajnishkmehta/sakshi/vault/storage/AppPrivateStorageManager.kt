@@ -1,7 +1,7 @@
 package rajnishkmehta.sakshi.vault.storage
 
 import android.content.Context
-import rajnishkmehta.sakshi.vault.utils.MimeTypeHelper
+import rajnishkmehta.sakshi.vault.utils.MediaTypeHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -12,15 +12,15 @@ import java.io.InputStream
  */
 class AppPrivateStorageManager(private val context: Context) : StorageManager {
 
-    override fun getDestinationUri(fileId: String, mediaType: String, mimeType: String?): String {
-        val extension = MimeTypeHelper.getExtensionFromMimeType(mimeType)
+    override fun getDestinationUri(fileId: String, mediaType: String): String {
+        val extension = MediaTypeHelper.getExtensionFromMediaType(mediaType)
         val fileName = if (extension != null) "vault_${fileId}.$extension" else "vault_${fileId}"
         val file = File(context.filesDir, fileName)
         return file.absolutePath
     }
 
-    override fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String, mimeType: String?): String {
-        val destinationPath = getDestinationUri(fileId, mediaType, mimeType)
+    override fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String): String {
+        val destinationPath = getDestinationUri(fileId, mediaType)
         val destinationFile = File(destinationPath)
 
         // Ensure any existing file is deleted first to overwrite completely
@@ -34,8 +34,8 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
         return destinationFile.absolutePath
     }
 
-    override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String, mimeType: String?): Long {
-        val destinationPath = getDestinationUri(fileId, mediaType, mimeType)
+    override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String): Long {
+        val destinationPath = getDestinationUri(fileId, mediaType)
         val destinationFile = File(destinationPath)
 
         // Ensure parent directories exist
@@ -66,8 +66,8 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
         return bytesCopied
     }
 
-    override fun deleteMedia(fileId: String, mediaType: String, mimeType: String?): Boolean {
-        val path = getDestinationUri(fileId, mediaType, mimeType)
+    override fun deleteMedia(fileId: String, mediaType: String): Boolean {
+        val path = getDestinationUri(fileId, mediaType)
         val file = File(path)
         return if (file.exists()) {
             file.delete()

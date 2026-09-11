@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import rajnishkmehta.sakshi.vault.db.MediaRecord
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.storage.StorageManager
-import rajnishkmehta.sakshi.vault.utils.MimeTypeHelper
 import java.io.IOException
 import java.io.InputStream
 
@@ -28,16 +27,15 @@ class CopyEngine(
      *
      * @param fileId Unique identifier for the photo file.
      * @param sourceUriStr Source URI string of the photo.
-     * @param mimeType MIME type of the photo.
+     * @param mediaType Type of media.
      * @return The local vault destination path or URI.
      */
-    suspend fun copyPhoto(fileId: String, sourceUriStr: String, mimeType: String?): String {
+    suspend fun copyPhoto(fileId: String, sourceUriStr: String, mediaType: String): String {
         val uri = Uri.parse(sourceUriStr)
         val inputStream = openInputStreamWithRetry(uri)
-        val mediaType = MimeTypeHelper.determineMediaType(mimeType)
 
         val vaultPath = inputStream.use { stream ->
-            storageManager.saveMedia(fileId, stream, mediaType, mimeType)
+            storageManager.saveMedia(fileId, stream, mediaType)
         }
         val vaultUri = "file://$vaultPath"
 
@@ -48,7 +46,6 @@ class CopyEngine(
             originalUri = sourceUriStr,
             vaultUri = vaultUri,
             mediaType = mediaType,
-            mimeType = mimeType,
             completionState = "COMPLETED",
             lastCopiedOffset = java.io.File(vaultPath).length(),
             createdTime = existing?.createdTime ?: now,
@@ -65,13 +62,12 @@ class CopyEngine(
      *
      * @param fileId Unique identifier for the media file.
      * @param sourceUriStr Source URI string of the media.
-     * @param mimeType MIME type of the media.
+     * @param mediaType Type of media.
      * @return The number of new bytes copied in this pass.
      */
-    suspend fun copyMediaIncremental(fileId: String, sourceUriStr: String, mimeType: String?): Long {
+    suspend fun copyMediaIncremental(fileId: String, sourceUriStr: String, mediaType: String): Long {
         val uri = Uri.parse(sourceUriStr)
         val now = System.currentTimeMillis()
-        val mediaType = MimeTypeHelper.determineMediaType(mimeType)
 
         val existing = mediaRecordDao.getRecord(fileId)
         val lastOffset = existing?.lastCopiedOffset ?: 0L
@@ -79,11 +75,11 @@ class CopyEngine(
 
         val inputStream = openInputStreamWithRetry(uri)
         val newlyCopiedBytes = inputStream.use { stream ->
-            storageManager.appendMediaBytes(fileId, stream, lastOffset, mediaType, mimeType)
+            storageManager.appendMediaBytes(fileId, stream, lastOffset, mediaType)
         }
 
         val newOffset = lastOffset + newlyCopiedBytes
-        val vaultPath = storageManager.getDestinationUri(fileId, mediaType, mimeType)
+        val vaultPath = storageManager.getDestinationUri(fileId, mediaType)
         val vaultUri = "file://$vaultPath"
 
         // Update record in database
@@ -92,7 +88,6 @@ class CopyEngine(
             originalUri = sourceUriStr,
             vaultUri = vaultUri,
             mediaType = mediaType,
-            mimeType = mimeType,
             completionState = existing?.completionState ?: "SYNCING",
             lastCopiedOffset = newOffset,
             createdTime = created,

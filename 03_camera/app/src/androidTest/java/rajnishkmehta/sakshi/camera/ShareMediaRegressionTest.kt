@@ -56,7 +56,7 @@ class ShareMediaRegressionTest {
         val send = getParcelableExtra<Intent>(chooser, Intent.EXTRA_INTENT)!!
         assertEquals(Intent.ACTION_SEND, send.action)
         assertEquals(staleItem.uri, getParcelableExtra<Uri>(send, Intent.EXTRA_STREAM))
-        assertEquals(staleItem.mimeType(), send.type)
+        assertEquals(staleItem.getAndroidMimeType(), send.type)
         assertTrue(send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
     }
 
