@@ -42,10 +42,10 @@ class SyncScheduler(
     private val additionalCheckDelayMs = 4000L
 
     /**
-     * Starts a periodic synchronization loop for the given [fileId], [sourceUri] and [mimeType].
+     * Starts a periodic synchronization loop for the given [fileId], [sourceUri] .
      * If a synchronization loop is already running for this [fileId], it does nothing.
      */
-    fun startSync(fileId: String, sourceUri: String, mimeType: String?, callback: ISakshiVaultCallback) {
+    fun startSync(fileId: String, sourceUri: String, mediaType: String, callback: ISakshiVaultCallback) {
         activeCallbacks[fileId] = callback
 
         if (activeJobs.containsKey(fileId)) {
@@ -55,7 +55,7 @@ class SyncScheduler(
 
         val job = coroutineScope.launch {
             try {
-                runSyncLoop(fileId, sourceUri, mimeType)
+                runSyncLoop(fileId, sourceUri, mediaType)
             } catch (e: Exception) {
                 if (e !is kotlinx.coroutines.CancellationException) {
                     Log.e(tag, "Error in sync loop for $fileId", e)
@@ -90,7 +90,7 @@ class SyncScheduler(
                     val record = database.mediaRecordDao().getRecord(fileId)
                     if (record != null && record.completionState != "COMPLETED") {
                         Log.d(tag, "Performing final sync pass for $fileId")
-                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mimeType)
+                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType)
 
                         val updatedRecord = database.mediaRecordDao().getRecord(fileId)
                         if (updatedRecord != null) {
@@ -157,7 +157,7 @@ class SyncScheduler(
                 if (!activeJobs.containsKey(record.fileId)) {
                     val job = launch {
                         try {
-                            runSyncLoop(record.fileId, record.originalUri, record.mimeType)
+                            runSyncLoop(record.fileId, record.originalUri, record.mediaType)
                         } catch (e: Exception) {
                             Log.e(tag, "Resumed sync failed for ${record.fileId}", e)
                             updateDatabaseState(record.fileId, "FAILED")
@@ -205,7 +205,7 @@ class SyncScheduler(
             }
 
             // Drain currently remaining bytes only once
-            copyEngine.copyMediaIncremental(fileId, currentRecord.originalUri, currentRecord.mimeType)
+            copyEngine.copyMediaIncremental(fileId, currentRecord.originalUri, currentRecord.mediaType)
 
             updateDatabaseState(fileId, "PAUSED")
             val updatedRecord = database.mediaRecordDao().getRecord(fileId)
@@ -285,7 +285,7 @@ class SyncScheduler(
      * The main execution loop for synchronization. It implements the adaptive timer,
      * non-overlapping copy passes, and inactive completion heuristics.
      */
-    private suspend fun runSyncLoop(fileId: String, sourceUri: String, mimeType: String?) {
+    private suspend fun runSyncLoop(fileId: String, sourceUri: String, mediaType: String) {
         var consecutiveZeroBytePasses = 0
         var isProbingCompletion = false
         var additionalChecksRemaining = additionalChecksLimit
@@ -295,14 +295,12 @@ class SyncScheduler(
         val existing = dao.getRecord(fileId)
         if (existing == null) {
             val now = System.currentTimeMillis()
-            val mediaType = rajnishkmehta.sakshi.vault.utils.MimeTypeHelper.determineMediaType(mimeType)
-            dao.insertRecord(
+                        dao.insertRecord(
                 MediaRecord(
                     fileId = fileId,
                     originalUri = sourceUri,
                     vaultUri = null,
                     mediaType = mediaType,
-                    mimeType = mimeType,
                     completionState = "INITIALIZING",
                     lastCopiedOffset = 0L,
                     createdTime = now,
@@ -351,7 +349,7 @@ class SyncScheduler(
                         // Already drained during pauseSync, do not attempt to copy more bytes
                         copiedBytes = 0L
                     } else {
-                        copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mimeType)
+                        copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mediaType)
                     }
                 }
             } catch (e: Exception) {

@@ -13,8 +13,7 @@ data class MediaRecord(
     val fileId: String,
     val originalUri: String,
     val vaultUri: String?,
-    val mediaType: String, // "PHOTO", "VIDEO", "AUDIO", or "UNKNOWN"
-    val mimeType: String?, // "image/jpeg", "video/mp4", etc.
+    val mediaType: String, // "PHOTO", "VIDEO", "AUDIO", or "OTHER"
     val completionState: String, // "INITIALIZING", "SYNCING", "COMPLETED", "STOPPED", "FAILED"
     val lastCopiedOffset: Long,
     val createdTime: Long,

@@ -13,11 +13,10 @@ interface StorageManager {
      * Obtains the destination URI or path string where the given media file is stored.
      *
      * @param fileId Unique identifier of the file.
-     * @param mediaType The type of media (e.g. "PHOTO", "VIDEO", "AUDIO", "UNKNOWN").
-     * @param mimeType The precise MIME type of the media (e.g. "image/jpeg").
+     * @param mediaType The type of media (e.g. "PHOTO", "VIDEO", "AUDIO", "OTHER").
      * @return The URI/path string pointing to the destination.
      */
-    fun getDestinationUri(fileId: String, mediaType: String, mimeType: String?): String
+    fun getDestinationUri(fileId: String, mediaType: String): String
 
     /**
      * Stores a complete media file by reading from the provided [inputStream] and writing it to the destination.
@@ -25,11 +24,10 @@ interface StorageManager {
      *
      * @param fileId Unique identifier of the media.
      * @param inputStream Source stream containing the media bytes.
-     * @param mediaType The type of media (e.g. "PHOTO", "VIDEO", "AUDIO", "UNKNOWN").
-     * @param mimeType The precise MIME type of the media (e.g. "image/jpeg").
+     * @param mediaType The type of media (e.g. "PHOTO", "VIDEO", "AUDIO", "OTHER").
      * @return The absolute path or content URI of the saved media.
      */
-    fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String, mimeType: String?): String
+    fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String): String
 
     /**
      * Appends newly written media bytes to the private destination file starting at the specified [offset].
@@ -38,19 +36,17 @@ interface StorageManager {
      * @param fileId Unique identifier of the media.
      * @param inputStream Source stream containing the media bytes.
      * @param offset The starting position in the source stream where copying should resume.
-     * @param mediaType The type of media (e.g. "PHOTO", "VIDEO", "AUDIO", "UNKNOWN").
-     * @param mimeType The precise MIME type of the media (e.g. "video/mp4").
+     * @param mediaType The type of media (e.g. "PHOTO", "VIDEO", "AUDIO", "OTHER").
      * @return The number of newly copied bytes.
      */
-    fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String, mimeType: String?): Long
+    fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String): Long
 
     /**
-     * Deletes the local media file associated with the given [fileId], [mediaType], and [mimeType].
+     * Deletes the local media file associated with the given [fileId], [mediaType].
      *
      * @param fileId Unique identifier of the media.
      * @param mediaType The type of media.
-     * @param mimeType The precise MIME type of the media.
      * @return True if deletion was successful, false otherwise.
      */
-    fun deleteMedia(fileId: String, mediaType: String, mimeType: String?): Boolean
+    fun deleteMedia(fileId: String, mediaType: String): Boolean
 }

@@ -188,7 +188,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         val photoRequest = rajnishkmehta.sakshi.sdk.api.models.PhotoRequest(
             fileId = fileId,
             uri = item.uri,
-            mimeType = mimeType
+            mediaType = "PHOTO"
         )
         mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
