@@ -295,7 +295,7 @@ class SyncScheduler(
         val existing = dao.getRecord(fileId)
         if (existing == null) {
             val now = System.currentTimeMillis()
-                        dao.insertRecord(
+            dao.insertRecord(
                 MediaRecord(
                     fileId = fileId,
                     originalUri = sourceUri,
