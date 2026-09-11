@@ -55,7 +55,7 @@ class SyncScheduler(
 
         val job = coroutineScope.launch {
             try {
-                runSyncLoop(fileId, sourceUri, mediaType)
+                runSyncLoop(fileId, sourceUri, mediaType, fileExtension)
             } catch (e: Exception) {
                 if (e !is kotlinx.coroutines.CancellationException) {
                     Log.e(tag, "Error in sync loop for $fileId", e)
@@ -90,7 +90,7 @@ class SyncScheduler(
                     val record = database.mediaRecordDao().getRecord(fileId)
                     if (record != null && record.completionState != "COMPLETED") {
                         Log.d(tag, "Performing final sync pass for $fileId")
-                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType)
+                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType, record.fileExtension)
 
                         val updatedRecord = database.mediaRecordDao().getRecord(fileId)
                         if (updatedRecord != null) {
@@ -301,6 +301,7 @@ class SyncScheduler(
                     originalUri = sourceUri,
                     vaultUri = null,
                     mediaType = mediaType,
+                    fileExtension = fileExtension,
                     completionState = "INITIALIZING",
                     lastCopiedOffset = 0L,
                     createdTime = now,
