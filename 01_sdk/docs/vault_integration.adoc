@@ -64,14 +64,14 @@ class SakshiVaultRemoteService : Service() {
         override fun sendPhoto(photoBundle: Bundle, callback: ISakshiVaultCallback) {
             val fileId = photoBundle.getString("file_id", "")
             val uriStr = photoBundle.getString("uri", "")
-            val mimeType = photoBundle.getString("mime_type", "") // example: image/jpeg
+            val mediaType = photoBundle.getString("media_type", "OTHER") // example: "PHOTO"
             val timestampEpochMs = photoBundle.getLong("timestamp", System.currentTimeMillis())
             val metadata = photoBundle.keySet()
                 .filter { it.startsWith("meta_") }
                 .associate { it.removePrefix("meta_") to (photoBundle.getString(it) ?: "") }
 
             // Perform Vault photo saving logic
-            val copiedBytes = savePhotoToVaultStorage(fileId, uriStr, mimeType)
+            val copiedBytes = savePhotoToVaultStorage(fileId, uriStr, mediaType)
 
             // Send CopyDoneAck back to client app
             val copyDoneAck = CopyDoneAck(
@@ -86,7 +86,7 @@ class SakshiVaultRemoteService : Service() {
         override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
             val fileId = avSyncBundle.getString("file_id", "")
             val sourceUriStr = avSyncBundle.getString("uri", "")
-            val mimeType = avSyncBundle.getString("mime_type", "") // example: video/mp4
+            val mediaType = avSyncBundle.getString("media_type", "OTHER") // example: "VIDEO"
             val startTimestampEpochMs = avSyncBundle.getLong("timestamp", System.currentTimeMillis())
             val metadata = avSyncBundle.keySet()
                 .filter { it.startsWith("meta_") }
@@ -99,7 +99,7 @@ class SakshiVaultRemoteService : Service() {
             )
 
             // 2. Vault scheduler begins incremental copy pass
-            val copiedBytes = performIncrementalCopy(fileId, sourceUriStr)
+            val copiedBytes = performIncrementalCopy(fileId, sourceUriStr, mediaType)
 
             // 3. Emit Copy Done Acknowledgement when finished
             val copyDoneAck = CopyDoneAck(
