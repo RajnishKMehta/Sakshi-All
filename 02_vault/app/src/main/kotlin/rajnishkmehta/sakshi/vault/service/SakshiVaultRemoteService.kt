@@ -60,7 +60,8 @@ class SakshiVaultRemoteService : Service() {
             val fileId = photoBundle.getString("file_id") ?: ""
             val uriStr = photoBundle.getString("uri") ?: ""
             val mediaType = photoBundle.getString("media_type") ?: "OTHER"
-            Log.d(tag, "Received sendPhoto request: fileId=$fileId, uri=$uriStr, mediaType=$mediaType")
+            val fileExtension = photoBundle.getString("file_extension") ?: "bin"
+            Log.d(tag, "Received sendPhoto request: fileId=$fileId, uri=$uriStr, mediaType=$mediaType, fileExtension=$fileExtension")
 
             if (fileId.isEmpty() || uriStr.isEmpty()) {
                 val error = SakshiError.Unknown("Invalid photo payload: empty file_id or uri", null)
@@ -70,7 +71,7 @@ class SakshiVaultRemoteService : Service() {
 
             serviceScope?.launch {
                 try {
-                    val vaultUriStr = copyEngine?.copyPhoto(fileId, uriStr, mediaType) ?: throw IllegalStateException("CopyEngine not initialized")
+                    val vaultUriStr = copyEngine?.copyPhoto(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
                     val realPath = vaultUriStr.removePrefix("file://")
                     val fileLength = File(realPath).length()
 
@@ -99,7 +100,8 @@ class SakshiVaultRemoteService : Service() {
             val fileId = avSyncBundle.getString("file_id") ?: ""
             val sourceUriStr = avSyncBundle.getString("uri") ?: ""
             val mediaType = avSyncBundle.getString("media_type") ?: "OTHER"
-            Log.d(tag, "Received startAVSync request: fileId=$fileId, uri=$sourceUriStr, mediaType=$mediaType")
+            val fileExtension = avSyncBundle.getString("file_extension") ?: "bin"
+            Log.d(tag, "Received startAVSync request: fileId=$fileId, uri=$sourceUriStr, mediaType=$mediaType, fileExtension=$fileExtension")
 
             if (fileId.isEmpty() || sourceUriStr.isEmpty()) {
                 val error = SakshiError.Unknown("Invalid video sync payload: empty file_id or uri", null)
@@ -108,7 +110,7 @@ class SakshiVaultRemoteService : Service() {
             }
 
             serviceScope?.launch {
-                scheduler?.startSync(fileId, sourceUriStr, mediaType, callback)
+                scheduler?.startSync(fileId, sourceUriStr, mediaType, fileExtension, callback)
             }
         }
 

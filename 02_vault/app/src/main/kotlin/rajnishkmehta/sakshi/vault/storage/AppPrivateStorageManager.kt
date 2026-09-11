@@ -11,20 +11,16 @@ import java.io.InputStream
  */
 class AppPrivateStorageManager(private val context: Context) : StorageManager {
 
-    override fun getDestinationUri(fileId: String, mediaType: String): String {
-        val extension = when (mediaType) {
-            "PHOTO" -> "jpg"
-            "VIDEO" -> "mp4"
-            "AUDIO" -> "m4a"
-            else -> "bin"
-        }
-        val fileName = "vault_${fileId}.$extension"
-        val file = File(context.filesDir, fileName)
+    override fun getDestinationUri(fileId: String, mediaType: String, fileExtension: String): String {
+        val mediaDir = File(context.filesDir, "media/${mediaType.lowercase()}")
+        mediaDir.mkdirs()
+        val fileName = "${fileId}.$fileExtension"
+        val file = File(mediaDir, fileName)
         return file.absolutePath
     }
 
-    override fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String): String {
-        val destinationPath = getDestinationUri(fileId, mediaType)
+    override fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String, fileExtension: String): String {
+        val destinationPath = getDestinationUri(fileId, mediaType, fileExtension)
         val destinationFile = File(destinationPath)
 
         // Ensure any existing file is deleted first to overwrite completely
@@ -38,8 +34,8 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
         return destinationFile.absolutePath
     }
 
-    override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String): Long {
-        val destinationPath = getDestinationUri(fileId, mediaType)
+    override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String, fileExtension: String): Long {
+        val destinationPath = getDestinationUri(fileId, mediaType, fileExtension)
         val destinationFile = File(destinationPath)
 
         // Ensure parent directories exist
@@ -70,8 +66,8 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
         return bytesCopied
     }
 
-    override fun deleteMedia(fileId: String, mediaType: String): Boolean {
-        val path = getDestinationUri(fileId, mediaType)
+    override fun deleteMedia(fileId: String, mediaType: String, fileExtension: String): Boolean {
+        val path = getDestinationUri(fileId, mediaType, fileExtension)
         val file = File(path)
         return if (file.exists()) {
             file.delete()
