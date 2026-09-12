@@ -30,12 +30,12 @@ class CopyEngine(
      *
      * @return The local vault destination path or URI.
      */
-    suspend fun copyPhoto(fileId: String, sourceUriStr: String, mediaType: String): String {
+    suspend fun copyPhoto(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
         val uri = Uri.parse(sourceUriStr)
         val inputStream = openInputStreamWithRetry(uri)
 
         val vaultPath = inputStream.use { stream ->
-            storageManager.saveMedia(fileId, stream, mediaType)
+            storageManager.saveMedia(fileId, stream, mediaType, fileExtension)
         }
         val vaultUri = "file://$vaultPath"
 
@@ -46,6 +46,7 @@ class CopyEngine(
             originalUri = sourceUriStr,
             vaultUri = vaultUri,
             mediaType = mediaType,
+            fileExtension = fileExtension,
             completionState = "COMPLETED",
             lastCopiedOffset = java.io.File(vaultPath).length(),
             createdTime = existing?.createdTime ?: now,
@@ -65,7 +66,7 @@ class CopyEngine(
      *
      * @return The number of new bytes copied in this pass.
      */
-    suspend fun copyMediaIncremental(fileId: String, sourceUriStr: String, mediaType: String): Long {
+    suspend fun copyMediaIncremental(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): Long {
         val uri = Uri.parse(sourceUriStr)
         val now = System.currentTimeMillis()
 
@@ -75,11 +76,11 @@ class CopyEngine(
 
         val inputStream = openInputStreamWithRetry(uri)
         val newlyCopiedBytes = inputStream.use { stream ->
-            storageManager.appendMediaBytes(fileId, stream, lastOffset, mediaType)
+            storageManager.appendMediaBytes(fileId, stream, lastOffset, mediaType, fileExtension)
         }
 
         val newOffset = lastOffset + newlyCopiedBytes
-        val vaultPath = storageManager.getDestinationUri(fileId, mediaType)
+        val vaultPath = storageManager.getDestinationUri(fileId, mediaType, fileExtension)
         val vaultUri = "file://$vaultPath"
 
         // Update record in database
@@ -88,6 +89,7 @@ class CopyEngine(
             originalUri = sourceUriStr,
             vaultUri = vaultUri,
             mediaType = mediaType,
+            fileExtension = fileExtension,
             completionState = existing?.completionState ?: "SYNCING",
             lastCopiedOffset = newOffset,
             createdTime = created,
