@@ -25,6 +25,7 @@ public class PathValidatorTest {
     @Test
     public fun testValidFileId() {
         PathValidator.validateFileId("vid-123_456")
+        PathValidator.validateFileId("a")
         PathValidator.validateFileId("1234567890")
     }
 

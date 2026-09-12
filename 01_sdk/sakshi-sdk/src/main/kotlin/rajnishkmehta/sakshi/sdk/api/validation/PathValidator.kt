@@ -24,14 +24,14 @@ public object PathValidator {
     /**
      * Validates the fileId as a safe filename component.
      * Allowed: lowercase a-z, digits 0-9, underscore _, hyphen -
-     * Must not be empty, must not exceed 255 chars, no path separators or spaces.
+     * Must be between 8 and 128 characters, no path separators or spaces.
      */
     public fun validateFileId(fileId: String) {
-        if (fileId.isEmpty()) {
-            throw IllegalArgumentException("fileId cannot be empty")
+        if (fileId.length < 8) {
+            throw IllegalArgumentException("fileId must be at least 8 characters long")
         }
-        if (fileId.length > 255) {
-            throw IllegalArgumentException("fileId exceeds maximum length of 255 characters")
+        if (fileId.length > 128) {
+            throw IllegalArgumentException("fileId exceeds maximum length of 128 characters")
         }
         val fileIdRegex = Regex("^[a-z0-9_-]+$")
         if (!fileIdRegex.matches(fileId)) {
@@ -41,11 +41,11 @@ public object PathValidator {
 
     /**
      * Validates the file extension.
-     * Must not be empty, not exceed 50 chars, not start/end with dot, no path separators/spaces.
+     * Must be between 1 and 50 characters, not start/end with dot, no path separators/spaces.
      */
     public fun validateFileExtension(extension: String) {
-        if (extension.isEmpty()) {
-            throw IllegalArgumentException("fileExtension cannot be empty")
+        if (extension.length < 1) {
+            throw IllegalArgumentException("fileExtension must be at least 1 character long")
         }
         if (extension.length > 50) {
             throw IllegalArgumentException("fileExtension exceeds maximum length of 50 characters")
