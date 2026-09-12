@@ -4,6 +4,7 @@ import android.content.Context
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import rajnishkmehta.sakshi.sdk.api.validation.PathValidator
 
 /**
  * Concrete implementation of [StorageManager] that stores media in the application's private files directory.
@@ -12,14 +13,20 @@ import java.io.InputStream
 class AppPrivateStorageManager(private val context: Context) : StorageManager {
 
     override fun getDestinationUri(fileId: String, mediaType: String, fileExtension: String): String {
+        PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
+
         val mediaDir = File(context.filesDir, "media/${mediaType.lowercase()}")
         mediaDir.mkdirs()
         val fileName = "${fileId}.$fileExtension"
         val file = File(mediaDir, fileName)
+
+        PathValidator.validateDestinationPath(context.filesDir, file)
+
         return file.absolutePath
     }
 
     override fun saveMedia(fileId: String, inputStream: InputStream, mediaType: String, fileExtension: String): String {
+        PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
         val destinationPath = getDestinationUri(fileId, mediaType, fileExtension)
         val destinationFile = File(destinationPath)
 
@@ -35,6 +42,7 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
     }
 
     override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String, fileExtension: String): Long {
+        PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
         val destinationPath = getDestinationUri(fileId, mediaType, fileExtension)
         val destinationFile = File(destinationPath)
 
@@ -67,6 +75,7 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
     }
 
     override fun deleteMedia(fileId: String, mediaType: String, fileExtension: String): Boolean {
+        PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
         val path = getDestinationUri(fileId, mediaType, fileExtension)
         val file = File(path)
         return if (file.exists()) {

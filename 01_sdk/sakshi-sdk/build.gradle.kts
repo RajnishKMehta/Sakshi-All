@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.core.ktx)
+    testImplementation("junit:junit:4.13.2")
 }
 
 mavenPublishing {
