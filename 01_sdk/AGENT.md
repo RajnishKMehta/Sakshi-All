@@ -48,6 +48,7 @@ The Vault application is an external application that handles:
 3. **Target & Compile Versions**: Latest stable Android SDK versions.
 4. **Dependencies**:
    * Use strictly necessary dependencies (e.g., Kotlin Standard Library, Kotlinx Coroutines Core, AndroidX Core / Annotations).
+   * Define all dependencies in the Version Catalog (`libs.versions.toml`) and reference them through `libs.*`; avoid declaring dependency coordinates directly in build files unless there is a specific reason.
    * Verify the latest stable versions from official Google/Android documentation before adding any dependency or selecting an Android API.
    * Never use deprecated Android or Kotlin APIs.
 5. **Asynchrony**:
@@ -62,6 +63,7 @@ The Vault application is an external application that handles:
 Root package: `rajnishkmehta.sakshi.sdk`
 
 ### 4.2 Recommended Package Hierarchy
+
 ```
 rajnishkmehta.sakshi.sdk/
 ├── api/                   # Public API interfaces, models, and entry points
@@ -98,7 +100,6 @@ rajnishkmehta.sakshi.sdk/
 * **Acknowledgements & Errors**: Asynchronous feedback indicating success, progress events, or typed error codes.
 
 ---
-
 ## 7. Video Synchronization Protocol Overview
 
 1. **Client (e.g., Camera App)**:

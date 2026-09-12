@@ -13,3 +13,5 @@ This document summarizes the core guidelines from the individual projects (SDK, 
 Do not downgrade any dependency, plugin, library, SDK, Gradle version, Kotlin version, Android version, GitHub Action version, or other project/tooling version without explicit permission from the user. Never downgrade a version merely to solve a compatibility issue, build error, warning, or test failure. Ask the user first if a downgrade is genuinely required.
 
 7. **Documentation Sync**: Whenever a code change is made that alters the API or behavior, the corresponding documentation (KDoc and markdown) must be updated simultaneously.
+
+8. **Version Catalogs**: Dependencies should be defined in the Version Catalog (libs.versions.toml) and referenced through `libs.*`; avoid declaring dependency coordinates directly in build files unless there is a specific reason.

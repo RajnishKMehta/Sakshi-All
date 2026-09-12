@@ -57,6 +57,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.core.ktx)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 mavenPublishing {
