@@ -110,7 +110,15 @@ class SakshiVaultRemoteService : Service() {
             }
 
             serviceScope?.launch {
-                scheduler?.startSync(fileId, sourceUriStr, mediaType, fileExtension, callback)
+                try {
+                    rajnishkmehta.sakshi.sdk.api.validation.PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
+                    scheduler?.startSync(fileId, sourceUriStr, mediaType, fileExtension, callback)
+                } catch (e: IllegalArgumentException) {
+                    Log.e(tag, "Invalid path components for startAVSync: ${e.message}", e)
+                    // Mark sync failed natively handled since it never starts properly, just return error
+                    val error = SakshiError.Unknown("Invalid payload: ${e.message}", e)
+                    VaultResponder.sendError(callback, error)
+                }
             }
         }
 
