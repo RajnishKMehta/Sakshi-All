@@ -53,6 +53,7 @@ public class PathValidatorTest {
         assertThrows(IllegalArgumentException::class.java) { PathValidator.validateFileExtension("mp4.") }
         assertThrows(IllegalArgumentException::class.java) { PathValidator.validateFileExtension("mp4/avi") }
         assertThrows(IllegalArgumentException::class.java) { PathValidator.validateFileExtension("..") }
+        assertThrows(IllegalArgumentException::class.java) { PathValidator.validateFileExtension("a".repeat(13)) }
     }
 
     @Test
