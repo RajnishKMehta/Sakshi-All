@@ -355,7 +355,7 @@ class SyncScheduler(
                 }
             } catch (e: IllegalArgumentException) {
                 Log.e(tag, "Validation failed for $fileId", e)
-                updateDatabaseState(fileId, "FAILED")
+                dao.deleteRecord(fileId)
                 if (callback != null) {
                     val sakshiError = SakshiError.Unknown("Validation failed: ${e.message}", e)
                     VaultResponder.sendError(callback, sakshiError)

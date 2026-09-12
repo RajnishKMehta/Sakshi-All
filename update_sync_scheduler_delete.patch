@@ -1,0 +1,11 @@
+--- ./02_vault/app/src/main/kotlin/rajnishkmehta/sakshi/vault/sync/SyncScheduler.kt
++++ ./02_vault/app/src/main/kotlin/rajnishkmehta/sakshi/vault/sync/SyncScheduler.kt
+@@ -355,7 +355,7 @@
+                 }
+             } catch (e: IllegalArgumentException) {
+                 Log.e(tag, "Validation failed for $fileId", e)
+-                updateDatabaseState(fileId, "FAILED")
++                dao.deleteRecord(fileId)
+                 if (callback != null) {
+                     val sakshiError = SakshiError.Unknown("Validation failed: ${e.message}", e)
+                     VaultResponder.sendError(callback, sakshiError)
