@@ -53,25 +53,25 @@ class SakshiVaultRemoteService : Service() {
         }
 
         /**
-         * Receives a completed photo, copies it to private vault storage,
+         * Receives a completed file, copies it to private vault storage,
          * persists metadata in the database, and acknowledges success.
          */
-        override fun sendPhoto(photoBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = photoBundle.getString("file_id") ?: ""
-            val uriStr = photoBundle.getString("uri") ?: ""
-            val mediaType = photoBundle.getString("media_type") ?: "OTHER"
-            val fileExtension = photoBundle.getString("file_extension") ?: "bin"
-            Log.d(tag, "Received sendPhoto request: fileId=$fileId, uri=$uriStr, mediaType=$mediaType, fileExtension=$fileExtension")
+        override fun copyFile(fileBundle: Bundle, callback: ISakshiVaultCallback) {
+            val fileId = fileBundle.getString("file_id") ?: ""
+            val uriStr = fileBundle.getString("uri") ?: ""
+            val mediaType = fileBundle.getString("media_type") ?: "OTHER"
+            val fileExtension = fileBundle.getString("file_extension") ?: "bin"
+            Log.d(tag, "Received copyFile request: fileId=$fileId, uri=$uriStr, mediaType=$mediaType, fileExtension=$fileExtension")
 
             if (fileId.isEmpty() || uriStr.isEmpty()) {
-                val error = SakshiError.Unknown("Invalid photo payload: empty file_id or uri", null)
+                val error = SakshiError.Unknown("Invalid file payload: empty file_id or uri", null)
                 VaultResponder.sendError(callback, error)
                 return
             }
 
             serviceScope?.launch {
                 try {
-                    val vaultUriStr = copyEngine?.copyPhoto(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
+                    val vaultUriStr = copyEngine?.copyFile(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
                     val realPath = vaultUriStr.removePrefix("file://")
                     val fileLength = File(realPath).length()
 
@@ -81,13 +81,13 @@ class SakshiVaultRemoteService : Service() {
                         fileLength,
                         System.currentTimeMillis()
                     )
-                    VaultResponder.sendPhotoAck(callback, response)
-                    Log.d(tag, "Successfully copied photo $fileId to vault storage")
+                    VaultResponder.sendFileCopyAck(callback, response)
+                    Log.d(tag, "Successfully copied file $fileId to vault storage")
                 } catch (e: Exception) {
-                    Log.e(tag, "Failed to copy photo $fileId", e)
+                    Log.e(tag, "Failed to copy file $fileId", e)
                     VaultResponder.sendError(
                         callback,
-                        SakshiError.Unknown("Failed to copy photo to vault storage: ${e.message}", e)
+                        SakshiError.Unknown("Failed to copy file to vault storage: ${e.message}", e)
                     )
                 }
             }

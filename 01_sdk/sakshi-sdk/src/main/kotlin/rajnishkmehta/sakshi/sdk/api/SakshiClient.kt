@@ -3,7 +3,7 @@ package rajnishkmehta.sakshi.sdk.api
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
@@ -26,12 +26,12 @@ public interface SakshiClient {
     public suspend fun pingVault(): SakshiResult<VaultPingResponse>
 
     /**
-     * Sends a photo payload to Vault for ingestion.
+     * Sends a file payload to Vault for ingestion.
      *
-     * @param request [PhotoRequest] detailing photo URI, ID, and metadata.
+     * @param request [FileCopyRequest] detailing file URI, ID, and metadata.
      * @return [SakshiResult] containing [CopyDoneAck] acknowledgement or [SakshiError] failure.
      */
-    public suspend fun sendPhoto(request: PhotoRequest): SakshiResult<CopyDoneAck>
+    public suspend fun copyFile(request: FileCopyRequest): SakshiResult<CopyDoneAck>
 
     /**
      * Initiates audio/video synchronization for a recording in Vault.

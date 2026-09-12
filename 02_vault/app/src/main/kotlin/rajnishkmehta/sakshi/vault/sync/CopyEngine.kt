@@ -23,16 +23,16 @@ class CopyEngine(
     private val mediaRecordDao = database.mediaRecordDao()
 
     /**
-     * Copies a photo from the source URI to secure vault storage, saves metadata, and updates the database.
+     * Copies a file from the source URI to secure vault storage, saves metadata, and updates the database.
      *
-     * @param fileId Unique identifier for the photo file.
-     * @param sourceUriStr Source URI string of the photo.
+     * @param fileId Unique identifier for the file.
+     * @param sourceUriStr Source URI string of the file.
      *
      * @return The local vault destination path or URI.
      */
-    suspend fun copyPhoto(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
+    suspend fun copyFile(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
         val uri = Uri.parse(sourceUriStr)
-        val inputStream = openInputStreamWithRetry(uri)
+        val inputStream = context.contentResolver.openInputStream(uri) ?: throw IOException("ContentResolver returned null InputStream for $uri")
 
         val vaultPath = inputStream.use { stream ->
             storageManager.saveMedia(fileId, stream, mediaType, fileExtension)
@@ -74,7 +74,7 @@ class CopyEngine(
         val lastOffset = existing?.lastCopiedOffset ?: 0L
         val created = existing?.createdTime ?: now
 
-        val inputStream = openInputStreamWithRetry(uri)
+        val inputStream = context.contentResolver.openInputStream(uri) ?: throw IOException("ContentResolver returned null InputStream for $uri")
         val newlyCopiedBytes = inputStream.use { stream ->
             storageManager.appendMediaBytes(fileId, stream, lastOffset, mediaType, fileExtension)
         }

@@ -61,18 +61,18 @@ class SakshiVaultRemoteService : Service() {
             }
         }
 
-        override fun sendPhoto(photoBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = photoBundle.getString("file_id", "")
-            val uriStr = photoBundle.getString("uri", "")
-            val mediaType = photoBundle.getString("media_type", "OTHER") // example: "PHOTO"
-            val fileExtension = photoBundle.getString("file_extension", "bin") // example: "jpg"
-            val timestampEpochMs = photoBundle.getLong("timestamp", System.currentTimeMillis())
-            val metadata = photoBundle.keySet()
+        override fun copyFile(fileBundle: Bundle, callback: ISakshiVaultCallback) {
+            val fileId = fileBundle.getString("file_id", "")
+            val uriStr = fileBundle.getString("uri", "")
+            val mediaType = fileBundle.getString("media_type", "OTHER") // example: "PHOTO"
+            val fileExtension = fileBundle.getString("file_extension", "bin") // example: "jpg"
+            val timestampEpochMs = fileBundle.getLong("timestamp", System.currentTimeMillis())
+            val metadata = fileBundle.keySet()
                 .filter { it.startsWith("meta_") }
-                .associate { it.removePrefix("meta_") to (photoBundle.getString(it) ?: "") }
+                .associate { it.removePrefix("meta_") to (fileBundle.getString(it) ?: "") }
 
-            // Perform Vault photo saving logic
-            val copiedBytes = savePhotoToVaultStorage(fileId, uriStr, mediaType, fileExtension)
+            // Perform Vault file saving logic
+            val copiedBytes = saveFileToVaultStorage(fileId, uriStr, mediaType, fileExtension)
 
             // Send CopyDoneAck back to client app
             val copyDoneAck = CopyDoneAck(
@@ -81,7 +81,7 @@ class SakshiVaultRemoteService : Service() {
                 totalCopiedBytes = copiedBytes,
                 timestampEpochMs = System.currentTimeMillis()
             )
-            VaultResponder.sendPhotoAck(callback, copyDoneAck)
+            VaultResponder.sendFileCopyAck(callback, copyDoneAck)
         }
 
         override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
@@ -154,7 +154,7 @@ class SakshiVaultRemoteService : Service() {
 
 Vault developers use `VaultResponder` helpers to respond cleanly without handling raw Bundles:
 
-* `VaultResponder.sendPhotoAck(callback, copyDoneAck)`
+* `VaultResponder.sendFileCopyAck(callback, copyDoneAck)`
 * `VaultResponder.sendAVSyncStatus(callback, avSyncStatus)`
 * `VaultResponder.sendCopyDone(callback, copyDoneAck)`
 * `VaultResponder.sendError(callback, sakshiError)`

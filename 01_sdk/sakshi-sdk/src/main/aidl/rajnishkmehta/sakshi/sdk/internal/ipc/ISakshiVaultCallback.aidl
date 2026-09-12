@@ -8,11 +8,11 @@ import android.os.Bundle;
  */
 interface ISakshiVaultCallback {
     /**
-     * Called when a photo send operation completes or acknowledges.
+     * Called when a file send operation completes or acknowledges.
      *
-     * @param responseBundle Bundle containing photo response payload.
+     * @param responseBundle Bundle containing file response payload.
      */
-    void onPhotoAck(in Bundle responseBundle);
+    void onFileCopyAck(in Bundle responseBundle);
 
     /**
      * Called when audio/video synchronization status changes.

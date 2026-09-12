@@ -48,7 +48,7 @@ if (pingResult.isSuccess) {
 }
 ----
 
-== 4. Photo Submission
+== 4. File Submission
 
 Send a photo payload to Vault for storage:
 
@@ -56,17 +56,17 @@ Send a photo payload to Vault for storage:
 ----
 import android.net.Uri
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
-import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 
-val photoRequest = PhotoRequest(
+val fileCopyRequest = FileCopyRequest(
     fileId = "photo_2026_1001",
     uri = photoContentUri, // android.net.Uri
     mediaType = "PHOTO", // "PHOTO", "VIDEO", "AUDIO", or "OTHER"
     fileExtension = "jpg" // File extension
 )
 
-val result: SakshiResult<CopyDoneAck> = client.sendPhoto(photoRequest)
+val result: SakshiResult<CopyDoneAck> = client.copyFile(fileCopyRequest)
 when (result) {
     is SakshiResult.Success -> {
         val ack = result.data

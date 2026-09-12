@@ -185,7 +185,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
         val fileId = "img_${uniqueHash}"
 
-        val photoRequest = rajnishkmehta.sakshi.sdk.api.models.PhotoRequest(
+        val fileCopyRequest = rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest(
             fileId = fileId,
             uri = item.uri,
             mediaType = "PHOTO",
@@ -193,9 +193,9 @@ class ImageCapturer(val mActivity: MainActivity) {
         )
         mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val result = mActivity.sakshiClient.sendPhoto(photoRequest)
+            val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                android.util.Log.e("SakshiSDK", "Photo ingestion failed: " + result.error.message)
+                android.util.Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
             }
         }
 

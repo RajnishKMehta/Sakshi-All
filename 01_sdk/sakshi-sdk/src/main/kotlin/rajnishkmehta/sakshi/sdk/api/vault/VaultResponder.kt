@@ -13,15 +13,15 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 public object VaultResponder {
 
     /**
-     * Sends a photo ingestion acknowledgement back to the client application.
+     * Sends a file ingestion acknowledgement back to the client application.
      *
-     * @param callback The [ISakshiVaultCallback] received in `sendPhoto`.
+     * @param callback The [ISakshiVaultCallback] received in `copyFile`.
      * @param ack The [CopyDoneAck] details.
      */
     @JvmStatic
-    public fun sendPhotoAck(callback: ISakshiVaultCallback, ack: CopyDoneAck) {
+    public fun sendFileCopyAck(callback: ISakshiVaultCallback, ack: CopyDoneAck) {
         runCatching {
-            callback.onPhotoAck(AidlMappers.toBundle(ack))
+            callback.onFileCopyAck(AidlMappers.toBundle(ack))
         }
     }
 
