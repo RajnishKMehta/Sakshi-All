@@ -1,9 +1,0 @@
---- 01_sdk/sakshi-sdk/src/test/kotlin/rajnishkmehta/sakshi/sdk/api/validation/PathValidatorTest.kt
-+++ 01_sdk/sakshi-sdk/src/test/kotlin/rajnishkmehta/sakshi/sdk/api/validation/PathValidatorTest.kt
-@@ -23,7 +23,6 @@
-     @Test
-     public fun testValidFileId() {
-         PathValidator.validateFileId("vid-123_456")
--        PathValidator.validateFileId("a")
-         PathValidator.validateFileId("1234567890")
-     }
