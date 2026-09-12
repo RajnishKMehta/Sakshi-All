@@ -353,6 +353,15 @@ class SyncScheduler(
                         copiedBytes = copyEngine.copyMediaIncremental(fileId, sourceUri, mediaType, fileExtension)
                     }
                 }
+            } catch (e: IllegalArgumentException) {
+                Log.e(tag, "Validation failed for $fileId", e)
+                updateDatabaseState(fileId, "FAILED")
+                if (callback != null) {
+                    val sakshiError = SakshiError.Unknown("Validation failed: ${e.message}", e)
+                    VaultResponder.sendError(callback, sakshiError)
+                }
+                activeJobs.remove(fileId)
+                break
             } catch (e: Exception) {
                 Log.e(tag, "Copy pass failed for $fileId on current attempt", e)
                 copyError = e
