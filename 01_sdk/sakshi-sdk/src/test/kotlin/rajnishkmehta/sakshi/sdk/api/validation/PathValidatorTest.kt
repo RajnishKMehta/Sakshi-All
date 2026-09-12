@@ -1,9 +1,9 @@
 package rajnishkmehta.sakshi.sdk.api.validation
 
-import org.junit.Assert.assertThrows
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Test
 import java.io.File
-import org.junit.Assert.assertTrue
+import org.junit.jupiter.api.Assertions.assertTrue
 
 public class PathValidatorTest {
 
