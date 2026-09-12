@@ -82,7 +82,7 @@ class SakshiVaultRemoteService : Service() {
                         System.currentTimeMillis()
                     )
                     VaultResponder.sendFileCopyAck(callback, response)
-                    Log.d(tag, "Successfully copied photo $fileId to vault storage")
+                    Log.d(tag, "Successfully copied file $fileId to vault storage")
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to copy file $fileId", e)
                     VaultResponder.sendError(

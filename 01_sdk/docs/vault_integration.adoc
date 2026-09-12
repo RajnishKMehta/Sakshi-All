@@ -71,8 +71,8 @@ class SakshiVaultRemoteService : Service() {
                 .filter { it.startsWith("meta_") }
                 .associate { it.removePrefix("meta_") to (fileBundle.getString(it) ?: "") }
 
-            // Perform Vault photo saving logic
-            val copiedBytes = savePhotoToVaultStorage(fileId, uriStr, mediaType, fileExtension)
+            // Perform Vault file saving logic
+            val copiedBytes = saveFileToVaultStorage(fileId, uriStr, mediaType, fileExtension)
 
             // Send CopyDoneAck back to client app
             val copyDoneAck = CopyDoneAck(

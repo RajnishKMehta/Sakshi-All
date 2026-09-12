@@ -30,7 +30,7 @@ Sakshi SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
 |  +------------------------------+  |   Android IPC   |  +-----------------------------+  |
 |  |        SakshiClient          |  | <=============> |  |   Incremental Copy Engine   |  |
 |  +------------------------------+  |   (AIDL/Binder) |  |   VaultResponder Helper     |  |
-|  (Send Photos & Video Sync)     |                 |  |   Media Records Database    |  |
+|  (Copy Files & Video Sync)     |                 |  |   Media Records Database    |  |
 +------------------------------------+                 +-----------------------------------+
 ```
 
@@ -97,16 +97,16 @@ import rajnishkmehta.sakshi.sdk.api.SakshiClient
 
 val client = SakshiClient.create(context)
 
-// 1. Send Photo (returns SakshiResult<CopyDoneAck>)
+// 1. Copy File (returns SakshiResult<CopyDoneAck>)
 coroutineScope.launch {
-    val result = client.copyFile(FileCopyRequest(fileId = "photo_001", uri = photoUri))
+    val result = client.copyFile(FileCopyRequest(fileId = "photo_001", uri = photoUri, mediaType = "PHOTO", fileExtension = "jpg"))
     when (result) {
         is SakshiResult.Success -> {
             val ack = result.data
-            println("Photo Sent! File ID: ${ack.fileId}, Copied Bytes: ${ack.totalCopiedBytes}")
+            println("File Copied! File ID: ${ack.fileId}, Copied Bytes: ${ack.totalCopiedBytes}")
         }
         is SakshiResult.Failure -> {
-            println("Photo ingestion failed: ${result.error.message}")
+            println("File ingestion failed: ${result.error.message}")
         }
     }
 }
