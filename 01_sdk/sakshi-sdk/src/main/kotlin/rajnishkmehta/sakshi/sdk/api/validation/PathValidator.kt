@@ -41,14 +41,14 @@ public object PathValidator {
 
     /**
      * Validates the file extension.
-     * Must be between 1 and 50 characters, not start/end with dot, no path separators/spaces.
+     * Must be between 1 and 12 characters, not start/end with dot, no path separators/spaces.
      */
     public fun validateFileExtension(extension: String) {
         if (extension.length < 1) {
             throw IllegalArgumentException("fileExtension must be at least 1 character long")
         }
-        if (extension.length > 50) {
-            throw IllegalArgumentException("fileExtension exceeds maximum length of 50 characters")
+        if (extension.length > 12) {
+            throw IllegalArgumentException("fileExtension exceeds maximum length of 12 characters")
         }
         if (extension.startsWith(".") || extension.endsWith(".")) {
             throw IllegalArgumentException("fileExtension cannot start or end with a dot")
