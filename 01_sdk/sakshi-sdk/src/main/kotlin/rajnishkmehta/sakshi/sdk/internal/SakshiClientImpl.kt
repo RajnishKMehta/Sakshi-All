@@ -11,7 +11,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
@@ -58,7 +58,7 @@ internal class SakshiClientImpl(
         }
     }
 
-    override suspend fun sendPhoto(request: PhotoRequest): SakshiResult<CopyDoneAck> {
+    override suspend fun copyFile(request: FileCopyRequest): SakshiResult<CopyDoneAck> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
             return SakshiResult.Failure(serviceResult.errorOrNull()!!)
@@ -68,7 +68,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) {
+                override fun onFileCopyAck(responseBundle: Bundle) {
                     val response = AidlMappers.toCopyDoneAck(responseBundle)
                     if (continuation.isActive) {
                         continuation.resume(SakshiResult.Success(response))
@@ -87,13 +87,13 @@ internal class SakshiClientImpl(
             }
 
             try {
-                val photoBundle = AidlMappers.toBundle(request)
-                service.sendPhoto(photoBundle, callback)
+                val fileBundle = AidlMappers.toBundle(request)
+                service.copyFile(fileBundle, callback)
             } catch (e: Throwable) {
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            SakshiError.IpcError(message = e.message ?: "Failed to send photo", cause = e)
+                            SakshiError.IpcError(message = e.message ?: "Failed to copy file", cause = e)
                         )
                     )
                 }
@@ -112,7 +112,7 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         val callback = object : ISakshiVaultCallback.Stub() {
-            override fun onPhotoAck(responseBundle: Bundle) = Unit
+            override fun onFileCopyAck(responseBundle: Bundle) = Unit
 
             override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                 val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
@@ -168,7 +168,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) = Unit
+                override fun onFileCopyAck(responseBundle: Bundle) = Unit
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                     if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
@@ -216,7 +216,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) = Unit
+                override fun onFileCopyAck(responseBundle: Bundle) = Unit
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                     if (status.state == AVSyncStatus.State.PAUSED) {
@@ -263,7 +263,7 @@ internal class SakshiClientImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val callback = object : ISakshiVaultCallback.Stub() {
-                override fun onPhotoAck(responseBundle: Bundle) = Unit
+                override fun onFileCopyAck(responseBundle: Bundle) = Unit
                 override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                     val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                     if (status.state == AVSyncStatus.State.SYNCING) {

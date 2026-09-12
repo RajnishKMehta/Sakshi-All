@@ -17,12 +17,12 @@ interface ISakshiVaultService {
     Bundle ping(in Bundle requestBundle);
 
     /**
-     * Sends a photo payload/URI reference to Vault for ingestion.
+     * Sends a file payload/URI reference to Vault for ingestion.
      *
-     * @param photoBundle Payload bundle containing photo details.
+     * @param fileBundle Payload bundle containing file details.
      * @param callback Callback to receive acknowledgement or errors.
      */
-    void sendPhoto(in Bundle photoBundle, in ISakshiVaultCallback callback);
+    void copyFile(in Bundle fileBundle, in ISakshiVaultCallback callback);
 
     /**
      * Notifies Vault to start audio/video synchronization for a recording.

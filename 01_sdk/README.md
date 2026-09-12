@@ -99,7 +99,7 @@ val client = SakshiClient.create(context)
 
 // 1. Send Photo (returns SakshiResult<CopyDoneAck>)
 coroutineScope.launch {
-    val result = client.sendPhoto(PhotoRequest(fileId = "photo_001", uri = photoUri))
+    val result = client.copyFile(FileCopyRequest(fileId = "photo_001", uri = photoUri))
     when (result) {
         is SakshiResult.Success -> {
             val ack = result.data

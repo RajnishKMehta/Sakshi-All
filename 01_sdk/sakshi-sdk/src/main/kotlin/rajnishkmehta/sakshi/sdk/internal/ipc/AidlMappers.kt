@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.api.models.PhotoRequest
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
@@ -15,7 +15,7 @@ import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
  */
 internal object AidlMappers {
 
-    // Bundle Keys - Photo
+    // Bundle Keys - File
     private const val KEY_URI: String = "uri"
     private const val KEY_MEDIA_TYPE: String = "media_type"
     private const val KEY_FILE_EXTENSION: String = "file_extension"
@@ -37,7 +37,7 @@ internal object AidlMappers {
     private const val KEY_EXISTS: String = "exists"
     private const val KEY_ERROR_CODE: String = "error_code"
 
-    internal fun toBundle(request: PhotoRequest): Bundle {
+    internal fun toBundle(request: FileCopyRequest): Bundle {
         return Bundle().apply {
             putString(KEY_FILE_ID, request.fileId)
             putString(KEY_URI, request.uri.toString())

@@ -31,7 +31,7 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback;
 
 interface ISakshiVaultService {
     Bundle ping(in Bundle requestBundle);
-    void sendPhoto(in Bundle photoBundle, in ISakshiVaultCallback callback);
+    void copyFile(in Bundle fileBundle, in ISakshiVaultCallback callback);
         void startAVSync(in Bundle avSyncBundle, in ISakshiVaultCallback callback);
     void pauseAVSync(in String fileId, in ISakshiVaultCallback callback);
     void resumeAVSync(in String fileId, in ISakshiVaultCallback callback);
@@ -49,7 +49,7 @@ package rajnishkmehta.sakshi.sdk.internal.ipc;
 import android.os.Bundle;
 
 interface ISakshiVaultCallback {
-    void onPhotoAck(in Bundle responseBundle);
+    void onFileCopyAck(in Bundle responseBundle);
     void onAVSyncStatus(in Bundle syncStatusBundle);
     void onCopyDone(in Bundle copyDoneBundle);
     void onError(in Bundle errorBundle);
@@ -58,7 +58,7 @@ interface ISakshiVaultCallback {
 
 == 3. Bundle Data Structures
 
-=== 3.1 `PhotoRequest` Bundle Keys
+=== 3.1 `FileCopyRequest` Bundle Keys
 _Direction: client → vault_
 
 **Description**: Contains the details of a photo capture event. Sent by the client application to the Vault to request secure ingestion and archiving of the photo.
@@ -66,7 +66,7 @@ _Direction: client → vault_
 [cols="1,1,2", options="header"]
 |===
 | Key | Type | Description
-| `file_id` | String | Unique identifier for this photo submission.
+| `file_id` | String | Unique identifier for this file submission.
 | `uri` | String | Content URI of the source photo file.
 | `media_type` | String | Media type of the photo (`"PHOTO"`, `"VIDEO"`, `"AUDIO"`, `"OTHER"`).
 | `file_extension` | String | The file extension of the photo.
@@ -109,7 +109,7 @@ _Direction: vault → client_
 === 3.4 `CopyDoneAck` Bundle Keys
 _Direction: vault → client_
 
-**Description**: Sent by Vault to acknowledge successful copy completion or ingestion. This payload is returned as the final outcome of a successful photo submission or upon the completion of a video file transfer pass.
+**Description**: Sent by Vault to acknowledge successful copy completion or ingestion. This payload is returned as the final outcome of a successful file submission or upon the completion of a video file transfer pass.
 
 [cols="1,1,2", options="header"]
 |===

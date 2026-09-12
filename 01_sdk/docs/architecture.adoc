@@ -55,7 +55,7 @@ Sakshi SDK (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android clien
 === 2.1 Client Application Side (e.g., Camera / Audio)
 Client applications initiate requests to transfer media or start incremental synchronization sessions:
 * Initiates ping health checks.
-* Submits photo requests (`PhotoRequest`).
+* Submits photo requests (`FileCopyRequest`).
 * Signals start of audio/video recordings (`SakshiClient.startAVSync` accepts `AVSyncRequest`) and stop (`SakshiClient.stopAVSync` accepts `fileId`).
 * Observes status updates and copy completion acknowledgements (`CopyDoneAck`).
 
