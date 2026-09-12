@@ -361,6 +361,7 @@ class SyncScheduler(
                     VaultResponder.sendError(callback, sakshiError)
                 }
                 activeJobs.remove(fileId)
+                activeCallbacks.remove(fileId)
                 break
             } catch (e: Exception) {
                 Log.e(tag, "Copy pass failed for $fileId on current attempt", e)
