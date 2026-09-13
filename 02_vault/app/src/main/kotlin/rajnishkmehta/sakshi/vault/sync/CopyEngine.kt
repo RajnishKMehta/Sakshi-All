@@ -50,7 +50,8 @@ class CopyEngine(
             completionState = "COMPLETED",
             lastCopiedOffset = java.io.File(vaultPath).length(),
             createdTime = existing?.createdTime ?: now,
-            updatedTime = now
+            updatedTime = now,
+            vaultAddedTimestamp = existing?.vaultAddedTimestamp ?: now
         )
         mediaRecordDao.insertRecord(record)
         return vaultPath
@@ -93,7 +94,8 @@ class CopyEngine(
             completionState = existing?.completionState ?: "SYNCING",
             lastCopiedOffset = newOffset,
             createdTime = created,
-            updatedTime = now
+            updatedTime = now,
+            vaultAddedTimestamp = existing?.vaultAddedTimestamp ?: now
         )
         mediaRecordDao.insertRecord(record)
 
