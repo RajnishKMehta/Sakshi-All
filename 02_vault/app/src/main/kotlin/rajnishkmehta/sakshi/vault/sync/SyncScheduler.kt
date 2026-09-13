@@ -97,7 +97,8 @@ class SyncScheduler(
                         if (updatedRecord != null) {
                             val finalRecord = updatedRecord.copy(
                                 completionState = "COMPLETED",
-                                updatedTime = System.currentTimeMillis()
+                                updatedTime = System.currentTimeMillis(),
+                vaultAddedTimestamp = record.vaultAddedTimestamp
                             )
                             database.mediaRecordDao().insertRecord(finalRecord)
 
@@ -317,7 +318,8 @@ class SyncScheduler(
                     completionState = "INITIALIZING",
                     lastCopiedOffset = 0L,
                     createdTime = now,
-                    updatedTime = now
+                    updatedTime = now,
+                    vaultAddedTimestamp = now
                 )
             )
         }
@@ -430,7 +432,8 @@ class SyncScheduler(
         if (record != null) {
             val finalRecord = record.copy(
                 completionState = "COMPLETED",
-                updatedTime = System.currentTimeMillis()
+                updatedTime = System.currentTimeMillis(),
+                vaultAddedTimestamp = record.vaultAddedTimestamp
             )
             dao.insertRecord(finalRecord)
 
@@ -480,7 +483,8 @@ class SyncScheduler(
             dao.insertRecord(
                 record.copy(
                     completionState = state,
-                    updatedTime = System.currentTimeMillis()
+                    updatedTime = System.currentTimeMillis(),
+                vaultAddedTimestamp = record.vaultAddedTimestamp
                 )
             )
         }

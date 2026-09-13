@@ -97,3 +97,7 @@ dependencies {
 room3 {
     schemaDirectory("$projectDir/schemas")
 }
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+}
