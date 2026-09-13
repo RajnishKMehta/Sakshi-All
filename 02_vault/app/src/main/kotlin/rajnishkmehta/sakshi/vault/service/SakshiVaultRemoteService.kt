@@ -12,6 +12,7 @@ import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 import rajnishkmehta.sakshi.vault.storage.StorageManager
 import rajnishkmehta.sakshi.vault.sync.CopyEngine
 import rajnishkmehta.sakshi.vault.sync.SyncScheduler
+import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailGenerator
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.api.SakshiError
@@ -36,6 +37,7 @@ class SakshiVaultRemoteService : Service() {
     private var storageManager: StorageManager? = null
     private var copyEngine: CopyEngine? = null
     private var scheduler: SyncScheduler? = null
+    private var thumbnailGenerator: ThumbnailGenerator? = null
     private var serviceScope: CoroutineScope? = null
 
     private val binder = object : ISakshiVaultService.Stub() {
@@ -82,6 +84,7 @@ class SakshiVaultRemoteService : Service() {
                         System.currentTimeMillis()
                     )
                     VaultResponder.sendFileCopyAck(callback, response)
+                    thumbnailGenerator?.generateThumbnail(fileId, mediaType, fileExtension, realPath)
                     Log.d(tag, "Successfully copied file $fileId to vault storage")
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to copy file $fileId", e)
@@ -190,7 +193,8 @@ class SakshiVaultRemoteService : Service() {
             database = VaultDatabase.getDatabase(applicationContext)
             storageManager = AppPrivateStorageManager(applicationContext)
             copyEngine = CopyEngine(applicationContext, database!!, storageManager!!)
-            scheduler = SyncScheduler(applicationContext, database!!, copyEngine!!)
+            thumbnailGenerator = ThumbnailGenerator(applicationContext)
+            scheduler = SyncScheduler(applicationContext, database!!, copyEngine!!, thumbnailGenerator!!)
 
             // Automatically resume any interrupted, pending synchronizations from database
             scheduler?.resumePendingSyncs()

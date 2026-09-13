@@ -15,6 +15,8 @@ import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailGenerator
+import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 
 /**
  * Adaptive scheduler that manages non-overlapping synchronization loops for recording files.
@@ -25,6 +27,7 @@ class SyncScheduler(
     private val context: Context,
     private val database: VaultDatabase,
     private val copyEngine: CopyEngine,
+    private val thumbnailGenerator: ThumbnailGenerator,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
 
@@ -93,6 +96,11 @@ class SyncScheduler(
                         copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType, record.fileExtension)
 
                         val updatedRecord = database.mediaRecordDao().getRecord(fileId)
+                        if (updatedRecord != null) {
+                            val storageManager = AppPrivateStorageManager(context)
+                            val destPath = storageManager.getDestinationUri(fileId, updatedRecord.mediaType, updatedRecord.fileExtension)
+                            thumbnailGenerator.generateThumbnail(fileId, updatedRecord.mediaType, updatedRecord.fileExtension, destPath)
+                        }
                         if (updatedRecord != null) {
                             val finalRecord = updatedRecord.copy(
                                 completionState = "COMPLETED",
@@ -416,6 +424,10 @@ class SyncScheduler(
         val dao = database.mediaRecordDao()
         val record = dao.getRecord(fileId)
         if (record != null) {
+            val storageManager = AppPrivateStorageManager(context)
+            val destPath = storageManager.getDestinationUri(fileId, record.mediaType, record.fileExtension)
+            thumbnailGenerator.generateThumbnail(fileId, record.mediaType, record.fileExtension, destPath)
+
             val finalRecord = record.copy(
                 completionState = "COMPLETED",
                 updatedTime = System.currentTimeMillis()
