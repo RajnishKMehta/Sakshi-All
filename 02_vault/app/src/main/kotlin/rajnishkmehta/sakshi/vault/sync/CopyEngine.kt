@@ -28,7 +28,7 @@ class CopyEngine(
      * @param fileId Unique identifier for the file.
      * @param sourceUriStr Source URI string of the file.
      *
-     * @return The local vault destination path or URI.
+     * @return The local vault destination path.
      */
     suspend fun copyFile(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
         val uri = Uri.parse(sourceUriStr)
@@ -37,14 +37,14 @@ class CopyEngine(
         val vaultPath = inputStream.use { stream ->
             storageManager.saveMedia(fileId, stream, mediaType, fileExtension)
         }
-        val vaultUri = "file://$vaultPath"
+
 
         val now = System.currentTimeMillis()
         val existing = mediaRecordDao.getRecord(fileId)
         val record = MediaRecord(
             fileId = fileId,
             originalUri = sourceUriStr,
-            vaultUri = vaultUri,
+            vaultPath = vaultPath,
             mediaType = mediaType,
             fileExtension = fileExtension,
             completionState = "COMPLETED",
@@ -53,7 +53,7 @@ class CopyEngine(
             updatedTime = now
         )
         mediaRecordDao.insertRecord(record)
-        return vaultUri
+        return vaultPath
     }
 
     /**
@@ -81,13 +81,13 @@ class CopyEngine(
 
         val newOffset = lastOffset + newlyCopiedBytes
         val vaultPath = storageManager.getDestinationUri(fileId, mediaType, fileExtension)
-        val vaultUri = "file://$vaultPath"
+
 
         // Update record in database
         val record = MediaRecord(
             fileId = fileId,
             originalUri = sourceUriStr,
-            vaultUri = vaultUri,
+            vaultPath = vaultPath,
             mediaType = mediaType,
             fileExtension = fileExtension,
             completionState = existing?.completionState ?: "SYNCING",

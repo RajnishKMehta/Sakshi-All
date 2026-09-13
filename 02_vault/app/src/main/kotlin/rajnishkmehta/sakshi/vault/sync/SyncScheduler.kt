@@ -126,14 +126,13 @@ class SyncScheduler(
                             }
 
                             // Generate thumbnail for explicitly stopped file
-                            finalRecord.vaultUri?.let { vaultUri ->
-                                val realPath = vaultUri.removePrefix("file://")
+                            finalRecord.vaultPath?.let { vaultPath ->
                                 ThumbnailManager.generateAndStoreThumbnail(
                                     context,
                                     fileId,
                                     finalRecord.mediaType,
                                     finalRecord.fileExtension,
-                                    File(realPath)
+                                    File(vaultPath)
                                 )
                             }
                         }
@@ -312,7 +311,7 @@ class SyncScheduler(
                 MediaRecord(
                     fileId = fileId,
                     originalUri = sourceUri,
-                    vaultUri = null,
+                    vaultPath = null,
                     mediaType = mediaType,
                     fileExtension = fileExtension,
                     completionState = "INITIALIZING",
@@ -460,14 +459,13 @@ class SyncScheduler(
             }
 
             // Generate thumbnail for AVSync completed file
-            finalRecord.vaultUri?.let { vaultUri ->
-                val realPath = vaultUri.removePrefix("file://")
+            finalRecord.vaultPath?.let { vaultPath ->
                 ThumbnailManager.generateAndStoreThumbnail(
                     context,
                     fileId,
                     finalRecord.mediaType,
                     finalRecord.fileExtension,
-                    File(realPath)
+                    File(vaultPath)
                 )
             }
         }

@@ -12,7 +12,7 @@ data class MediaRecord(
     @PrimaryKey
     val fileId: String,
     val originalUri: String,
-    val vaultUri: String?,
+    val vaultPath: String?,
     val mediaType: String, // "PHOTO", "VIDEO", "AUDIO", or "OTHER"
     val fileExtension: String,
     val completionState: String, // "INITIALIZING", "SYNCING", "COMPLETED", "STOPPED", "FAILED"
