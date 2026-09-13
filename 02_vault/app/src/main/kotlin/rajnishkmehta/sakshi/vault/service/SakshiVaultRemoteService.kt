@@ -18,6 +18,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiError
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 import rajnishkmehta.sakshi.vault.BuildConfig
+import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
 import java.io.File
 
 /**
@@ -71,9 +72,8 @@ class SakshiVaultRemoteService : Service() {
 
             serviceScope?.launch {
                 try {
-                    val vaultUriStr = copyEngine?.copyFile(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
-                    val realPath = vaultUriStr.removePrefix("file://")
-                    val fileLength = File(realPath).length()
+                    val vaultPath = copyEngine?.copyFile(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
+                    val fileLength = File(vaultPath).length()
 
                     val response = CopyDoneAck(
                         fileId,
@@ -83,6 +83,15 @@ class SakshiVaultRemoteService : Service() {
                     )
                     VaultResponder.sendFileCopyAck(callback, response)
                     Log.d(tag, "Successfully copied file $fileId to vault storage")
+
+                    // Generate thumbnail
+                    ThumbnailManager.generateAndStoreThumbnail(
+                        applicationContext,
+                        fileId,
+                        mediaType,
+                        fileExtension,
+                        File(vaultPath)
+                    )
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to copy file $fileId", e)
                     VaultResponder.sendError(

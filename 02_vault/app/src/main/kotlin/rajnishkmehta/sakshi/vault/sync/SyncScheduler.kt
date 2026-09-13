@@ -1,6 +1,7 @@
 package rajnishkmehta.sakshi.vault.sync
 
 import android.content.Context
+import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
 import android.net.Uri
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import kotlinx.coroutines.*
@@ -121,6 +122,17 @@ class SyncScheduler(
                                         finalRecord.lastCopiedOffset,
                                         System.currentTimeMillis()
                                     )
+                                )
+                            }
+
+                            // Generate thumbnail for explicitly stopped file
+                            finalRecord.vaultPath?.let { vaultPath ->
+                                ThumbnailManager.generateAndStoreThumbnail(
+                                    context,
+                                    fileId,
+                                    finalRecord.mediaType,
+                                    finalRecord.fileExtension,
+                                    File(vaultPath)
                                 )
                             }
                         }
@@ -299,7 +311,7 @@ class SyncScheduler(
                 MediaRecord(
                     fileId = fileId,
                     originalUri = sourceUri,
-                    vaultUri = null,
+                    vaultPath = null,
                     mediaType = mediaType,
                     fileExtension = fileExtension,
                     completionState = "INITIALIZING",
@@ -443,6 +455,17 @@ class SyncScheduler(
                         finalRecord.lastCopiedOffset,
                         System.currentTimeMillis()
                     )
+                )
+            }
+
+            // Generate thumbnail for AVSync completed file
+            finalRecord.vaultPath?.let { vaultPath ->
+                ThumbnailManager.generateAndStoreThumbnail(
+                    context,
+                    fileId,
+                    finalRecord.mediaType,
+                    finalRecord.fileExtension,
+                    File(vaultPath)
                 )
             }
         }
