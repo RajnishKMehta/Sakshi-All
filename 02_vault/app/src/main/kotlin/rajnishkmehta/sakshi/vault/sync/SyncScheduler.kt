@@ -1,6 +1,7 @@
 package rajnishkmehta.sakshi.vault.sync
 
 import android.content.Context
+import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
 import android.net.Uri
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import kotlinx.coroutines.*
@@ -443,6 +444,18 @@ class SyncScheduler(
                         finalRecord.lastCopiedOffset,
                         System.currentTimeMillis()
                     )
+                )
+            }
+
+            // Generate thumbnail for AVSync completed file
+            finalRecord.vaultUri?.let { vaultUri ->
+                val realPath = vaultUri.removePrefix("file://")
+                ThumbnailManager.generateAndStoreThumbnail(
+                    context,
+                    fileId,
+                    finalRecord.mediaType,
+                    finalRecord.fileExtension,
+                    File(realPath)
                 )
             }
         }
