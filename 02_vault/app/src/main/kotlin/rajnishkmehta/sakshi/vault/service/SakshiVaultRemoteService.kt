@@ -72,9 +72,8 @@ class SakshiVaultRemoteService : Service() {
 
             serviceScope?.launch {
                 try {
-                    val vaultUriStr = copyEngine?.copyFile(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
-                    val realPath = vaultUriStr.removePrefix("file://")
-                    val fileLength = File(realPath).length()
+                    val vaultPath = copyEngine?.copyFile(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
+                    val fileLength = File(vaultPath).length()
 
                     val response = CopyDoneAck(
                         fileId,
@@ -91,7 +90,7 @@ class SakshiVaultRemoteService : Service() {
                         fileId,
                         mediaType,
                         fileExtension,
-                        File(realPath)
+                        File(vaultPath)
                     )
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to copy file $fileId", e)
