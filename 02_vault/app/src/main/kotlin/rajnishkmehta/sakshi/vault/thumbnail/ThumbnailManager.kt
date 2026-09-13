@@ -8,7 +8,6 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import rajnishkmehta.sakshi.sdk.api.validation.PathValidator
 import rajnishkmehta.sakshi.vault.AppLog as Log
 
 /**
@@ -17,7 +16,7 @@ import rajnishkmehta.sakshi.vault.AppLog as Log
 object ThumbnailManager {
     private const val TAG = "ThumbnailManager"
     // Sensible small thumbnail size for Portal/gallery preview
-    private val THUMBNAIL_SIZE = Size(512, 512)
+    private val THUMBNAIL_SIZE = Size(320, 320)
 
     /**
      * Generates a thumbnail for a given source media file and saves it in the private Vault storage.
@@ -48,14 +47,10 @@ object ThumbnailManager {
         }
 
         try {
-            PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
-
             val thumbnailDir = File(context.filesDir, "media/${mediaType.lowercase()}/thumbnail")
             thumbnailDir.mkdirs()
 
-            val thumbnailFile = File(thumbnailDir, "${fileId}.${fileExtension}")
-            PathValidator.validateDestinationPath(context.filesDir, thumbnailFile)
-
+            val thumbnailFile = File(thumbnailDir, "${fileId}.webp")
             Log.d(TAG, "Generating thumbnail for $fileId ($mediaType) at ${thumbnailFile.absolutePath}")
 
             val bitmap: Bitmap = if (mediaType == "PHOTO") {
@@ -65,12 +60,7 @@ object ThumbnailManager {
             }
 
             FileOutputStream(thumbnailFile).use { out ->
-                val format = when (fileExtension.lowercase()) {
-                    "png" -> Bitmap.CompressFormat.PNG
-                    "webp" -> Bitmap.CompressFormat.WEBP
-                    else -> Bitmap.CompressFormat.JPEG
-                }
-                bitmap.compress(format, 80, out)
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 80, out)
             }
 
             Log.d(TAG, "Successfully generated thumbnail for $fileId")

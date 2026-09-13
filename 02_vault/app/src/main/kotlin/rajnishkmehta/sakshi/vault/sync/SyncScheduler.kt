@@ -124,6 +124,18 @@ class SyncScheduler(
                                     )
                                 )
                             }
+
+                            // Generate thumbnail for explicitly stopped file
+                            finalRecord.vaultUri?.let { vaultUri ->
+                                val realPath = vaultUri.removePrefix("file://")
+                                ThumbnailManager.generateAndStoreThumbnail(
+                                    context,
+                                    fileId,
+                                    finalRecord.mediaType,
+                                    finalRecord.fileExtension,
+                                    File(realPath)
+                                )
+                            }
                         }
                     }
                 }
