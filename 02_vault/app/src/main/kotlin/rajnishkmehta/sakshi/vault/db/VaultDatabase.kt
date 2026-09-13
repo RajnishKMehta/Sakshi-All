@@ -23,7 +23,7 @@ abstract class VaultDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     VaultDatabase::class.java,
-                    "sakshi_vault_database"
+                    "sakshi_vault_beta_database"
                 )
                 .setDriver(AndroidSQLiteDriver())
                 .fallbackToDestructiveMigration()
