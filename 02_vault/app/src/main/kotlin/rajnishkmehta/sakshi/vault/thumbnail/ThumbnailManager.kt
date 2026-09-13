@@ -60,14 +60,27 @@ object ThumbnailManager {
                 ThumbnailUtils.createVideoThumbnail(sourceFile, THUMBNAIL_SIZE, null)
             }
 
-            FileOutputStream(thumbnailFile).use { out ->
-                @Suppress("DEPRECATION")
-                val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    Bitmap.CompressFormat.WEBP_LOSSY
-                } else {
-                    Bitmap.CompressFormat.WEBP
+            @Suppress("DEPRECATION")
+            val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Bitmap.CompressFormat.WEBP_LOSSY
+            } else {
+                Bitmap.CompressFormat.WEBP
+            }
+
+            var compressSuccess = false
+            for (attempt in 1..2) {
+                FileOutputStream(thumbnailFile).use { out ->
+                    compressSuccess = bitmap.compress(format, 80, out)
                 }
-                bitmap.compress(format, 80, out)
+                if (compressSuccess) {
+                    break
+                }
+                thumbnailFile.delete()
+            }
+
+            if (!compressSuccess) {
+                Log.e(TAG, "Failed to compress thumbnail for $fileId")
+                return@withContext null
             }
 
             Log.d(TAG, "Successfully generated thumbnail for $fileId")
