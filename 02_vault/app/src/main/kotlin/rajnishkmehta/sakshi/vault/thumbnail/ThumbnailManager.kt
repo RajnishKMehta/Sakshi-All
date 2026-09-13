@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.media.ThumbnailUtils
 import android.util.Size
+import android.os.Build
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +61,13 @@ object ThumbnailManager {
             }
 
             FileOutputStream(thumbnailFile).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 80, out)
+                @Suppress("DEPRECATION")
+                val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    Bitmap.CompressFormat.WEBP_LOSSY
+                } else {
+                    Bitmap.CompressFormat.WEBP
+                }
+                bitmap.compress(format, 80, out)
             }
 
             Log.d(TAG, "Successfully generated thumbnail for $fileId")
