@@ -4,6 +4,7 @@ room = "3.0.2"
 sakshi = "1.0.0-beta.7"
 kotlin = "2.4.10"
 coroutines = "1.11.0"
+media3 = "1.11.0"
 androidx-core = "1.19.0"
 ksp = "2.3.11"
 
@@ -21,6 +22,8 @@ sakshi-sdk = { group = "io.github.rajnishkmehta.sakshi", name = "sakshi-sdk", ve
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
+# Media3
+androidx-media3-inspector-frame = { group = "androidx.media3", name = "media3-inspector-frame", version.ref = "media3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

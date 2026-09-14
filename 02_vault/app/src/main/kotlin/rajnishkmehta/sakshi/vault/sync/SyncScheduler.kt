@@ -131,7 +131,6 @@ class SyncScheduler(
                                     context,
                                     fileId,
                                     finalRecord.mediaType,
-                                    finalRecord.fileExtension,
                                     File(vaultPath)
                                 )
                             }
@@ -464,7 +463,6 @@ class SyncScheduler(
                     context,
                     fileId,
                     finalRecord.mediaType,
-                    finalRecord.fileExtension,
                     File(vaultPath)
                 )
             }
