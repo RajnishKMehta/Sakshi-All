@@ -103,12 +103,17 @@ object ThumbnailManager {
                     retriever.release()
                 }
 
+                if (originalWidth <= 0 || originalHeight <= 0) {
+                    Log.e(TAG, "Cannot extract video thumbnail: Invalid dimensions for $fileId. Aborting to avoid unbounded extraction.")
+                    return@withContext null
+                }
+
                 val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
 
                 val builder = FrameExtractor.Builder(context, mediaItem)
 
                 val maxOriginal = maxOf(1, maxOf(originalWidth, originalHeight))
-                if (maxOriginal > MAX_DIMENSION && originalWidth > 0 && originalHeight > 0) {
+                if (maxOriginal > MAX_DIMENSION) {
                     val scale = MAX_DIMENSION.toFloat() / maxOriginal
                     val targetWidth = maxOf(1, (originalWidth * scale).toInt())
                     val targetHeight = maxOf(1, (originalHeight * scale).toInt())
