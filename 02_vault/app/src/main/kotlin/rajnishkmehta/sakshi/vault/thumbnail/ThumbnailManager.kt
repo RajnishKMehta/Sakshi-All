@@ -2,9 +2,14 @@ package rajnishkmehta.sakshi.vault.thumbnail
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.media.ThumbnailUtils
-import android.util.Size
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
+import android.util.Size
+import androidx.annotation.OptIn
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.inspector.frame.FrameExtractor
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +22,7 @@ import rajnishkmehta.sakshi.vault.AppLog as Log
 object ThumbnailManager {
     private const val TAG = "ThumbnailManager"
     // Sensible small thumbnail size for Portal/gallery preview
-    private val THUMBNAIL_SIZE = Size(320, 320)
+    private const val MAX_DIMENSION = 320
 
     /**
      * Generates a thumbnail for a given source media file and saves it in the private Vault storage.
@@ -26,15 +31,14 @@ object ThumbnailManager {
      * @param context Application context
      * @param fileId Unique file identifier
      * @param mediaType The media type ("PHOTO", "VIDEO", etc.)
-     * @param fileExtension The original file extension
      * @param sourceFile The fully copied source file in vault storage
      * @return The generated thumbnail File, or null if generation was skipped or failed.
      */
+    @OptIn(UnstableApi::class)
     suspend fun generateAndStoreThumbnail(
         context: Context,
         fileId: String,
         mediaType: String,
-        fileExtension: String,
         sourceFile: File
     ): File? = withContext(Dispatchers.IO) {
         if (mediaType != "PHOTO" && mediaType != "VIDEO") {
@@ -55,9 +59,44 @@ object ThumbnailManager {
             Log.d(TAG, "Generating thumbnail for $fileId ($mediaType) at ${thumbnailFile.absolutePath}")
 
             val bitmap: Bitmap = if (mediaType == "PHOTO") {
-                ThumbnailUtils.createImageThumbnail(sourceFile, THUMBNAIL_SIZE, null)
+                val source = ImageDecoder.createSource(sourceFile)
+                ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                    decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+
+                    val width = info.size.width
+                    val height = info.size.height
+                    val maxOriginal = maxOf(width, height)
+
+                    if (maxOriginal > MAX_DIMENSION) {
+                        val scale = MAX_DIMENSION.toFloat() / maxOriginal
+                        val targetWidth = (width * scale).toInt()
+                        val targetHeight = (height * scale).toInt()
+                        decoder.setTargetSize(targetWidth, targetHeight)
+                    }
+                }
             } else {
-                ThumbnailUtils.createVideoThumbnail(sourceFile, THUMBNAIL_SIZE, null)
+                var frameExtractor: FrameExtractor? = null
+                try {
+                    val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
+                    frameExtractor = FrameExtractor.Builder(context, mediaItem).build()
+                    val frame = frameExtractor.thumbnail.get()
+                    val originalBitmap = frame.bitmap
+
+                    val width = originalBitmap.width
+                    val height = originalBitmap.height
+                    val maxOriginal = maxOf(width, height)
+
+                    if (maxOriginal > MAX_DIMENSION) {
+                        val scale = MAX_DIMENSION.toFloat() / maxOriginal
+                        val targetWidth = (width * scale).toInt()
+                        val targetHeight = (height * scale).toInt()
+                        Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, true)
+                    } else {
+                        originalBitmap
+                    }
+                } finally {
+                    frameExtractor?.close()
+                }
             }
 
             @Suppress("DEPRECATION")
