@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.util.Size
+import android.media.MediaMetadataRetriever
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -15,6 +15,7 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.guava.await
 import rajnishkmehta.sakshi.vault.AppLog as Log
 
 /**
@@ -76,16 +77,47 @@ object ThumbnailManager {
                     }
                 }
             } else {
-                var frameExtractor: FrameExtractor? = null
+                val retriever = MediaMetadataRetriever()
+                var originalWidth = 0
+                var originalHeight = 0
                 try {
-                    val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
-                    frameExtractor = FrameExtractor.Builder(context, mediaItem)
-                        .setEffects(listOf(Presentation.createForShortSide(MAX_DIMENSION)))
-                        .build()
-                    val frame = frameExtractor.thumbnail.get()
-                    frame.bitmap
+                    retriever.setDataSource(sourceFile.absolutePath)
+                    val widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    val heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    val rotationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+
+                    val w = widthStr?.toIntOrNull() ?: 0
+                    val h = heightStr?.toIntOrNull() ?: 0
+                    val r = rotationStr?.toIntOrNull() ?: 0
+
+                    if (r == 90 || r == 270) {
+                        originalWidth = h
+                        originalHeight = w
+                    } else {
+                        originalWidth = w
+                        originalHeight = h
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to retrieve video metadata for $fileId", e)
                 } finally {
-                    frameExtractor?.close()
+                    retriever.release()
+                }
+
+                val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
+
+                val builder = FrameExtractor.Builder(context, mediaItem)
+
+                val maxOriginal = maxOf(1, maxOf(originalWidth, originalHeight))
+                if (maxOriginal > MAX_DIMENSION && originalWidth > 0 && originalHeight > 0) {
+                    val scale = MAX_DIMENSION.toFloat() / maxOriginal
+                    val targetWidth = maxOf(1, (originalWidth * scale).toInt())
+                    val targetHeight = maxOf(1, (originalHeight * scale).toInt())
+                    builder.setEffects(listOf(Presentation.createForWidthAndHeight(targetWidth, targetHeight, Presentation.LAYOUT_SCALE_TO_FIT)))
+                }
+
+                builder.build().use { frameExtractor ->
+                    val frame = frameExtractor.thumbnail.await()
+                    frame.bitmap
                 }
             }
 
