@@ -98,7 +98,7 @@ class SyncScheduler(
                             val finalRecord = updatedRecord.copy(
                                 completionState = "COMPLETED",
                                 updatedTime = System.currentTimeMillis()
-                            )
+                                )
                             database.mediaRecordDao().insertRecord(finalRecord)
 
                             if (storedCallback != null) {
@@ -112,28 +112,27 @@ class SyncScheduler(
                                         totalBytes = finalRecord.lastCopiedOffset,
                                         isCompleted = true,
                                         message = "Recording stopped. Sync completed."
+                                        )
                                     )
-                                )
                                 VaultResponder.sendCopyDone(
                                     storedCallback,
                                     CopyDoneAck(
-                                        fileId,
+                                            fileId,
                                         uriParsed,
                                         finalRecord.lastCopiedOffset,
                                         System.currentTimeMillis()
+                                        )
                                     )
-                                )
                             }
 
                             // Generate thumbnail for explicitly stopped file
                             finalRecord.vaultPath?.let { vaultPath ->
-                                ThumbnailManager.generateAndStoreThumbnail(
-                                    context,
-                                    fileId,
-                                    finalRecord.mediaType,
-                                    finalRecord.fileExtension,
-                                    File(vaultPath)
-                                )
+                            ThumbnailManager.generateAndStoreThumbnail(
+                                context,
+                                fileId,
+                                finalRecord.mediaType,
+                                File(vaultPath)
+                            )
                             }
                         }
                     }
@@ -145,7 +144,7 @@ class SyncScheduler(
                         VaultResponder.sendError(
                             storedCallback,
                             SakshiError.Unknown("Final sync pass failed: ${e.message}", e)
-                        )
+                            )
                     }
                 }
             } finally {
@@ -460,13 +459,12 @@ class SyncScheduler(
 
             // Generate thumbnail for AVSync completed file
             finalRecord.vaultPath?.let { vaultPath ->
-                ThumbnailManager.generateAndStoreThumbnail(
-                    context,
-                    fileId,
-                    finalRecord.mediaType,
-                    finalRecord.fileExtension,
-                    File(vaultPath)
-                )
+                            ThumbnailManager.generateAndStoreThumbnail(
+                                context,
+                                fileId,
+                                finalRecord.mediaType,
+                                File(vaultPath)
+                            )
             }
         }
         activeJobs.remove(fileId)

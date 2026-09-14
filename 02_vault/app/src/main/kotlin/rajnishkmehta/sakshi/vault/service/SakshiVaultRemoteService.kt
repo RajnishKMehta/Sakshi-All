@@ -89,7 +89,6 @@ class SakshiVaultRemoteService : Service() {
                         applicationContext,
                         fileId,
                         mediaType,
-                        fileExtension,
                         File(vaultPath)
                     )
                 } catch (e: Exception) {
