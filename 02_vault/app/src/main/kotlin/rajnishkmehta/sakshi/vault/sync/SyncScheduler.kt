@@ -91,7 +91,7 @@ class SyncScheduler(
                     val record = database.mediaRecordDao().getRecord(fileId)
                     if (record != null && record.completionState != "COMPLETED") {
                         Log.d(tag, "Performing final sync pass for $fileId")
-                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType, record.fileExtension)
+                        copyEngine.copyFile(fileId, record.originalUri, record.mediaType, record.fileExtension)
 
                         val updatedRecord = database.mediaRecordDao().getRecord(fileId)
                         if (updatedRecord != null) {
@@ -366,7 +366,7 @@ class SyncScheduler(
                 }
             } catch (e: IllegalArgumentException) {
                 Log.e(tag, "Validation failed for $fileId", e)
-                dao.deleteRecord(fileId)
+                updateDatabaseState(fileId, "FAILED")
                 if (callback != null) {
                     val sakshiError = SakshiError.Unknown("Validation failed: ${e.message}", e)
                     VaultResponder.sendError(callback, sakshiError)
@@ -374,6 +374,8 @@ class SyncScheduler(
                 activeJobs.remove(fileId)
                 activeCallbacks.remove(fileId)
                 break
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(tag, "Copy pass failed for $fileId on current attempt", e)
                 copyError = e
