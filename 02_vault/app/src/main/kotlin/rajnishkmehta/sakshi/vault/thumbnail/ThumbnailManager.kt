@@ -9,6 +9,7 @@ import android.util.Size
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.effect.Presentation
 import androidx.media3.inspector.frame.FrameExtractor
 import java.io.File
 import java.io.FileOutputStream
@@ -65,12 +66,12 @@ object ThumbnailManager {
 
                     val width = info.size.width
                     val height = info.size.height
-                    val maxOriginal = maxOf(width, height)
+                    val maxOriginal = maxOf(1, maxOf(width, height))
 
                     if (maxOriginal > MAX_DIMENSION) {
                         val scale = MAX_DIMENSION.toFloat() / maxOriginal
-                        val targetWidth = (width * scale).toInt()
-                        val targetHeight = (height * scale).toInt()
+                        val targetWidth = maxOf(1, (width * scale).toInt())
+                        val targetHeight = maxOf(1, (height * scale).toInt())
                         decoder.setTargetSize(targetWidth, targetHeight)
                     }
                 }
@@ -78,22 +79,11 @@ object ThumbnailManager {
                 var frameExtractor: FrameExtractor? = null
                 try {
                     val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
-                    frameExtractor = FrameExtractor.Builder(context, mediaItem).build()
+                    frameExtractor = FrameExtractor.Builder(context, mediaItem)
+                        .setEffects(listOf(Presentation.createForShortSide(MAX_DIMENSION)))
+                        .build()
                     val frame = frameExtractor.thumbnail.get()
-                    val originalBitmap = frame.bitmap
-
-                    val width = originalBitmap.width
-                    val height = originalBitmap.height
-                    val maxOriginal = maxOf(width, height)
-
-                    if (maxOriginal > MAX_DIMENSION) {
-                        val scale = MAX_DIMENSION.toFloat() / maxOriginal
-                        val targetWidth = (width * scale).toInt()
-                        val targetHeight = (height * scale).toInt()
-                        Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, true)
-                    } else {
-                        originalBitmap
-                    }
+                    frame.bitmap
                 } finally {
                     frameExtractor?.close()
                 }
