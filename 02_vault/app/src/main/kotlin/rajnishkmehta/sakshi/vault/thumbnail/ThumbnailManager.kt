@@ -58,15 +58,22 @@ object ThumbnailManager {
                 ThumbnailUtils.createImageThumbnail(sourceFile, THUMBNAIL_SIZE, null)
             } else {
                 var extractedBitmap: Bitmap? = null
+                var width = 0
+                var height = 0
+                var rotation = 0
                 val retriever = MediaMetadataRetriever()
                 try {
                     retriever.setDataSource(sourceFile.absolutePath)
-                    val widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                    val heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                    var width = widthStr?.toIntOrNull() ?: 0
-                    var height = heightStr?.toIntOrNull() ?: 0
+                    for (attempt in 1..10) {
+                        val widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                        val heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                        width = widthStr?.toIntOrNull() ?: 0
+                        height = heightStr?.toIntOrNull() ?: 0
+                        rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+                        if (width > 0 && height > 0) break
+                        kotlinx.coroutines.delay(300)
+                    }
 
-                    val rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
                     if (rotation == 90 || rotation == 270) {
                         val tmp = width
                         width = height
