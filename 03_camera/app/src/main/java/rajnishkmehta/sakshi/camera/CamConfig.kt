@@ -1560,6 +1560,8 @@ class CamConfig(private val mActivity: MainActivity) {
                 // package, so this has to be re-checked on every camera-video upgrade.
 
                 if (videoFormat == SettingValues.Default.FORMAT_FMP4) {
+                    // Use the custom Media3 fragmented MP4 muxer factory for FMP4 format,
+                    // providing stable fragmented output as per configured format settings.
                     recorderBuilder.setMuxerFactory(FragmentedMedia3MuxerFactory())
                 } else {
                     recorderBuilder.setMuxerFactory { MediaMuxerImpl() }
