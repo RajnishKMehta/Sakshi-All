@@ -9,6 +9,7 @@ import androidx.media3.muxer.FragmentedMp4Muxer
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import androidx.media3.common.util.UnstableApi
+import androidx.annotation.OptIn
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
@@ -17,7 +18,7 @@ import androidx.media3.common.util.UnstableApi
  * It translates Android's [MediaFormat] to Media3's [androidx.media3.common.Format] to correctly
  * initialize tracks for muxing.
  */
-@androidx.annotation.OptIn(UnstableApi::class)
+@OptIn(UnstableApi::class)
 class FragmentedMedia3Muxer : Muxer {
 
     private var muxer: FragmentedMp4Muxer? = null
