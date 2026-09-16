@@ -119,6 +119,7 @@ class CamConfig(private val mActivity: MainActivity) {
             const val PHOTO_QUALITY = "photo_quality"
 
             const val REMOVE_EXIF_AFTER_CAPTURE = "remove_exif_after_capture"
+            const val VIDEO_CONTAINER_FORMAT = "video_container_format"
 
             const val GYROSCOPE_SUGGESTIONS = "gyroscope_suggestions"
 
@@ -167,6 +168,9 @@ class CamConfig(private val mActivity: MainActivity) {
             const val PHOTO_QUALITY = 100
 
             const val REMOVE_EXIF_AFTER_CAPTURE = false
+
+            const val FORMAT_FMP4 = 0
+            const val FORMAT_MPEG4 = 1
 
             const val GYROSCOPE_SUGGESTIONS = false
 
@@ -581,9 +585,9 @@ class CamConfig(private val mActivity: MainActivity) {
 
 
     var videoFormat: Int
-        get() = prefs.getInt(KEY_VIDEO_CONTAINER_FORMAT, FORMAT_FMP4)
+        get() = commonPref.getInt(SettingValues.Key.VIDEO_CONTAINER_FORMAT, SettingValues.Default.FORMAT_FMP4)
         set(value) {
-            prefs.edit().putInt(KEY_VIDEO_CONTAINER_FORMAT, value).apply()
+            commonPref.edit().putInt(SettingValues.Key.VIDEO_CONTAINER_FORMAT, value).apply()
         }
 
     var removeExifAfterCapture: Boolean
@@ -1555,7 +1559,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 // is what every release up to 1.5 used, keeps up. Both live in an internal
                 // package, so this has to be re-checked on every camera-video upgrade.
 
-                if (videoFormat == FORMAT_FMP4) {
+                if (videoFormat == SettingValues.Default.FORMAT_FMP4) {
                     recorderBuilder.setMuxerFactory(FragmentedMedia3MuxerFactory())
                 } else {
                     recorderBuilder.setMuxerFactory { MediaMuxerImpl() }

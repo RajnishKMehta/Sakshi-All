@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.zxing.core)
 
     implementation(libs.sakshi.sdk)
+    implementation(libs.androidx.media3.muxer)
 
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)
