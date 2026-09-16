@@ -112,6 +112,10 @@
     <string name="remove_exif_title">Remove EXIF data after capture</string>
     <string name="remove_exif_subtitle">Note: Geo-tagging/Location option is independent of this setting</string>
     <string name="video_setting_title">Video</string>
+    <string name="video_container_format">Video Container Format</string>
+    <string name="video_container_format_desc">Format for saving video recordings</string>
+    <string name="fmp4_crash_safe">fMP4 (Crash-Safe, Recommended)</string>
+    <string name="mp4_standard">MP4 (Standard Compatibility)</string>
     <string name="degree_format">%d°</string>
     <string name="percent_symbol">%</string>
 
