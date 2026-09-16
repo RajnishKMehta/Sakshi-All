@@ -118,10 +118,10 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+    override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuf, bufferInfo: MediaCodec.BufferInfo) {
         val m = muxer ?: return
         val token = trackIds[trackIndex] ?: return
-        m.writeSampleData(token, byteBuffer, bufferInfo)
+        m.writeSampleData(token, byteBuf, bufferInfo)
     }
 
     @SuppressLint("RestrictedApi")
