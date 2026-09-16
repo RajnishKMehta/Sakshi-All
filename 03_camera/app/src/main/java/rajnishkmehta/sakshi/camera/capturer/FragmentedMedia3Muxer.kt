@@ -9,6 +9,14 @@ import androidx.media3.muxer.FragmentedMp4Muxer
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 
+/**
+ * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
+ *
+ * This class handles writing captured video and audio streams into a Fragmented MP4 (fMP4) container.
+ * It translates Android's [MediaFormat] to Media3's [androidx.media3.common.Format] to correctly
+ * initialize tracks for muxing.
+ */
+@androidx.media3.common.util.UnstableApi
 class FragmentedMedia3Muxer : Muxer {
 
     private var muxer: FragmentedMp4Muxer? = null
@@ -108,10 +116,10 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+    override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         val m = muxer ?: return
         val token = trackIds[trackIndex] ?: return
-        m.writeSampleData(token, byteBuf, bufferInfo)
+        m.writeSampleData(token, byteBuffer, bufferInfo)
     }
 
     @SuppressLint("RestrictedApi")
