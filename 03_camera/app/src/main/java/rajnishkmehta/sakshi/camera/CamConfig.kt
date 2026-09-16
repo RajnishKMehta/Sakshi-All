@@ -43,6 +43,8 @@ import androidx.camera.core.DynamicRange
 import androidx.camera.video.GroupableFeatures
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
+import androidx.camera.video.internal.muxer.MuxerFactory
+import rajnishkmehta.sakshi.camera.capturer.FragmentedMedia3MuxerFactory
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.internal.muxer.MediaMuxerImpl
@@ -575,6 +577,13 @@ class CamConfig(private val mActivity: MainActivity) {
             val editor = commonPref.edit()
             editor.putInt(SettingValues.Key.PHOTO_QUALITY, value)
             editor.apply()
+        }
+
+
+    var videoFormat: Int
+        get() = prefs.getInt(KEY_VIDEO_CONTAINER_FORMAT, FORMAT_FMP4)
+        set(value) {
+            prefs.edit().putInt(KEY_VIDEO_CONTAINER_FORMAT, value).apply()
         }
 
     var removeExifAfterCapture: Boolean
@@ -1545,7 +1554,12 @@ class CamConfig(private val mActivity: MainActivity) {
                 // then has to drain everything the muxer is behind by. The platform muxer, which
                 // is what every release up to 1.5 used, keeps up. Both live in an internal
                 // package, so this has to be re-checked on every camera-video upgrade.
-                recorderBuilder.setMuxerFactory { MediaMuxerImpl() }
+
+                if (videoFormat == FORMAT_FMP4) {
+                    recorderBuilder.setMuxerFactory(FragmentedMedia3MuxerFactory())
+                } else {
+                    recorderBuilder.setMuxerFactory { MediaMuxerImpl() }
+                }
 
                 if (!usesFeatureGroup) {
                     recorderBuilder.setQualitySelector(QualitySelector.from(videoQuality))
