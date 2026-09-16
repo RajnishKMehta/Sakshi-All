@@ -1,5 +1,7 @@
 package rajnishkmehta.sakshi.camera.capturer
 
+import android.annotation.SuppressLint
+
 import android.media.MediaCodec
 import android.os.ParcelFileDescriptor
 import androidx.camera.video.internal.muxer.Muxer
@@ -13,35 +15,42 @@ class FragmentedMedia3Muxer : Muxer {
     private val trackIds = mutableMapOf<Int, androidx.media3.muxer.Muxer.TrackToken>()
     private var outputSet = false
 
+    @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
         val fos = FileOutputStream(path)
         muxer = FragmentedMp4Muxer.Builder(fos).build()
         outputSet = true
     }
 
+    @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
         muxer = FragmentedMp4Muxer.Builder(fos).build()
         outputSet = true
     }
 
+    @SuppressLint("RestrictedApi")
     override fun setOrientationDegrees(degrees: Int) {
         // Not currently exposed directly by FragmentedMp4Muxer.Builder without Metadata or Track options,
         // but typically handled at track level. Can be ignored or implemented if needed.
     }
 
+    @SuppressLint("RestrictedApi")
     override fun setLocation(latitude: Double, longitude: Double) {
         // Ignored for fragmented MP4
     }
 
+    @SuppressLint("RestrictedApi")
     override fun setCaptureFps(captureFps: Int) {
         // Ignored
     }
 
+    @SuppressLint("RestrictedApi")
     override fun isInterruptionResilient(): Boolean {
         return true
     }
 
+    @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
         val m = muxer ?: throw IllegalStateException("Muxer not initialized")
 
@@ -98,18 +107,22 @@ class FragmentedMedia3Muxer : Muxer {
         return trackId
     }
 
+    @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         val m = muxer ?: return
         val token = trackIds[trackIndex] ?: return
         m.writeSampleData(token, byteBuf, bufferInfo)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun start() {
     }
 
+    @SuppressLint("RestrictedApi")
     override fun stop() {
     }
 
+    @SuppressLint("RestrictedApi")
     override fun release() {
         muxer?.close()
         muxer = null
