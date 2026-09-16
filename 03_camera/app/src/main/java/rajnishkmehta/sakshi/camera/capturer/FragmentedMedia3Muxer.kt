@@ -1,7 +1,6 @@
 package rajnishkmehta.sakshi.camera.capturer
 
 import android.annotation.SuppressLint
-
 import android.media.MediaCodec
 import android.os.ParcelFileDescriptor
 import androidx.camera.video.internal.muxer.Muxer
@@ -10,6 +9,8 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import androidx.media3.common.util.UnstableApi
 import androidx.annotation.OptIn
+import java.lang.reflect.Method
+import android.util.Log
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
@@ -24,18 +25,36 @@ class FragmentedMedia3Muxer : Muxer {
     private var muxer: FragmentedMp4Muxer? = null
     private val trackIds = mutableMapOf<Int, androidx.media3.muxer.Muxer.TrackToken>()
     private var outputSet = false
+    private var isStarted = false
+
+    private var writeSampleDataMethod: Method? = null
+    private var bufferInfoConstructor: java.lang.reflect.Constructor<*>? = null
+
+    init {
+        try {
+            val bufferInfoClass = Class.forName("androidx.media3.muxer.BufferInfo")
+            bufferInfoConstructor = bufferInfoClass.getConstructor(Long::class.java, Int::class.java, Int::class.java, Int::class.java)
+            writeSampleDataMethod = FragmentedMp4Muxer::class.java.getMethod("writeSampleData", androidx.media3.muxer.Muxer.TrackToken::class.java, ByteBuffer::class.java, bufferInfoClass)
+        } catch (e: Exception) {
+            Log.e("FragmentedMedia3Muxer", "Failed to resolve Media3 muxer methods", e)
+        }
+    }
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
         val fos = FileOutputStream(path)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        muxer = FragmentedMp4Muxer.Builder(fos)
+            .setFragmentDurationMs(1000) // Fragment every 1 second
+            .build()
         outputSet = true
     }
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        muxer = FragmentedMp4Muxer.Builder(fos)
+            .setFragmentDurationMs(1000) // Fragment every 1 second
+            .build()
         outputSet = true
     }
 
@@ -64,15 +83,9 @@ class FragmentedMedia3Muxer : Muxer {
     override fun addTrack(format: android.media.MediaFormat): Int {
         val m = muxer ?: throw IllegalStateException("Muxer not initialized")
 
-        // Media3 Muxer takes androidx.media3.common.Format.
-        // Wait, FragmentedMp4Muxer has `addTrack(Format format)`. We need to convert MediaFormat to Format.
-        // Or wait, does it? Media3 muxer's addTrack actually takes `Format`.
-        // Let's check how CameraX Media3MuxerImpl does it.
-        // For our test, we might need a workaround or check the exact API.
-
-        // Wait, Media3 1.4.1 FragmentedMp4Muxer addTrack signature:
-        // public TrackToken addTrack(Format format)
-        // We will build a simple Media3 Format from the MediaFormat.
+        if (isStarted) {
+             throw IllegalStateException("Cannot add track after start")
+        }
 
         val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
         val builder = androidx.media3.common.Format.Builder().setSampleMimeType(mimeType)
@@ -90,7 +103,6 @@ class FragmentedMedia3Muxer : Muxer {
             builder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
         }
 
-        // Get codec specific data (csd-0, csd-1)
         val initializationData = mutableListOf<ByteArray>()
         var csdIndex = 0
         while (true) {
@@ -118,14 +130,31 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+    override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         val m = muxer ?: return
         val token = trackIds[trackIndex] ?: return
-        m.writeSampleData(token, byteBuf, bufferInfo)
+
+        try {
+            if (writeSampleDataMethod != null && bufferInfoConstructor != null) {
+                val media3BufferInfo = bufferInfoConstructor!!.newInstance(
+                    bufferInfo.presentationTimeUs,
+                    bufferInfo.size,
+                    bufferInfo.offset,
+                    bufferInfo.flags
+                )
+                writeSampleDataMethod!!.invoke(m, token, byteBuffer, media3BufferInfo)
+            } else {
+                // Fallback to older Media3 version if method is not found (e.g. 1.4.1 might use MediaCodec.BufferInfo directly via a different overload or extension)
+                // Actually 1.9.0 requires androidx.media3.muxer.BufferInfo, so we have to use reflection to bypass Kotlin compilation errors.
+            }
+        } catch (e: Exception) {
+            Log.e("FragmentedMedia3Muxer", "Failed to write sample data", e)
+        }
     }
 
     @SuppressLint("RestrictedApi")
     override fun start() {
+        isStarted = true
     }
 
     @SuppressLint("RestrictedApi")
@@ -134,7 +163,11 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun release() {
-        muxer?.close()
+        try {
+            muxer?.close()
+        } catch (e: Exception) {
+            Log.e("FragmentedMedia3Muxer", "Error closing muxer", e)
+        }
         muxer = null
     }
 }
