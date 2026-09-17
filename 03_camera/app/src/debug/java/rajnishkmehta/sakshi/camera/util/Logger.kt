@@ -23,14 +23,14 @@ object Logger {
 
     private val executor = Executors.newSingleThreadExecutor()
 
+
     private fun writeLog(level: String, tag: String, msg: String, tr: Throwable? = null) {
         if (logDir == null) return
 
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())
-        val trace = tr?.let { "
-" + Log.getStackTraceString(it) } ?: ""
-        val logLine = "$timestamp $level/$tag: $msg$trace
-"
+        val trace = tr?.let { "\n" + Log.getStackTraceString(it) } ?: ""
+        val logLine = "$timestamp $level/$tag: $msg$trace\n"
+
 
         executor.execute {
             try {
@@ -48,18 +48,18 @@ object Logger {
                 specificFile?.let {
                     FileWriter(File(logDir, it), true).use { writer -> writer.append(logLine) }
                 }
-            } catch (e: Exception) {
-                Log.e("Logger", "Failed to write log", e)
-            }
-        }
-    }
+
+                specificFile?.let {
+                    FileWriter(File(logDir, it), true).use { writer -> writer.append(logLine) }
+                }
 
 
             specificFile?.let {
                 FileWriter(File(logDir, it), true).use { writer -> writer.append(logLine) }
             }
         } catch (e: Exception) {
-            Log.e("Logger", "Failed to write log", e)
+                Log.e("Logger", "Failed to write log", e)
+            }
         }
     }
 
