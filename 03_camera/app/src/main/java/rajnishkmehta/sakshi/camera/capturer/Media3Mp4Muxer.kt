@@ -1,10 +1,11 @@
 package rajnishkmehta.sakshi.camera.capturer
 
 import android.annotation.SuppressLint
+
 import android.media.MediaCodec.BufferInfo as AndroidBufferInfo
 import android.os.ParcelFileDescriptor
 import androidx.camera.video.internal.muxer.Muxer
-import androidx.media3.muxer.FragmentedMp4Muxer
+import androidx.media3.muxer.Mp4Muxer
 import androidx.media3.muxer.BufferInfo
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -12,43 +13,40 @@ import androidx.media3.common.util.UnstableApi
 import androidx.annotation.OptIn
 
 /**
- * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
+ * A custom [Muxer] implementation utilizing Media3's [Mp4Muxer].
  *
- * This class handles writing captured video and audio streams into a Fragmented MP4 (fMP4) container.
+ * This class handles writing captured video and audio streams into a standard MP4 container.
  * It translates Android's [android.media.MediaFormat] to Media3's [androidx.media3.common.Format] to correctly
- * initialize tracks for muxing.
+ * initialize tracks for muxing, fully replacing the built-in MediaMuxerImpl.
  */
 @OptIn(UnstableApi::class)
-class FragmentedMedia3Muxer : Muxer {
+class Media3Mp4Muxer : Muxer {
 
-    private var muxer: FragmentedMp4Muxer? = null
-
-    // We do not need trackIds mapping to tokens anymore since Media3 1.11.0 uses integer track IDs.
+    private var muxer: Mp4Muxer? = null
     private var outputSet = false
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
         val fos = FileOutputStream(path)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        muxer = Mp4Muxer.Builder(fos).build()
         outputSet = true
     }
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        muxer = Mp4Muxer.Builder(fos).build()
         outputSet = true
     }
 
     @SuppressLint("RestrictedApi")
     override fun setOrientationDegrees(degrees: Int) {
-        // Not currently exposed directly by FragmentedMp4Muxer.Builder without Metadata or Track options,
-        // but typically handled at track level. Can be ignored or implemented if needed.
+        // Not exposed directly by Mp4Muxer without specific track updates. Ignored for now.
     }
 
     @SuppressLint("RestrictedApi")
     override fun setLocation(latitude: Double, longitude: Double) {
-        // Ignored for fragmented MP4
+        // Not currently mapped
     }
 
     @SuppressLint("RestrictedApi")
@@ -58,7 +56,7 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun isInterruptionResilient(): Boolean {
-        return true
+        return false // MP4 (non-fragmented) is typically not interruption resilient
     }
 
     @SuppressLint("RestrictedApi")
@@ -81,7 +79,6 @@ class FragmentedMedia3Muxer : Muxer {
             builder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
         }
 
-        // Get codec specific data (csd-0, csd-1)
         val initializationData = mutableListOf<ByteArray>()
         var csdIndex = 0
         while (true) {
@@ -102,7 +99,6 @@ class FragmentedMedia3Muxer : Muxer {
         }
         builder.setInitializationData(initializationData)
 
-        // addTrack returns an Int track ID in Media3 1.11.0
         return m.addTrack(builder.build())
     }
 
@@ -110,7 +106,6 @@ class FragmentedMedia3Muxer : Muxer {
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
         val m = muxer ?: return
 
-        // Map AndroidBufferInfo to Media3 BufferInfo as requested
         val media3BufferInfo = BufferInfo(
             bufferInfo.presentationTimeUs,
             bufferInfo.size,

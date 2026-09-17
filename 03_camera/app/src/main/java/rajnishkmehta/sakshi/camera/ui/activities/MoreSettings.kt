@@ -20,6 +20,7 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import rajnishkmehta.sakshi.camera.CamConfig
+import rajnishkmehta.sakshi.camera.ui.OptionsSelectionDialog
 import rajnishkmehta.sakshi.camera.CapturedItems
 import rajnishkmehta.sakshi.camera.NumInputFilter
 import rajnishkmehta.sakshi.camera.R
@@ -194,6 +195,38 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
         val csSetting = binding.cameraSoundsSetting
         csSetting.setOnClickListener {
             csSwitch.performClick()
+        }
+
+        val vFSetting = binding.videoFormatSetting
+        val vFValue = binding.videoFormatValue
+
+        vFValue.text = if (camConfig.videoFormat == CamConfig.SettingValues.Default.FORMAT_FMP4) {
+            getString(R.string.fragmented_mp4)
+        } else {
+            getString(R.string.mp4)
+        }
+
+        supportFragmentManager.setFragmentResultListener("video_format_selection", this) { _, bundle ->
+            val which = bundle.getInt(OptionsSelectionDialog.RESULT_SELECTED_INDEX)
+            if (which == 0) {
+                camConfig.videoFormat = CamConfig.SettingValues.Default.FORMAT_FMP4
+                vFValue.text = getString(R.string.fragmented_mp4)
+            } else {
+                camConfig.videoFormat = CamConfig.SettingValues.Default.FORMAT_MPEG4
+                vFValue.text = getString(R.string.mp4)
+            }
+        }
+
+        vFSetting.setOnClickListener {
+            val options = arrayOf(getString(R.string.fragmented_mp4), getString(R.string.mp4))
+            val checkedItem = if (camConfig.videoFormat == CamConfig.SettingValues.Default.FORMAT_FMP4) 0 else 1
+            val dialog = OptionsSelectionDialog.newInstance(
+                R.string.video_container_format,
+                options,
+                checkedItem,
+                "video_format_selection"
+            )
+            dialog.show(supportFragmentManager, OptionsSelectionDialog.TAG)
         }
 
         val sIAPSetting = binding.saveImageAsPreviewSetting

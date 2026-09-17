@@ -44,10 +44,11 @@ import androidx.camera.video.GroupableFeatures
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.camera.video.internal.muxer.MuxerFactory
+import rajnishkmehta.sakshi.camera.capturer.Media3Mp4MuxerFactory
 import rajnishkmehta.sakshi.camera.capturer.FragmentedMedia3MuxerFactory
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
-import androidx.camera.video.internal.muxer.MediaMuxerImpl
+
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -1564,7 +1565,7 @@ class CamConfig(private val mActivity: MainActivity) {
                     // providing stable fragmented output as per configured format settings.
                     recorderBuilder.setMuxerFactory(FragmentedMedia3MuxerFactory())
                 } else {
-                    recorderBuilder.setMuxerFactory { MediaMuxerImpl() }
+                    recorderBuilder.setMuxerFactory(Media3Mp4MuxerFactory())
                 }
 
                 if (!usesFeatureGroup) {
