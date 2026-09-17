@@ -7,12 +7,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-/**
- * A reusable dialog fragment for single-choice settings that survives configuration changes.
- * It uses the Fragment Result API to return the selected index to the caller.
- */
 class OptionsSelectionDialog : DialogFragment() {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val args = requireArguments()
         val titleResId = args.getInt(ARG_TITLE_RES_ID)
@@ -40,19 +35,14 @@ class OptionsSelectionDialog : DialogFragment() {
 
         const val RESULT_SELECTED_INDEX = "result_selected_index"
 
-        fun newInstance(
-            titleResId: Int,
-            options: Array<String>,
-            selectedIndex: Int,
-            requestKey: String
-        ): OptionsSelectionDialog {
+        fun newInstance(titleResId: Int, options: Array<String>, selectedIndex: Int, requestKey: String): OptionsSelectionDialog {
             val fragment = OptionsSelectionDialog()
-            fragment.arguments = bundleOf(
-                ARG_TITLE_RES_ID to titleResId,
-                ARG_OPTIONS to options,
-                ARG_SELECTED_INDEX to selectedIndex,
-                ARG_REQUEST_KEY to requestKey
-            )
+            val b = Bundle()
+            b.putInt(ARG_TITLE_RES_ID, titleResId)
+            b.putStringArray(ARG_OPTIONS, options)
+            b.putInt(ARG_SELECTED_INDEX, selectedIndex)
+            b.putString(ARG_REQUEST_KEY, requestKey)
+            fragment.arguments = b
             return fragment
         }
     }

@@ -14,10 +14,6 @@ import androidx.annotation.OptIn
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [Mp4Muxer].
- *
- * This class handles writing captured video and audio streams into a standard MP4 container.
- * It translates Android's [android.media.MediaFormat] to Media3's [androidx.media3.common.Format] to correctly
- * initialize tracks for muxing, fully replacing the built-in MediaMuxerImpl.
  */
 @OptIn(UnstableApi::class)
 class Media3Mp4Muxer : Muxer {
@@ -40,44 +36,26 @@ class Media3Mp4Muxer : Muxer {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun setOrientationDegrees(degrees: Int) {
-        // Not exposed directly by Mp4Muxer without specific track updates. Ignored for now.
-    }
+    override fun setOrientationDegrees(degrees: Int) {}
 
     @SuppressLint("RestrictedApi")
-    override fun setLocation(latitude: Double, longitude: Double) {
-        // Not currently mapped
-    }
+    override fun setLocation(latitude: Double, longitude: Double) {}
 
     @SuppressLint("RestrictedApi")
-    override fun setCaptureFps(captureFps: Int) {
-        // Ignored
-    }
+    override fun setCaptureFps(captureFps: Int) {}
 
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean {
-        return false // MP4 (non-fragmented) is typically not interruption resilient
-    }
+    override fun isInterruptionResilient(): Boolean = false
 
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
         val m = muxer ?: throw IllegalStateException("Muxer not initialized")
-
         val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
         val builder = androidx.media3.common.Format.Builder().setSampleMimeType(mimeType)
-
-        if (format.containsKey(android.media.MediaFormat.KEY_WIDTH)) {
-            builder.setWidth(format.getInteger(android.media.MediaFormat.KEY_WIDTH))
-        }
-        if (format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) {
-            builder.setHeight(format.getInteger(android.media.MediaFormat.KEY_HEIGHT))
-        }
-        if (format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
-            builder.setChannelCount(format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT))
-        }
-        if (format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
-            builder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
-        }
+        if (format.containsKey(android.media.MediaFormat.KEY_WIDTH)) builder.setWidth(format.getInteger(android.media.MediaFormat.KEY_WIDTH))
+        if (format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) builder.setHeight(format.getInteger(android.media.MediaFormat.KEY_HEIGHT))
+        if (format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) builder.setChannelCount(format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT))
+        if (format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) builder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
 
         val initializationData = mutableListOf<ByteArray>()
         var csdIndex = 0
@@ -86,54 +64,35 @@ class Media3Mp4Muxer : Muxer {
             if (format.containsKey(csdKey)) {
                 val buffer = format.getByteBuffer(csdKey)
                 if (buffer != null) {
-                    val bytes = ByteArray(buffer.capacity())
+                    val bytes = ByteArray(buffer.remaining())
                     buffer.position(0)
                     buffer.get(bytes)
                     buffer.position(0)
                     initializationData.add(bytes)
                 }
                 csdIndex++
-            } else {
-                break
-            }
+            } else break
         }
         builder.setInitializationData(initializationData)
-
         return m.addTrack(builder.build())
     }
 
     @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
         val m = muxer ?: return
-
         val media3BufferInfo = BufferInfo(
             bufferInfo.presentationTimeUs,
             bufferInfo.size,
             bufferInfo.flags
         )
-
-        val oldPosition = byteBuffer.position()
-        val oldLimit = byteBuffer.limit()
-
-        try {
-            byteBuffer.position(bufferInfo.offset)
-            byteBuffer.limit(bufferInfo.offset + bufferInfo.size)
-        } catch (e: Exception) {
-            throw androidx.camera.video.internal.muxer.MuxerException("Failed to write sample data", e)
-        } finally {
-            byteBuffer.limit(oldLimit)
-            byteBuffer.position(oldPosition)
-        }
-
+        m.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
     }
 
     @SuppressLint("RestrictedApi")
-    override fun start() {
-    }
+    override fun start() {}
 
     @SuppressLint("RestrictedApi")
-    override fun stop() {
-    }
+    override fun stop() {}
 
     @SuppressLint("RestrictedApi")
     override fun release() {
