@@ -563,7 +563,6 @@ open class MainActivity : AppCompatActivity(),
         if (lastVaultPackage != camConfig.vaultPackage) {
             lastVaultPackage = camConfig.vaultPackage
             checkVault()
-            checkVault()
         }
         // Check camera permission again if the user switches back to the app (maybe
         // after enabling/disabling the camera permission in Settings)
@@ -631,7 +630,6 @@ open class MainActivity : AppCompatActivity(),
         camConfig = CamConfig(this)
         checkVault()
         lastVaultPackage = camConfig.vaultPackage
-            checkVault()
         cameraControl = CameraControl(camConfig)
         mainOverlay = binding.mainOverlay
         imageCapturer = ImageCapturer(this)
