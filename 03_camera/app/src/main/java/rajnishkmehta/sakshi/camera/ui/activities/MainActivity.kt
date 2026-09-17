@@ -24,6 +24,7 @@ import android.os.Vibrator
 import android.provider.Settings
 import android.text.util.Linkify
 import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger
 import android.view.GestureDetector
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -286,9 +287,9 @@ open class MainActivity : AppCompatActivity(),
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED
             ) {
-                Log.i(TAG, "Permission granted for recording audio.")
+                DebugLogger.i(TAG, "Permission granted for recording audio.")
             } else {
-                Log.i(TAG, "Permission denied for recording audio.")
+                DebugLogger.i(TAG, "Permission denied for recording audio.")
                 showAudioPermissionDeniedDialog()
             }
         }
@@ -299,9 +300,9 @@ open class MainActivity : AppCompatActivity(),
                 ) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                Log.i(TAG, "Permission granted for camera.")
+                DebugLogger.i(TAG, "Permission granted for camera.")
             } else {
-                Log.i(TAG, "Permission denied for camera.")
+                DebugLogger.i(TAG, "Permission denied for camera.")
             }
         }
     }
@@ -321,7 +322,7 @@ open class MainActivity : AppCompatActivity(),
             }
         }
 
-        Log.i(TAG, "Selected location: ${data?.encodedPath!!}")
+        DebugLogger.i(TAG, "Selected location: ${data?.encodedPath!!}")
     }
 
     private fun showAudioPermissionDeniedDialog(onDisableAudio: () -> Unit = {}) {
@@ -449,7 +450,7 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun checkPermissions() {
-        Log.i(TAG, "Checking camera status...")
+        DebugLogger.i(TAG, "Checking camera status...")
 
         // Check if the app has access to the user's camera
         when {
@@ -457,14 +458,14 @@ open class MainActivity : AppCompatActivity(),
 
                 // If the user has manually granted the permission, dismiss the dialog.
                 if (cameraPermissionDialog != null && cameraPermissionDialog!!.isShowing) cameraPermissionDialog!!.cancel()
-                Log.i(TAG, "Permission granted.")
+                DebugLogger.i(TAG, "Permission granted.")
 
                 // Setup the camera since the permission is available
                 camConfig.initializeCamera()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
 
-                Log.i(TAG, "The user has default denied camera permission.")
+                DebugLogger.i(TAG, "The user has default denied camera permission.")
 
                 // Don't build and show a new dialog if it's already visible
                 if (cameraPermissionDialog != null && cameraPermissionDialog!!.isShowing) return
@@ -500,7 +501,7 @@ open class MainActivity : AppCompatActivity(),
             // Request for the permission (Android will actually popup the permission
             // dialog in this case)
             else -> {
-                Log.i(TAG, "Requesting permission from user...")
+                DebugLogger.i(TAG, "Requesting permission from user...")
 
                 requestPermissionLauncher.launch(cameraPermission)
             }
@@ -586,7 +587,7 @@ open class MainActivity : AppCompatActivity(),
                 if (hasCameraPermission()) {
                     camConfig.initializeCamera(true)
                 } else {
-                    Log.i(TAG, "Leaving the camera uninitialized until the permission is granted.")
+                    DebugLogger.i(TAG, "Leaving the camera uninitialized until the permission is granted.")
                 }
             }
         }
@@ -747,7 +748,7 @@ open class MainActivity : AppCompatActivity(),
                 imageCapturer.takePicture()
             } else {
                 openGallery()
-                Log.i(TAG, "Attempting to open gallery...")
+                DebugLogger.i(TAG, "Attempting to open gallery...")
             }
         }
 
@@ -1459,7 +1460,7 @@ open class MainActivity : AppCompatActivity(),
 
         val i = tabLayout.selectedTabPosition - 1
 
-        Log.i(TAG, "onSwipeRight $i")
+        DebugLogger.i(TAG, "onSwipeRight $i")
         tabLayout.getTabAt(i)?.let {
             finalizeMode(it)
         }
@@ -1655,7 +1656,7 @@ open class MainActivity : AppCompatActivity(),
                 }
             }
 
-            Log.i(TAG, "zAngle: $zAngle")
+            DebugLogger.i(TAG, "zAngle: $zAngle")
 
             val lzAngle = when {
                 zAngle < -45 -> {
@@ -1871,7 +1872,7 @@ open class MainActivity : AppCompatActivity(),
                     bitmap = ImageDecoder.decodeBitmap(source, ImageResizer(side, side))
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "unable to update preview", e)
+                DebugLogger.d(TAG, "unable to update preview", e)
             }
 
             if (bitmap != null) {

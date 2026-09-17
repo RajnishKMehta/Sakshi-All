@@ -99,3 +99,10 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [C
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Debugging
+
+Debug builds include a specialized logging system to assist with development.
+- **Log Files**: Logs are categorized and saved to internal storage (`All`, `Info`, `Warning`, `Error`).
+- **Exporting**: In the "More Settings" screen of debug builds, an option allows exporting these logs via the Android share sheet.
+- **Release Builds**: The entire logging system is stripped away via ProGuard in release builds for performance and security.

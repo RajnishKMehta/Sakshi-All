@@ -209,6 +209,22 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
 
         val sLS = binding.storageLocationSetting
 
+        try {
+            val debugLogsSetting = findViewById<android.view.View>(R.id.debug_logs_setting)
+            if (debugLogsSetting != null) {
+                debugLogsSetting.setOnClickListener {
+                    try {
+                        val intent = android.content.Intent(this, Class.forName("rajnishkmehta.sakshi.camera.debug.DebugLogsActivity"))
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore, not in debug build
+        }
+
         binding.vaultPackageSetting.setOnClickListener {
             val dialog = rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog()
             dialog.isMandatory = false
