@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Export Debug Logs"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnExportAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Export All Logs"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnExportError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Export Error Logs"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnExportWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Export Warning Logs"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnExportInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Export Info Logs"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnDeleteAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete All Logs"
+        android:textColor="@android:color/holo_red_dark"/>
+
+</LinearLayout>

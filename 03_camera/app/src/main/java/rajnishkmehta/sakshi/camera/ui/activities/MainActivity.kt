@@ -325,6 +325,7 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun showAudioPermissionDeniedDialog(onDisableAudio: () -> Unit = {}) {
+        rajnishkmehta.sakshi.camera.logging.Logger.w("MainActivity", "Audio permission denied")
         val builder = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.audio_permission_dialog_title)
             .setMessage(R.string.audio_permission_dialog_message)
@@ -448,6 +449,7 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun checkPermissions() {
+        if (!hasCameraPermission()) rajnishkmehta.sakshi.camera.logging.Logger.e("MainActivity", "Permissions missing")
         Log.i(TAG, "Checking camera status...")
 
         // Check if the app has access to the user's camera
@@ -621,6 +623,7 @@ open class MainActivity : AppCompatActivity(),
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
+        rajnishkmehta.sakshi.camera.logging.Logger.i("MainActivity", "onCreate called")
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         snackBar = Snackbar.make(binding.root, "", Snackbar.LENGTH_LONG)

@@ -73,6 +73,7 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        rajnishkmehta.sakshi.camera.logging.Logger.i("MoreSettings", "onCreate called")
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -304,6 +305,8 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
         highResSetting.setOnClickListener {
             highResToggle.performClick()
         }
+
+        rajnishkmehta.sakshi.camera.logging.DebugHelper.addLogsOption(this, binding.rootView as android.widget.LinearLayout)
 
         if (!showStorageSettings) {
             binding.storageLocationSettings.visibility = View.GONE

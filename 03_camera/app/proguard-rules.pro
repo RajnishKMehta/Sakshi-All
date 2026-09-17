@@ -9,3 +9,13 @@
 -keepclassmembers class androidx.camera.core.internal.utils.ImageUtil {
     private static byte[] cropJpegByteArray(byte[], android.graphics.Rect, int);
 }
+
+-assumenosideeffects class rajnishkmehta.sakshi.camera.logging.Logger {
+    public static void i(...);
+    public static void e(...);
+    public static void w(...);
+}
+
+-assumenosideeffects class rajnishkmehta.sakshi.camera.logging.DebugHelper {
+    public static void addLogsOption(...);
+}

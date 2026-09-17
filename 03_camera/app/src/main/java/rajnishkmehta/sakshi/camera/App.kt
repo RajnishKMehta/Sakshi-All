@@ -85,6 +85,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        rajnishkmehta.sakshi.camera.logging.Logger.init(this)
         registerActivityLifecycleCallbacks(activityLifeCycleHelper)
         DynamicColors.applyToActivitiesIfAvailable(this)
 
