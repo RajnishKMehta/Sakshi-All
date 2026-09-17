@@ -1,11 +1,12 @@
 package rajnishkmehta.sakshi.camera.ui.activities
 
+import rajnishkmehta.sakshi.camera.util.Logger
+
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.FrameLayout
 import android.widget.MediaController
 import android.widget.RelativeLayout
@@ -107,7 +108,7 @@ class VideoPlayer : AppCompatActivity() {
                     hasAudio = it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "", e)
+                Logger.d(TAG, "", e)
             }
 
             mainExecutor.execute {
@@ -140,7 +141,7 @@ class VideoPlayer : AppCompatActivity() {
         try {
             videoView.setVideoURI(uri)
         } catch (e: IllegalStateException) {
-            Log.e(TAG, "Unable to play video", e)
+            Logger.e(TAG, "Unable to play video", e)
             Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
             finish()
         }

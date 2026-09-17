@@ -1,5 +1,7 @@
 package rajnishkmehta.sakshi.camera.ui
 
+import rajnishkmehta.sakshi.camera.util.Logger
+
 import android.Manifest
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
@@ -11,7 +13,6 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -86,6 +87,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
     private var selfIlluminationSetting: View
     private var videoQualitySetting: View
     private var timerSetting: View
+    var debugLogsSetting: View? = null
 
     var settingsFrame: View
 
@@ -593,7 +595,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
             "720p (HD)" -> Quality.HD
             "480p (SD)" -> Quality.SD
             else -> {
-                Log.e("TAG", "Unknown quality: $title")
+                Logger.e("TAG", "Unknown quality: $title")
                 Quality.SD
             }
         }
@@ -802,7 +804,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
             Quality.HD -> "720p (HD)"
             Quality.SD -> "480p (SD)"
             else -> {
-                Log.i("TAG", "Unknown constant: $quality")
+                Logger.i("TAG", "Unknown constant: $quality")
                 "Unknown"
             }
         }

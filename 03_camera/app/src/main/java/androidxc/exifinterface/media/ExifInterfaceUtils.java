@@ -16,6 +16,8 @@
 
 package androidxc.exifinterface.media;
 
+import rajnishkmehta.sakshi.camera.util.Logger;
+
 import android.media.MediaDataSource;
 import android.media.MediaMetadataRetriever;
 import android.system.ErrnoException;
@@ -147,7 +149,7 @@ class ExifInterfaceUtils {
         try {
             Os.close(fd);
         } catch (ErrnoException ex) {
-            Log.e(TAG, "Error closing fd.", ex);
+            Logger.e(TAG, "Error closing fd.", ex);
         }
     }
 

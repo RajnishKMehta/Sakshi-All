@@ -1,5 +1,7 @@
 package rajnishkmehta.sakshi.camera
 
+import rajnishkmehta.sakshi.camera.util.Logger
+
 import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
@@ -85,6 +87,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Logger.init(this)
         registerActivityLifecycleCallbacks(activityLifeCycleHelper)
         DynamicColors.applyToActivitiesIfAvailable(this)
 
