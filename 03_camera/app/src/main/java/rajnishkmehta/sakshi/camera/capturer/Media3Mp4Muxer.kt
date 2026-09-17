@@ -112,7 +112,19 @@ class Media3Mp4Muxer : Muxer {
             bufferInfo.flags
         )
 
-        m.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
+        val oldPosition = byteBuffer.position()
+        val oldLimit = byteBuffer.limit()
+
+        try {
+            byteBuffer.position(bufferInfo.offset)
+            byteBuffer.limit(bufferInfo.offset + bufferInfo.size)
+        } catch (e: Exception) {
+            throw androidx.camera.video.internal.muxer.MuxerException("Failed to write sample data", e)
+        } finally {
+            byteBuffer.limit(oldLimit)
+            byteBuffer.position(oldPosition)
+        }
+
     }
 
     @SuppressLint("RestrictedApi")
