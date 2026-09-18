@@ -175,7 +175,10 @@ object DebugLogger {
     }
 
     /**
-     * Deletes all currently generated log files from the debug directory.
+     * Deletes all currently active log files from the debug directory.
+     * Rotated log files (e.g., info_logs_1.txt) are not deleted by this operation.
+     *
+     * @return `true` if all active log files were successfully deleted or if the directory is empty, `false` otherwise.
      */
     @JvmStatic
     fun clearLogs(): Boolean {
