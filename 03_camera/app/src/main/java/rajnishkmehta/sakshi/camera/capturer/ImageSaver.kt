@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.capturer
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -326,7 +326,7 @@ class ImageSaver(
             val num = contentResolver.delete(uri, null, null)
             check(num == 1) { "unexpected number of deleted rows: $num" }
         } catch (deleteException: Exception) {
-            Logger.w(TAG, "unable to delete an incomplete image $uri", deleteException)
+            log.w(TAG, "unable to delete an incomplete image $uri", deleteException)
         }
     }
 
@@ -359,7 +359,7 @@ class ImageSaver(
             val now = timestamp()
             val us = (now - start) / 1000
             val durationStr = if (us < 10_000) "$us us" else "${us / 1000} ms"
-            Logger.d(TAG, "${lazyMessage()}: $durationStr")
+            log.d(TAG, "${lazyMessage()}: $durationStr")
         }
     }
 }

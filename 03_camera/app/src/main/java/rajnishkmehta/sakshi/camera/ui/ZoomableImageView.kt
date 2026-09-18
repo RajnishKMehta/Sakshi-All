@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.ui
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.animation.Animator
 import android.animation.Animator.AnimatorListener
@@ -352,7 +352,7 @@ class ZoomableImageView @JvmOverloads constructor(
             if (drawable?.intrinsicWidth ?: 0 == 0 || drawable?.intrinsicHeight ?: 0 == 0) return
             val bmWidth = drawable.intrinsicWidth
             val bmHeight = drawable.intrinsicHeight
-//            Logger.d("bmSize", "bmWidth: $bmWidth bmHeight : $bmHeight")
+//            log.d("bmSize", "bmWidth: $bmWidth bmHeight : $bmHeight")
             val scaleX = viewWidth.toFloat() / bmWidth.toFloat()
             val scaleY = viewHeight.toFloat() / bmHeight.toFloat()
             scale = scaleX.coerceAtMost(scaleY)

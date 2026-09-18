@@ -11,6 +11,10 @@ import rajnishkmehta.sakshi.camera.R
 import rajnishkmehta.sakshi.camera.util.Logger
 import java.io.File
 
+/**
+ * An Activity available only in debug builds that allows the user to view,
+ * export, and delete application logs written by the [Logger].
+ */
 class DebugLogActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

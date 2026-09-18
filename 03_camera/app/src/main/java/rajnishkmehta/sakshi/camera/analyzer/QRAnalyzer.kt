@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.analyzer
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import androidx.camera.core.ImageAnalysis.Analyzer
 import androidx.camera.core.ImageProxy
@@ -37,7 +37,7 @@ class QRAnalyzer(private val mActivity: MainActivity) : Analyzer {
             DecodeHintType::class.java
         )
 
-        Logger.i(TAG, "allowedFormats: ${camConfig.allowedFormats}")
+        log.i(TAG, "allowedFormats: ${camConfig.allowedFormats}")
 
         supportedHints[DecodeHintType.POSSIBLE_FORMATS] =
             if (camConfig.scanAllCodes) {
@@ -114,7 +114,7 @@ class QRAnalyzer(private val mActivity: MainActivity) : Analyzer {
             val now = System.nanoTime()
             val delta = now - lastFpsTimestamp
             val fps = 1_000_000_000 * frameCount.toFloat() / delta
-            Logger.d(TAG, "Analysis FPS: ${"%.02f".format(fps)}")
+            log.d(TAG, "Analysis FPS: ${"%.02f".format(fps)}")
             lastFpsTimestamp = now
         }
 

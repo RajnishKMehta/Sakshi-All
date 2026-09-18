@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.graphics.Bitmap
 import kotlin.math.abs
@@ -17,7 +17,7 @@ object BlurBitmap {
         val w = bitmap.width
         val h = bitmap.height
         val pix = IntArray(w * h)
-        // Logger.e("pix", w.toString() + " " + h + " " + pix.size)
+        // log.e("pix", w.toString() + " " + h + " " + pix.size)
         bitmap.getPixels(pix, 0, w, 0, 0, w, h)
         val wm = w - 1
         val hm = h - 1
@@ -211,7 +211,7 @@ object BlurBitmap {
             }
             x++
         }
-        // Logger.e("pix", w.toString() + " " + h + " " + pix.size)
+        // log.e("pix", w.toString() + " " + h + " " + pix.size)
         bitmap.setPixels(pix, 0, w, 0, 0, w, h)
         return bitmap
     }

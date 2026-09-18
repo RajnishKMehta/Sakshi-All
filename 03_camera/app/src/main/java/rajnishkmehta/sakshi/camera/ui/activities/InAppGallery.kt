@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.ui.activities
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
@@ -281,7 +281,7 @@ class InAppGallery : AppCompatActivity() {
                 }
             }
         } catch (e: Exception) {
-            Logger.d("queryStoredTimestamps", "no MediaStore timestamps from ${uri.authority}", e)
+            log.d("queryStoredTimestamps", "no MediaStore timestamps from ${uri.authority}", e)
         }
 
         if (modified == null) {
@@ -295,7 +295,7 @@ class InAppGallery : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Logger.d("queryStoredTimestamps", "no document timestamp from ${uri.authority}", e)
+                log.d("queryStoredTimestamps", "no document timestamp from ${uri.authority}", e)
             }
         }
 
@@ -374,7 +374,7 @@ class InAppGallery : AppCompatActivity() {
                             dateAdded = convertTimeForVideo(date)
                             dateModified = dateAdded
                         } catch (e: ParseException) {
-                            Logger.d("showCurrentMediaDetails", "unparseable video date: $date", e)
+                            log.d("showCurrentMediaDetails", "unparseable video date: $date", e)
                         }
                     }
 
@@ -454,7 +454,7 @@ class InAppGallery : AppCompatActivity() {
                 curItem.captureTime()?.let { dateAdded = convertTime(it, showTimeZone = false) }
             }
         } catch (e: Exception) {
-            Logger.d("showCurrentMediaDetails", "unable to obtain file details", e)
+            log.d("showCurrentMediaDetails", "unable to obtain file details", e)
             showMessage(getString(R.string.unable_to_obtain_file_details))
             return
         }

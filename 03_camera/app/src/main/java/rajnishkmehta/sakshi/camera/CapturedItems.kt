@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -136,7 +136,7 @@ internal fun shareCapturedItem(activity: Activity, item: CapturedItem): Int? {
         activity.startActivity(Intent.createChooser(intent, activity.getString(R.string.share_image)))
         null
     } catch (e: SecurityException) {
-        Logger.e(CapturedItems.TAG, "unable to share ${item.uiName()}", e)
+        log.e(CapturedItems.TAG, "unable to share ${item.uiName()}", e)
         R.string.unable_to_share_media
     }
 }
@@ -163,7 +163,7 @@ internal fun editCapturedItem(activity: Activity, item: CapturedItem, useDefault
     } catch (e: ActivityNotFoundException) {
         R.string.no_editor_app_error
     } catch (e: SecurityException) {
-        Logger.e(CapturedItems.TAG, "unable to edit ${item.uiName()}", e)
+        log.e(CapturedItems.TAG, "unable to edit ${item.uiName()}", e)
         R.string.unable_to_edit_media
     }
 }
@@ -217,7 +217,7 @@ object CapturedItems {
                 resolver.releasePersistableUriPermission(uri, flags)
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) {
-                    Logger.d(TAG, "unable to release the grant for $uri", e)
+                    log.d(TAG, "unable to release the grant for $uri", e)
                 }
             }
         }
@@ -285,7 +285,7 @@ object CapturedItems {
                 }
             }
         } catch (e: Exception) {
-            Logger.d(TAG, "unable to collect MediaStore items, volume $volumeName", e)
+            log.d(TAG, "unable to collect MediaStore items, volume $volumeName", e)
         }
     }
 
@@ -313,7 +313,7 @@ object CapturedItems {
             }
         } catch (e: Exception) {
             if (BuildConfig.DEBUG) {
-                Logger.d(TAG, "unable to collect SAF items, treeUri $treeUri", e)
+                log.d(TAG, "unable to collect SAF items, treeUri $treeUri", e)
             }
         }
     }

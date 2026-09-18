@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.content.Intent
 import android.graphics.Bitmap
@@ -38,7 +38,7 @@ class GallerySliderAdapter(
 
     override fun onBindViewHolder(holder: GallerySlide, position: Int) {
         val mediaPreview: ZoomableImageView = holder.binding.slidePreview
-//        Logger.d("GallerySliderAdapter", "postiion $position, preview ${System.identityHashCode(mediaPreview)}")
+//        log.d("GallerySliderAdapter", "postiion $position, preview ${System.identityHashCode(mediaPreview)}")
         val playButton: ImageView = holder.binding.playButton
         val item = items[position]
 

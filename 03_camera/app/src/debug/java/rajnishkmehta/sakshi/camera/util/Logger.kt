@@ -10,9 +10,18 @@ import java.util.Date
 import java.util.concurrent.Executors
 import java.util.Locale
 
+/**
+ * A custom Logger implementation that allows logs to be saved to files in debug builds
+ * and stripped completely in release builds to improve performance and security.
+ */
 object Logger {
     private var logDir: File? = null
 
+    /**
+     * Initializes the logger and prepares the log directory.
+     *
+     * @param context Application context used to retrieve the external files directory.
+     */
     @JvmStatic fun init(context: Context) {
         logDir = File(context.getExternalFilesDir(null), "logs")
         if (logDir?.exists() == false) {
@@ -63,11 +72,25 @@ object Logger {
         }
     }
 
+    /**
+     * Logs a debug message.
+     *
+     * @param tag Used to identify the source of a log message.
+     * @param msg The message you would like logged.
+     * @param tr An exception to log.
+     */
     @JvmStatic @JvmOverloads fun d(tag: String, msg: String, tr: Throwable? = null) {
         Log.d(tag, msg)
         writeLog("D", tag, msg)
     }
 
+    /**
+     * Logs an error message.
+     *
+     * @param tag Used to identify the source of a log message.
+     * @param msg The message you would like logged.
+     * @param tr An exception to log.
+     */
     @JvmStatic @JvmOverloads fun e(tag: String, msg: String, tr: Throwable? = null) {
         if (tr != null) {
             Log.e(tag, msg, tr)
@@ -77,6 +100,13 @@ object Logger {
         writeLog("E", tag, msg, tr)
     }
 
+    /**
+     * Logs a warning message.
+     *
+     * @param tag Used to identify the source of a log message.
+     * @param msg The message you would like logged.
+     * @param tr An exception to log.
+     */
     @JvmStatic @JvmOverloads fun w(tag: String, msg: String, tr: Throwable? = null) {
         if (tr != null) {
             Log.w(tag, msg, tr)
@@ -86,6 +116,13 @@ object Logger {
         writeLog("W", tag, msg, tr)
     }
 
+    /**
+     * Logs an info message.
+     *
+     * @param tag Used to identify the source of a log message.
+     * @param msg The message you would like logged.
+     * @param tr An exception to log.
+     */
     @JvmStatic @JvmOverloads fun i(tag: String, msg: String, tr: Throwable? = null) {
         Log.i(tag, msg)
         writeLog("I", tag, msg)

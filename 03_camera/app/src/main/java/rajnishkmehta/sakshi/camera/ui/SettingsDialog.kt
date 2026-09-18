@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.ui
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.Manifest
 import android.animation.ArgbEvaluator
@@ -595,7 +595,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
             "720p (HD)" -> Quality.HD
             "480p (SD)" -> Quality.SD
             else -> {
-                Logger.e("TAG", "Unknown quality: $title")
+                log.e("TAG", "Unknown quality: $title")
                 Quality.SD
             }
         }
@@ -804,7 +804,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
             Quality.HD -> "720p (HD)"
             Quality.SD -> "480p (SD)"
             else -> {
-                Logger.i("TAG", "Unknown constant: $quality")
+                log.i("TAG", "Unknown constant: $quality")
                 "Unknown"
             }
         }

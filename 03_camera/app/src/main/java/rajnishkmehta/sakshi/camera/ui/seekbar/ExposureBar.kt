@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.ui.seekbar
 
-import rajnishkmehta.sakshi.camera.util.Logger
+import rajnishkmehta.sakshi.camera.util.Logger as log
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -49,7 +49,7 @@ class ExposureBar : AppCompatSeekBar {
 
         incrementProgressBy(exposureState.exposureCompensationIndex)
 
-        Logger.i("TAG", "Setting progress from setExposureConfig")
+        log.i("TAG", "Setting progress from setExposureConfig")
         progress = (exposureState.exposureCompensationStep.numerator
                 / exposureState.exposureCompensationStep.denominator) *
                 exposureState.exposureCompensationIndex
@@ -110,8 +110,8 @@ class ExposureBar : AppCompatSeekBar {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> {
                 progress = max - (max * event.y / (height / 2)).toInt()
 
-                Logger.i("progress", progress.toString())
-                Logger.i("max", max.toString())
+                log.i("progress", progress.toString())
+                log.i("max", max.toString())
 
                 mainActivity.camConfig.camera?.cameraControl
                     ?.setExposureCompensationIndex(progress)
