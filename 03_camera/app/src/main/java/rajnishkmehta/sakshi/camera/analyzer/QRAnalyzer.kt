@@ -1,6 +1,6 @@
 package rajnishkmehta.sakshi.camera.analyzer
 
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import androidx.camera.core.ImageAnalysis.Analyzer
 import androidx.camera.core.ImageProxy
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity

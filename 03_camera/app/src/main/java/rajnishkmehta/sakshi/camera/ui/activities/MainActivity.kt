@@ -23,7 +23,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.text.util.Linkify
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.GestureDetector
 import android.view.KeyEvent
 import android.view.MotionEvent

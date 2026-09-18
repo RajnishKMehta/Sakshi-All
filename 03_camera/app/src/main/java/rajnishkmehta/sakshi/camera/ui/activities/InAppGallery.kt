@@ -18,7 +18,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.MediaStore.MediaColumns
 import android.provider.OpenableColumns
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.util.Size
 import android.view.Menu
 import android.view.MenuItem

@@ -6,7 +6,7 @@ import android.graphics.Canvas
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -106,7 +106,17 @@ class ExposureBar : AppCompatSeekBar {
             return false
         }
         when (event.action) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                progress = max - (max * event.y / (height / 2)).toInt()
+
+                mainActivity.camConfig.camera?.cameraControl
+                    ?.setExposureCompensationIndex(progress)
+
+                showPanel()
+
+                onSizeChanged(width, height, 0, 0)
+            }
+            MotionEvent.ACTION_UP -> {
                 progress = max - (max * event.y / (height / 2)).toInt()
 
                 Log.i("progress", progress.toString())

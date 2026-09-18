@@ -9,3 +9,11 @@
 -keepclassmembers class androidx.camera.core.internal.utils.ImageUtil {
     private static byte[] cropJpegByteArray(byte[], android.graphics.Rect, int);
 }
+
+-assumenosideeffects class rajnishkmehta.sakshi.camera.debug.DebugLogger {
+    public static void init(android.content.Context);
+    public static void d(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static void i(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static void w(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static void e(java.lang.String, java.lang.String, java.lang.Throwable);
+}
