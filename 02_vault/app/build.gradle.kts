@@ -5,9 +5,11 @@ plugins {
 }
 
 android {
-    buildToolsVersion = "37.0.0"
-    namespace = "rajnishkmehta.sakshi.vault"
     compileSdk = 37
+    compileSdkMinor = 2
+    buildToolsVersion = "37.0.0"
+    ndkVersion = "30.0.16248370"
+    namespace = "rajnishkmehta.sakshi.vault"
 
     defaultConfig {
         applicationId = "rajnishkmehta.sakshi.vault"
