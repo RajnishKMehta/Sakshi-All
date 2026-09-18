@@ -426,7 +426,6 @@ open class MainActivity : AppCompatActivity(),
                 val list = capturedItems
                 if (list.isEmpty()) {
                     showMessage(R.string.no_image)
-                    return
                 }
                 it.putParcelableArrayListExtra(InAppGallery.INTENT_KEY_LIST_OF_SECURE_MODE_CAPTURED_ITEMS, list)
             } else {
@@ -557,6 +556,10 @@ open class MainActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
         resumeOrientationSensor()
+        if (lastVideoFormat != -1 && lastVideoFormat != camConfig.videoFormat) {
+            lastVideoFormat = camConfig.videoFormat
+            camConfig.startCamera(forced = true)
+        }
         if (lastVaultPackage != camConfig.vaultPackage) {
             lastVaultPackage = camConfig.vaultPackage
             checkVault()
@@ -1358,6 +1361,7 @@ open class MainActivity : AppCompatActivity(),
     lateinit var camConfig: CamConfig
 
     private var lastVaultPackage: String = ""
+    private var lastVideoFormat: Int = -1
     lateinit var sakshiClient: SakshiClient
     private lateinit var cameraControl: CameraControl
 

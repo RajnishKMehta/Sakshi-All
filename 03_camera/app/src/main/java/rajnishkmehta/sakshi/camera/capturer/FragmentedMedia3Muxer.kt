@@ -3,6 +3,7 @@ package rajnishkmehta.sakshi.camera.capturer
 import android.annotation.SuppressLint
 
 import android.media.MediaCodec
+import androidx.media3.muxer.BufferInfo
 import android.os.ParcelFileDescriptor
 import androidx.camera.video.internal.muxer.Muxer
 import androidx.media3.muxer.FragmentedMp4Muxer
@@ -22,7 +23,7 @@ import androidx.annotation.OptIn
 class FragmentedMedia3Muxer : Muxer {
 
     private var muxer: FragmentedMp4Muxer? = null
-    private val trackIds = mutableMapOf<Int, androidx.media3.muxer.Muxer.TrackToken>()
+
     private var outputSet = false
 
     @SuppressLint("RestrictedApi")
@@ -98,7 +99,7 @@ class FragmentedMedia3Muxer : Muxer {
             if (format.containsKey(csdKey)) {
                 val buffer = format.getByteBuffer(csdKey)
                 if (buffer != null) {
-                    val bytes = ByteArray(buffer.capacity())
+                    val bytes = ByteArray(buffer.remaining())
                     buffer.position(0)
                     buffer.get(bytes)
                     buffer.position(0)
@@ -111,17 +112,18 @@ class FragmentedMedia3Muxer : Muxer {
         }
         builder.setInitializationData(initializationData)
 
-        val token = m.addTrack(builder.build())
-        val trackId = trackIds.size
-        trackIds[trackId] = token
-        return trackId
+        return m.addTrack(builder.build())
     }
 
     @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         val m = muxer ?: return
-        val token = trackIds[trackIndex] ?: return
-        m.writeSampleData(token, byteBuf, bufferInfo)
+        val media3BufferInfo = BufferInfo(
+            bufferInfo.presentationTimeUs,
+            bufferInfo.size,
+            bufferInfo.flags
+        )
+        m.writeSampleData(trackIndex, byteBuf, media3BufferInfo)
     }
 
     @SuppressLint("RestrictedApi")

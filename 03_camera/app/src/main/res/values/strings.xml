@@ -251,4 +251,6 @@
     <string name="vault_download_url">https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk</string>
     <string name="vault_download_error">No browser app found to download the Vault APK</string>
     <string name="change_vault">Change Vault App</string>
+    <string name="fragmented_mp4">Fragmented MP4</string>
+    <string name="mp4">MP4</string>
 </resources>
