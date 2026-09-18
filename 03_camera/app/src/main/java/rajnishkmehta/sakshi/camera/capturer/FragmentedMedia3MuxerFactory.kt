@@ -1,6 +1,7 @@
 package rajnishkmehta.sakshi.camera.capturer
 
 import android.annotation.SuppressLint
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 
 import androidx.camera.video.internal.muxer.Muxer
 import androidx.camera.video.internal.muxer.MuxerFactory
@@ -17,6 +18,7 @@ import androidx.annotation.OptIn
 class FragmentedMedia3MuxerFactory : MuxerFactory {
     @SuppressLint("RestrictedApi")
     override fun create(outputFormat: Int): Muxer {
+        Log.d("FragmentedMedia3MuxerFactory", "create Muxer, outputFormat: $outputFormat")
         return FragmentedMedia3Muxer()
     }
 }

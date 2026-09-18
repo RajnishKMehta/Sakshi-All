@@ -169,6 +169,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
     }
 
     fun startRecording() {
+        Log.d("VideoCapturer", "startRecording() called")
         if (camConfig.camera == null) return
         val recorder = camConfig.videoCapture?.output ?: return
         if (isRecording) return
@@ -238,10 +239,13 @@ class VideoCapturer(private val mActivity: MainActivity) {
             var fileId: String? = null
 
             recording = pendingRecording.start(ctx.mainExecutor) { event ->
+                Log.d("VideoCapturer", "VideoRecordEvent received: ${event.javaClass.simpleName}")
 
                 if (event is VideoRecordEvent.Start) {
+                    Log.d("VideoCapturer", "Event: Start")
                     onRecordingStart()
                 } else if (event is androidx.camera.video.VideoRecordEvent.Status) {
+                    Log.d("VideoCapturer", "Event: Status, bytes: ${event.recordingStats.numBytesRecorded}, time: ${event.recordingStats.recordedDurationNanos}")
                     updateTimerTime(event.recordingStats.recordedDurationNanos)
                     if (!videoSyncStarted && event.recordingStats.numBytesRecorded > 1024) {
                         videoSyncStarted = true
@@ -257,6 +261,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
                             kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                Log.d("VideoCapturer", "Calling SakshiClient.startAVSync with fileId: $fileId")
                                 ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
                                     if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
                                         Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
@@ -266,6 +271,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         }
                     }
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
+                    Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
                     if (videoSyncStarted && fileId != null) {
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
                             ctx.handleCopyDone(fileId!!)
@@ -432,6 +438,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
     }
 
     fun stopRecording() {
+        Log.d("VideoCapturer", "stopRecording() called")
         cancelDeferredStart?.let {
             it()
             return
