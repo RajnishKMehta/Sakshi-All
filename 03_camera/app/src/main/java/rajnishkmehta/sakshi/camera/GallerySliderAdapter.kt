@@ -36,7 +36,7 @@ class GallerySliderAdapter(
 
     override fun onBindViewHolder(holder: GallerySlide, position: Int) {
         val mediaPreview: ZoomableImageView = holder.binding.slidePreview
-//        DebugLogger.d("GallerySliderAdapter", "postiion $position, preview ${System.identityHashCode(mediaPreview)}")
+//        log.d("GallerySliderAdapter", "postiion $position, preview ${System.identityHashCode(mediaPreview)}")
         val playButton: ImageView = holder.binding.playButton
         val item = items[position]
 

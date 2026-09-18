@@ -8,7 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
 import android.util.Size
 import android.view.MotionEvent
 import android.view.View
@@ -1137,7 +1137,7 @@ class CamConfig(private val mActivity: MainActivity) {
                     // started because the listener never runs. Recover exactly as the future-failure
                     // path does: report it and start the camera without extensions, on the main
                     // thread.
-                    DebugLogger.e(TAG, "Extensions manager initialization failed", e)
+                    log.e(TAG, "Extensions manager initialization failed", e)
                     ContextCompat.getMainExecutor(mActivity).execute {
                         mActivity.showMessage(mActivity.getString(R.string.extensions_manager_init_failure))
                         startCamera(forced = forced)
@@ -1203,13 +1203,13 @@ class CamConfig(private val mActivity: MainActivity) {
             // its own init (Pixels: "Framework size list map not supported in pixel path").
             // Nothing about it changes within a process lifetime, so this verdict is safe to
             // remember.
-            DebugLogger.w(TAG, "Extension mode $extensionMode is advertised but unusable here", e)
+            log.w(TAG, "Extension mode $extensionMode is advertised but unusable here", e)
             false
         } catch (e: Exception) {
             // Anything else may be transient — the camera service restarting, the camera briefly
             // held by another process. Fail this probe but leave the cache alone so the mode is
             // offered again once the underlying condition clears.
-            DebugLogger.w(TAG, "Probing extension mode $extensionMode failed, will retry later", e)
+            log.w(TAG, "Probing extension mode $extensionMode failed, will retry later", e)
             null
         }
     }
@@ -1269,7 +1269,7 @@ class CamConfig(private val mActivity: MainActivity) {
         val cameraInfo = try {
             cameraProvider?.getCameraInfo(cameraSelector) ?: return false
         } catch (exception: IllegalArgumentException) {
-            DebugLogger.w(TAG, "Unable to resolve camera info for feature combination gate", exception)
+            log.w(TAG, "Unable to resolve camera info for feature combination gate", exception)
             return false
         }
 
@@ -1278,7 +1278,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 CameraCharacteristics.INFO_SESSION_CONFIGURATION_QUERY_VERSION
             )
         } catch (exception: IllegalArgumentException) {
-            DebugLogger.w(TAG, "Camera info carries no camera2 characteristics", exception)
+            log.w(TAG, "Camera info carries no camera2 characteristics", exception)
             null
         }
 
@@ -1294,7 +1294,7 @@ class CamConfig(private val mActivity: MainActivity) {
             val cameraInfo = try {
                 cameraProvider?.getCameraInfo(cameraSelector) ?: return null
             } catch (exception: IllegalArgumentException) {
-                DebugLogger.w(TAG, "Unable to resolve camera info for quality lookup", exception)
+                log.w(TAG, "Unable to resolve camera info for quality lookup", exception)
                 return null
             }
             Recorder.getVideoCapabilities(cameraInfo)
@@ -1313,7 +1313,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 // Not fatal: startCamera() then requests no quality feature at all and the
                 // quality is left to Recorder's default selector. Worth a log because it means
                 // the user's explicit choice is silently not being asked for.
-                DebugLogger.w(TAG, "No groupable feature equivalent for video quality $quality")
+                log.w(TAG, "No groupable feature equivalent for video quality $quality")
                 null
             }
         }
@@ -1356,7 +1356,7 @@ class CamConfig(private val mActivity: MainActivity) {
         // The full request-vs-result picture (including which stabilization feature, if any,
         // survived) is only ever logged, never shown: the lead wants EIS left silently in its
         // known state -- 4K keeps priority and stabilization is given up without a notice.
-        DebugLogger.i(TAG, "Requested $requested but got $selected")
+        log.i(TAG, "Requested $requested but got $selected")
 
         val qualityLabel = qualityFeature?.let { describeQualityFeature(it) }
         // Only report a dropped quality that can be named: a message that can't say which
@@ -1467,7 +1467,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 appliedExtension = lensFacing to extMode
                 cameraSelector = em.getExtensionEnabledCameraSelector(cameraSelector, extMode)
             } else {
-                DebugLogger.e(TAG, "Mode $currentMode isn't available for this device")
+                log.e(TAG, "Mode $currentMode isn't available for this device")
             }
         }
 
@@ -1685,7 +1685,7 @@ class CamConfig(private val mActivity: MainActivity) {
             val cameraInfo = try {
                 cameraProvider?.getCameraInfo(cameraSelector)
             } catch (exception: IllegalArgumentException) {
-                DebugLogger.e(TAG, "Failed to query camera info", exception)
+                log.e(TAG, "Failed to query camera info", exception)
                 mActivity.showMessage(mActivity.getString(R.string.bind_failure))
                 return
             }
@@ -1721,7 +1721,7 @@ class CamConfig(private val mActivity: MainActivity) {
             }
 
             if (dropReason != null) {
-                DebugLogger.i(TAG, "$dropReason; disabling snapshots while recording")
+                log.i(TAG, "$dropReason; disabling snapshots while recording")
                 useCasesList.remove(snapshotUseCase)
                 imageCapture = null
             }
@@ -1758,7 +1758,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 // configuration (reported and swallowed); anything else is a real bug that must
                 // stay visible.
                 if (exception is IllegalArgumentException) {
-                    DebugLogger.e(TAG, "Failed to bind use cases", exception)
+                    log.e(TAG, "Failed to bind use cases", exception)
                     mActivity.showMessage(mActivity.getString(R.string.bind_failure))
                     return
                 }
@@ -1776,7 +1776,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 throw exception
             }
 
-            DebugLogger.e(TAG, "Extension mode $extMode failed to bind; disabling it", exception)
+            log.e(TAG, "Extension mode $extMode failed to bind; disabling it", exception)
             extensionUsability[key] = false
             mActivity.showMessage(mActivity.getString(R.string.extension_mode_unavailable))
 
@@ -1988,7 +1988,7 @@ class CamConfig(private val mActivity: MainActivity) {
             return
         }
 
-        DebugLogger.i(TAG, "Refreshing tabs...")
+        log.i(TAG, "Refreshing tabs...")
 
         tabLayout.removeAllTabs()
 

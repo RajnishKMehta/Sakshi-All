@@ -19,7 +19,7 @@ import android.provider.MediaStore
 import android.provider.MediaStore.MediaColumns
 import android.provider.OpenableColumns
 import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
 import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
@@ -281,7 +281,7 @@ class InAppGallery : AppCompatActivity() {
                 }
             }
         } catch (e: Exception) {
-            DebugLogger.d("queryStoredTimestamps", "no MediaStore timestamps from ${uri.authority}", e)
+            log.d("queryStoredTimestamps", "no MediaStore timestamps from ${uri.authority}", e)
         }
 
         if (modified == null) {
@@ -295,7 +295,7 @@ class InAppGallery : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                DebugLogger.d("queryStoredTimestamps", "no document timestamp from ${uri.authority}", e)
+                log.d("queryStoredTimestamps", "no document timestamp from ${uri.authority}", e)
             }
         }
 
@@ -374,7 +374,7 @@ class InAppGallery : AppCompatActivity() {
                             dateAdded = convertTimeForVideo(date)
                             dateModified = dateAdded
                         } catch (e: ParseException) {
-                            DebugLogger.d("showCurrentMediaDetails", "unparseable video date: $date", e)
+                            log.d("showCurrentMediaDetails", "unparseable video date: $date", e)
                         }
                     }
 
@@ -454,7 +454,7 @@ class InAppGallery : AppCompatActivity() {
                 curItem.captureTime()?.let { dateAdded = convertTime(it, showTimeZone = false) }
             }
         } catch (e: Exception) {
-            DebugLogger.d("showCurrentMediaDetails", "unable to obtain file details", e)
+            log.d("showCurrentMediaDetails", "unable to obtain file details", e)
             showMessage(getString(R.string.unable_to_obtain_file_details))
             return
         }

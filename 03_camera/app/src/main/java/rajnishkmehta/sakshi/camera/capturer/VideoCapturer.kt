@@ -258,7 +258,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                             kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                                 ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
                                     if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                                        rajnishkmehta.sakshi.camera.debug.DebugLogger.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                        rajnishkmehta.sakshi.camera.debug.log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
                                     }
                                 }
                             }

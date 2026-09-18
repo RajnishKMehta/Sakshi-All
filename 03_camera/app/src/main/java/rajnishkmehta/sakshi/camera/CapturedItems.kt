@@ -15,7 +15,7 @@ import android.provider.BaseColumns
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
 import androidx.annotation.StringRes
 import rajnishkmehta.sakshi.camera.CamConfig.SettingValues
 import rajnishkmehta.sakshi.camera.util.EphemeralSharedPrefs
@@ -136,7 +136,7 @@ internal fun shareCapturedItem(activity: Activity, item: CapturedItem): Int? {
         activity.startActivity(Intent.createChooser(intent, activity.getString(R.string.share_image)))
         null
     } catch (e: SecurityException) {
-        DebugLogger.e(CapturedItems.TAG, "unable to share ${item.uiName()}", e)
+        log.e(CapturedItems.TAG, "unable to share ${item.uiName()}", e)
         R.string.unable_to_share_media
     }
 }
@@ -163,7 +163,7 @@ internal fun editCapturedItem(activity: Activity, item: CapturedItem, useDefault
     } catch (e: ActivityNotFoundException) {
         R.string.no_editor_app_error
     } catch (e: SecurityException) {
-        DebugLogger.e(CapturedItems.TAG, "unable to edit ${item.uiName()}", e)
+        log.e(CapturedItems.TAG, "unable to edit ${item.uiName()}", e)
         R.string.unable_to_edit_media
     }
 }
@@ -217,7 +217,7 @@ object CapturedItems {
                 resolver.releasePersistableUriPermission(uri, flags)
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) {
-                    DebugLogger.d(TAG, "unable to release the grant for $uri", e)
+                    log.d(TAG, "unable to release the grant for $uri", e)
                 }
             }
         }
@@ -285,7 +285,7 @@ object CapturedItems {
                 }
             }
         } catch (e: Exception) {
-            DebugLogger.d(TAG, "unable to collect MediaStore items, volume $volumeName", e)
+            log.d(TAG, "unable to collect MediaStore items, volume $volumeName", e)
         }
     }
 
@@ -313,7 +313,7 @@ object CapturedItems {
             }
         } catch (e: Exception) {
             if (BuildConfig.DEBUG) {
-                DebugLogger.d(TAG, "unable to collect SAF items, treeUri $treeUri", e)
+                log.d(TAG, "unable to collect SAF items, treeUri $treeUri", e)
             }
         }
     }
