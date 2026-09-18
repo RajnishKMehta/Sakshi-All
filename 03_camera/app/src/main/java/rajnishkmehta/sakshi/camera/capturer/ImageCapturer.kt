@@ -196,7 +196,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                rajnishkmehta.sakshi.camera.debug.log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
+                log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
             }
         }
 

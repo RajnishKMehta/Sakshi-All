@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Debug Logs"
-            app:navigationIcon="@drawable/arrow_back" />
+            app:navigationIcon="?attr/homeAsUpIndicator" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

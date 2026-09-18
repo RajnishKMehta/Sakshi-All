@@ -1,5 +1,6 @@
 package rajnishkmehta.sakshi.camera.capturer
 
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
 import android.Manifest
 import android.animation.ValueAnimator
 import android.content.ContentValues
@@ -258,7 +259,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                             kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                                 ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
                                     if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                                        rajnishkmehta.sakshi.camera.debug.log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                        log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
                                     }
                                 }
                             }
