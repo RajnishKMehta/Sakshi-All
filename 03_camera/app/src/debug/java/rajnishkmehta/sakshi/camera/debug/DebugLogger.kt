@@ -135,7 +135,7 @@ object DebugLogger {
         if (logsDir == null) return
         try {
             var file = File(logsDir, fileName)
-            if (file.exists() && file.length() >= 1024 * 1024) {
+            if (file.exists() && file.length() >= 50 * 1024) {
                 val nameWithoutExt = fileName.substringBeforeLast(".")
                 val ext = fileName.substringAfterLast(".", "")
                 val extWithDot = if (ext.isNotEmpty()) ".$ext" else ""
