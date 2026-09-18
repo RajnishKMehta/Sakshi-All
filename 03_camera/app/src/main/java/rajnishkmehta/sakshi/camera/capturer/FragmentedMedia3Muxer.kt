@@ -1,6 +1,7 @@
 package rajnishkmehta.sakshi.camera.capturer
 
 import android.annotation.SuppressLint
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 
 import android.media.MediaCodec
 import androidx.media3.muxer.BufferInfo
@@ -28,6 +29,7 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
+        Log.d("FragmentedMedia3Muxer", "setOutput path: $path, format: $format")
         val fos = FileOutputStream(path)
         muxer = FragmentedMp4Muxer.Builder(fos).build()
         outputSet = true
@@ -35,6 +37,7 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
+        Log.d("FragmentedMedia3Muxer", "setOutput FD, format: $format")
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
         muxer = FragmentedMp4Muxer.Builder(fos).build()
         outputSet = true
@@ -63,6 +66,7 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
+        Log.d("FragmentedMedia3Muxer", "addTrack format: $format")
         val m = muxer ?: throw IllegalStateException("Muxer not initialized")
 
         // Media3 Muxer takes androidx.media3.common.Format.
@@ -117,6 +121,7 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+        Log.d("FragmentedMedia3Muxer", "writeSampleData trackIndex: $trackIndex, size: ${bufferInfo.size}, time: ${bufferInfo.presentationTimeUs}")
         val m = muxer ?: return
         val media3BufferInfo = BufferInfo(
             bufferInfo.presentationTimeUs,
@@ -128,14 +133,17 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun start() {
+        Log.d("FragmentedMedia3Muxer", "start")
     }
 
     @SuppressLint("RestrictedApi")
     override fun stop() {
+        Log.d("FragmentedMedia3Muxer", "stop")
     }
 
     @SuppressLint("RestrictedApi")
     override fun release() {
+        Log.d("FragmentedMedia3Muxer", "release")
         muxer?.close()
         muxer = null
     }
