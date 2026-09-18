@@ -2,9 +2,10 @@ package rajnishkmehta.sakshi.vault.thumbnail
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.media.ThumbnailUtils
-import android.util.Size
 import android.os.Build
+import android.util.Size
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,7 @@ object ThumbnailManager {
     private const val TAG = "ThumbnailManager"
     // Sensible small thumbnail size for Portal/gallery preview
     private val THUMBNAIL_SIZE = Size(320, 320)
+    private const val MAX_THUMBNAIL_DIMENSION = 320
 
     /**
      * Generates a thumbnail for a given source media file and saves it in the private Vault storage.
@@ -26,7 +28,6 @@ object ThumbnailManager {
      * @param context Application context
      * @param fileId Unique file identifier
      * @param mediaType The media type ("PHOTO", "VIDEO", etc.)
-     * @param fileExtension The original file extension
      * @param sourceFile The fully copied source file in vault storage
      * @return The generated thumbnail File, or null if generation was skipped or failed.
      */
@@ -34,7 +35,6 @@ object ThumbnailManager {
         context: Context,
         fileId: String,
         mediaType: String,
-        fileExtension: String,
         sourceFile: File
     ): File? = withContext(Dispatchers.IO) {
         if (mediaType != "PHOTO" && mediaType != "VIDEO") {
@@ -51,13 +51,60 @@ object ThumbnailManager {
             val thumbnailDir = File(context.filesDir, "media/${mediaType.lowercase()}/thumbnail")
             thumbnailDir.mkdirs()
 
-            val thumbnailFile = File(thumbnailDir, "${fileId}.webp")
+            val thumbnailFile = File(thumbnailDir, "$fileId.webp")
             Log.d(TAG, "Generating thumbnail for $fileId ($mediaType) at ${thumbnailFile.absolutePath}")
 
-            val bitmap: Bitmap = if (mediaType == "PHOTO") {
+            val bitmap: Bitmap? = if (mediaType == "PHOTO") {
                 ThumbnailUtils.createImageThumbnail(sourceFile, THUMBNAIL_SIZE, null)
             } else {
-                ThumbnailUtils.createVideoThumbnail(sourceFile, THUMBNAIL_SIZE, null)
+                var extractedBitmap: Bitmap? = null
+                var width = 0
+                var height = 0
+                var rotation = 0
+                val retriever = MediaMetadataRetriever()
+                try {
+                    retriever.setDataSource(sourceFile.absolutePath)
+                    for (attempt in 1..10) {
+                        val widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                        val heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                        width = widthStr?.toIntOrNull() ?: 0
+                        height = heightStr?.toIntOrNull() ?: 0
+                        rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+                        if (width > 0 && height > 0) break
+                        kotlinx.coroutines.delay(300)
+                    }
+
+                    if (rotation == 90 || rotation == 270) {
+                        val tmp = width
+                        width = height
+                        height = tmp
+                    }
+
+                    if (width <= 0 || height <= 0) {
+                        Log.e(TAG, "Aborting video thumbnail: Invalid dimensions ${width}x$height for $fileId")
+                        return@withContext null
+                    }
+
+                    var targetWidth = width
+                    var targetHeight = height
+                    if (width > MAX_THUMBNAIL_DIMENSION || height > MAX_THUMBNAIL_DIMENSION) {
+                        val scale = MAX_THUMBNAIL_DIMENSION.toFloat() / maxOf(width, height)
+                        targetWidth = maxOf(1, (width * scale).toInt())
+                        targetHeight = maxOf(1, (height * scale).toInt())
+                    }
+
+                    extractedBitmap = retriever.getScaledFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, targetWidth, targetHeight)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed video thumbnail extraction for $fileId", e)
+                } finally {
+                    retriever.release()
+                }
+                extractedBitmap
+            }
+
+            if (bitmap == null) {
+                Log.e(TAG, "Failed to create bitmap for $fileId")
+                return@withContext null
             }
 
             @Suppress("DEPRECATION")
