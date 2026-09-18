@@ -8,8 +8,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.graphics.Bitmap
 import android.os.Build
-import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -161,7 +160,7 @@ class ImageCapturer(val mActivity: MainActivity) {
     }
 
     fun onCaptureError(exception: ImageCaptureException) {
-        log.e(TAG, "onCaptureError", exception)
+        Log.e(TAG, "onCaptureError", exception)
 
         unfadeCaptureButton()
         currentImageSaver = null
@@ -196,7 +195,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
+                Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
             }
         }
 
@@ -207,7 +206,7 @@ class ImageCapturer(val mActivity: MainActivity) {
     }
 
     fun onImageSaverError(exception: ImageSaverException, skipErrorDialog: Boolean) {
-        log.e(TAG, "onImageSaverError", exception)
+        Log.e(TAG, "onImageSaverError", exception)
         mActivity.previewLoader.visibility = View.GONE
 
         if (!mActivity.isStarted) {

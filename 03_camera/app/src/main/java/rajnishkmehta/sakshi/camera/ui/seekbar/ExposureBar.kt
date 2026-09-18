@@ -6,8 +6,7 @@ import android.graphics.Canvas
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -49,7 +48,7 @@ class ExposureBar : AppCompatSeekBar {
 
         incrementProgressBy(exposureState.exposureCompensationIndex)
 
-        log.i("TAG", "Setting progress from setExposureConfig")
+        Log.i("TAG", "Setting progress from setExposureConfig")
         progress = (exposureState.exposureCompensationStep.numerator
                 / exposureState.exposureCompensationStep.denominator) *
                 exposureState.exposureCompensationIndex
@@ -110,8 +109,8 @@ class ExposureBar : AppCompatSeekBar {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> {
                 progress = max - (max * event.y / (height / 2)).toInt()
 
-                log.i("progress", progress.toString())
-                log.i("max", max.toString())
+                Log.i("progress", progress.toString())
+                Log.i("max", max.toString())
 
                 mainActivity.camConfig.camera?.cameraControl
                     ?.setExposureCompensationIndex(progress)

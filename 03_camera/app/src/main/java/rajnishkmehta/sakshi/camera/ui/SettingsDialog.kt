@@ -11,8 +11,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -594,7 +593,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
             "720p (HD)" -> Quality.HD
             "480p (SD)" -> Quality.SD
             else -> {
-                log.e("TAG", "Unknown quality: $title")
+                Log.e("TAG", "Unknown quality: $title")
                 Quality.SD
             }
         }
@@ -803,7 +802,7 @@ class SettingsDialog(val mActivity: MainActivity, themedContext: Context) :
             Quality.HD -> "720p (HD)"
             Quality.SD -> "480p (SD)"
             else -> {
-                log.i("TAG", "Unknown constant: $quality")
+                Log.i("TAG", "Unknown constant: $quality")
                 "Unknown"
             }
         }

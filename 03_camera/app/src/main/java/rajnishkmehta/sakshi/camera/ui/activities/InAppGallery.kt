@@ -18,8 +18,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.MediaStore.MediaColumns
 import android.provider.OpenableColumns
-import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
@@ -281,7 +280,7 @@ class InAppGallery : AppCompatActivity() {
                 }
             }
         } catch (e: Exception) {
-            log.d("queryStoredTimestamps", "no MediaStore timestamps from ${uri.authority}", e)
+            Log.d("queryStoredTimestamps", "no MediaStore timestamps from ${uri.authority}", e)
         }
 
         if (modified == null) {
@@ -295,7 +294,7 @@ class InAppGallery : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                log.d("queryStoredTimestamps", "no document timestamp from ${uri.authority}", e)
+                Log.d("queryStoredTimestamps", "no document timestamp from ${uri.authority}", e)
             }
         }
 
@@ -374,7 +373,7 @@ class InAppGallery : AppCompatActivity() {
                             dateAdded = convertTimeForVideo(date)
                             dateModified = dateAdded
                         } catch (e: ParseException) {
-                            log.d("showCurrentMediaDetails", "unparseable video date: $date", e)
+                            Log.d("showCurrentMediaDetails", "unparseable video date: $date", e)
                         }
                     }
 
@@ -454,7 +453,7 @@ class InAppGallery : AppCompatActivity() {
                 curItem.captureTime()?.let { dateAdded = convertTime(it, showTimeZone = false) }
             }
         } catch (e: Exception) {
-            log.d("showCurrentMediaDetails", "unable to obtain file details", e)
+            Log.d("showCurrentMediaDetails", "unable to obtain file details", e)
             showMessage(getString(R.string.unable_to_obtain_file_details))
             return
         }

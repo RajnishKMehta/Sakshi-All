@@ -10,8 +10,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.system.Os
-import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.Px
 import androidx.camera.core.ImageCapture
@@ -326,7 +325,7 @@ class ImageSaver(
             val num = contentResolver.delete(uri, null, null)
             check(num == 1) { "unexpected number of deleted rows: $num" }
         } catch (deleteException: Exception) {
-            log.w(TAG, "unable to delete an incomplete image $uri", deleteException)
+            Log.w(TAG, "unable to delete an incomplete image $uri", deleteException)
         }
     }
 
@@ -359,7 +358,7 @@ class ImageSaver(
             val now = timestamp()
             val us = (now - start) / 1000
             val durationStr = if (us < 10_000) "$us us" else "${us / 1000} ms"
-            log.d(TAG, "${lazyMessage()}: $durationStr")
+            Log.d(TAG, "${lazyMessage()}: $durationStr")
         }
     }
 }

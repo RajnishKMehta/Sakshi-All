@@ -5,8 +5,7 @@ import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import rajnishkmehta.sakshi.camera.debug.DebugLogger as log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.widget.FrameLayout
 import android.widget.MediaController
 import android.widget.RelativeLayout
@@ -108,7 +107,7 @@ class VideoPlayer : AppCompatActivity() {
                     hasAudio = it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null
                 }
             } catch (e: Exception) {
-                log.d(TAG, "", e)
+                Log.d(TAG, "", e)
             }
 
             mainExecutor.execute {
@@ -141,7 +140,7 @@ class VideoPlayer : AppCompatActivity() {
         try {
             videoView.setVideoURI(uri)
         } catch (e: IllegalStateException) {
-            log.e(TAG, "Unable to play video", e)
+            Log.e(TAG, "Unable to play video", e)
             Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
             finish()
         }
