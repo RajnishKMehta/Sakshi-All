@@ -14,7 +14,7 @@ import android.os.Parcelable
 import android.provider.BaseColumns
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import androidx.annotation.StringRes
 import rajnishkmehta.sakshi.camera.CamConfig.SettingValues
 import rajnishkmehta.sakshi.camera.util.EphemeralSharedPrefs

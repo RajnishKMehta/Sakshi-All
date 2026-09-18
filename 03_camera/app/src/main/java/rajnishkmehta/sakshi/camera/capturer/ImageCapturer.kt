@@ -8,7 +8,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.graphics.Bitmap
 import android.os.Build
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -195,7 +195,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
             if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                android.util.Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
+                Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
             }
         }
 

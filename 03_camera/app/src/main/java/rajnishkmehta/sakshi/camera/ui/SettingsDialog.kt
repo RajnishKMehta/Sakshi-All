@@ -11,7 +11,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View

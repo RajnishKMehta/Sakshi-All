@@ -7,7 +7,7 @@ import android.hardware.camera2.CameraCharacteristics
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.util.Size
 import android.view.MotionEvent
 import android.view.View

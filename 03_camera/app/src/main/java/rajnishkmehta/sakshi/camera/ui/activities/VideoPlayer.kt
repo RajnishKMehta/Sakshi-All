@@ -5,7 +5,7 @@ import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.widget.FrameLayout
 import android.widget.MediaController
 import android.widget.RelativeLayout
