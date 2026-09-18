@@ -9,6 +9,11 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import rajnishkmehta.sakshi.camera.R
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.ImageButton
+import android.view.Gravity
+import java.io.File
 
 /**
  * An activity specifically for debug builds that allows developers to view, export, and clear
@@ -43,8 +48,98 @@ class DebugLogsActivity : AppCompatActivity() {
         }
 
         findViewById<MaterialButton>(R.id.clearLogsBtn).setOnClickListener {
-            DebugLogger.clearLogs()
-            Toast.makeText(this, "Logs cleared", Toast.LENGTH_SHORT).show()
+            val success = DebugLogger.clearLogs()
+            if (success) {
+                Toast.makeText(this, "Logs cleared", Toast.LENGTH_SHORT).show()
+            }
+            populateLogFilesList()
+        }
+
+        findViewById<MaterialButton>(R.id.deleteRotatedLogsBtn).setOnClickListener {
+            val files = DebugLogger.getLogFiles()
+            val rotatedPattern = Regex(".*_\\d+\\.txt$")
+            var anyDeleted = false
+            for (file in files) {
+                if (rotatedPattern.matches(file.name)) {
+                    if (file.delete()) {
+                        anyDeleted = true
+                    }
+                }
+            }
+            if (anyDeleted) {
+                Toast.makeText(this, "Rotated logs deleted", Toast.LENGTH_SHORT).show()
+                populateLogFilesList()
+            }
+        }
+
+        populateLogFilesList()
+    }
+
+    private fun populateLogFilesList() {
+        val container = findViewById<LinearLayout>(R.id.logFilesContainer)
+        container.removeAllViews()
+
+        val files = DebugLogger.getLogFiles().sortedBy { it.name }
+        for (file in files) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 0, 0, 16)
+                }
+                gravity = Gravity.CENTER_VERTICAL
+            }
+
+            val textLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1.0f
+                )
+            }
+
+            val nameView = TextView(this).apply {
+                text = file.name
+                textSize = 16f
+                setTextColor(resources.getColor(android.R.color.black, theme))
+            }
+
+            val sizeView = TextView(this).apply {
+                val sizeKb = file.length() / 1024
+                text = "${sizeKb} KB"
+                textSize = 12f
+            }
+
+            textLayout.addView(nameView)
+            textLayout.addView(sizeView)
+
+            val exportBtn = ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_menu_share)
+                background = null
+                setOnClickListener {
+                    exportLogFile(file)
+                }
+            }
+
+            val deleteBtn = ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_menu_delete)
+                background = null
+                setOnClickListener {
+                    if (file.delete()) {
+                        Toast.makeText(this@DebugLogsActivity, "Deleted ${file.name}", Toast.LENGTH_SHORT).show()
+                        populateLogFilesList()
+                    }
+                }
+            }
+
+            row.addView(textLayout)
+            row.addView(exportBtn)
+            row.addView(deleteBtn)
+
+            container.addView(row)
         }
     }
 
@@ -56,8 +151,15 @@ class DebugLogsActivity : AppCompatActivity() {
     private fun exportLogFile(fileName: String) {
         val files = DebugLogger.getLogFiles()
         val fileToExport = files.find { it.name == fileName }
+        if (fileToExport != null) {
+            exportLogFile(fileToExport)
+        } else {
+            Toast.makeText(this, "Log file does not exist", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-        if (fileToExport != null && fileToExport.exists() && fileToExport.length() > 0) {
+    private fun exportLogFile(fileToExport: File) {
+        if (fileToExport.exists() && fileToExport.length() > 0) {
             val uri = FileProvider.getUriForFile(
                 this,
                 "${applicationContext.packageName}.debug.provider",

@@ -26,9 +26,22 @@ object DebugLogger {
      */
     @JvmStatic
     fun init(context: Context) {
-        logsDir = File(context.getExternalFilesDir(null), "debug_logs")
-        if (logsDir?.exists() == false) {
-            logsDir?.mkdirs()
+        val externalFilesDir = context.getExternalFilesDir(null)
+        if (externalFilesDir != null) {
+            val dir = File(externalFilesDir, "debug_logs")
+            if (!dir.exists()) {
+                if (dir.mkdirs()) {
+                    logsDir = dir
+                } else {
+                    logsDir = null
+                }
+            } else if (dir.isDirectory) {
+                logsDir = dir
+            } else {
+                logsDir = null
+            }
+        } else {
+            logsDir = null
         }
     }
 
@@ -121,7 +134,22 @@ object DebugLogger {
     private fun writeToFile(fileName: String, level: String, tag: String, message: String, throwable: Throwable? = null) {
         if (logsDir == null) return
         try {
-            val file = File(logsDir, fileName)
+            var file = File(logsDir, fileName)
+            if (file.exists() && file.length() >= 1024 * 1024) {
+                val nameWithoutExt = fileName.substringBeforeLast(".")
+                val ext = fileName.substringAfterLast(".", "")
+                val extWithDot = if (ext.isNotEmpty()) ".$ext" else ""
+
+                var n = 1
+                var rotatedFile = File(logsDir, "${nameWithoutExt}_$n$extWithDot")
+                while (rotatedFile.exists()) {
+                    n++
+                    rotatedFile = File(logsDir, "${nameWithoutExt}_$n$extWithDot")
+                }
+                file.renameTo(rotatedFile)
+                file = File(logsDir, fileName)
+            }
+
             val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(Date())
             val logLine = "$timestamp [$level] $tag: $message\n"
 
@@ -150,7 +178,17 @@ object DebugLogger {
      * Deletes all currently generated log files from the debug directory.
      */
     @JvmStatic
-    fun clearLogs() {
-        logsDir?.listFiles()?.forEach { it.delete() }
+    fun clearLogs(): Boolean {
+        val files = logsDir?.listFiles()
+        if (files == null || files.isEmpty()) {
+            return true
+        }
+        var allDeleted = true
+        for (file in files) {
+            if (!file.delete()) {
+                allDeleted = false
+            }
+        }
+        return allDeleted
     }
 }
