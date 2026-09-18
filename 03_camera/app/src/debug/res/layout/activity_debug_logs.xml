@@ -30,56 +30,27 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/exportAllLogsBtn"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Export All Logs" />
+                android:text="Active Logs"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:layout_marginBottom="8dp"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/exportErrorLogsBtn"
+            <LinearLayout
+                android:id="@+id/activeLogFilesContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Export Error Logs" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/exportWarningLogsBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Export Warning Logs" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/exportInfoLogsBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="Export Info Logs" />
-
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp" />
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/clearLogsBtn"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Clear All Logs"
+                android:text="Clear Active Logs"
                 app:icon="@drawable/delete" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/deleteRotatedLogsBtn"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Delete Rotated Logs"
-                app:icon="@android:drawable/ic_menu_delete" />
 
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
@@ -87,11 +58,27 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp" />
 
-            <LinearLayout
-                android:id="@+id/logFilesContainer"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:text="Rotated Logs"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:id="@+id/rotatedLogFilesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteRotatedLogsBtn"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delete Rotated Logs"
+                app:icon="@android:drawable/ic_menu_delete" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -183,10 +183,13 @@ object DebugLogger {
         if (files == null || files.isEmpty()) {
             return true
         }
+        val rotatedPattern = Regex(".*_\\d+\\.txt$")
         var allDeleted = true
         for (file in files) {
-            if (!file.delete()) {
-                allDeleted = false
+            if (!rotatedPattern.matches(file.name)) {
+                if (!file.delete()) {
+                    allDeleted = false
+                }
             }
         }
         return allDeleted

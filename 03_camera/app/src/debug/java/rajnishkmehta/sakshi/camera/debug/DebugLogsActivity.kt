@@ -31,22 +31,6 @@ class DebugLogsActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { finish() }
 
-        findViewById<MaterialButton>(R.id.exportAllLogsBtn).setOnClickListener {
-            exportLogFile("all_logs.txt")
-        }
-
-        findViewById<MaterialButton>(R.id.exportErrorLogsBtn).setOnClickListener {
-            exportLogFile("error_logs.txt")
-        }
-
-        findViewById<MaterialButton>(R.id.exportWarningLogsBtn).setOnClickListener {
-            exportLogFile("warning_logs.txt")
-        }
-
-        findViewById<MaterialButton>(R.id.exportInfoLogsBtn).setOnClickListener {
-            exportLogFile("info_logs.txt")
-        }
-
         findViewById<MaterialButton>(R.id.clearLogsBtn).setOnClickListener {
             val success = DebugLogger.clearLogs()
             if (success) {
@@ -76,10 +60,23 @@ class DebugLogsActivity : AppCompatActivity() {
     }
 
     private fun populateLogFilesList() {
-        val container = findViewById<LinearLayout>(R.id.logFilesContainer)
-        container.removeAllViews()
+        val activeContainer = findViewById<LinearLayout>(R.id.activeLogFilesContainer)
+        val rotatedContainer = findViewById<LinearLayout>(R.id.rotatedLogFilesContainer)
+        activeContainer.removeAllViews()
+        rotatedContainer.removeAllViews()
 
         val files = DebugLogger.getLogFiles().sortedBy { it.name }
+        val rotatedPattern = Regex(".*_\\d+\\.txt$")
+
+        // Resolve primary text color using Material3 theme attribute
+        val typedValue = android.util.TypedValue()
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
+        val primaryTextColor = if (typedValue.type >= android.util.TypedValue.TYPE_FIRST_COLOR_INT && typedValue.type <= android.util.TypedValue.TYPE_LAST_COLOR_INT) {
+            typedValue.data
+        } else {
+            androidx.core.content.ContextCompat.getColor(this, typedValue.resourceId)
+        }
+
         for (file in files) {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -104,13 +101,14 @@ class DebugLogsActivity : AppCompatActivity() {
             val nameView = TextView(this).apply {
                 text = file.name
                 textSize = 16f
-                setTextColor(resources.getColor(android.R.color.black, theme))
+                setTextColor(primaryTextColor)
             }
 
             val sizeView = TextView(this).apply {
                 val sizeKb = file.length() / 1024
                 text = "${sizeKb} KB"
                 textSize = 12f
+                setTextColor(primaryTextColor)
             }
 
             textLayout.addView(nameView)
@@ -139,7 +137,11 @@ class DebugLogsActivity : AppCompatActivity() {
             row.addView(exportBtn)
             row.addView(deleteBtn)
 
-            container.addView(row)
+            if (rotatedPattern.matches(file.name)) {
+                rotatedContainer.addView(row)
+            } else {
+                activeContainer.addView(row)
+            }
         }
     }
 
