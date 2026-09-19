@@ -31,10 +31,13 @@ class FragmentedMedia3Muxer : Muxer {
         muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
+    private var storedPfd: ParcelFileDescriptor? = null
+
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
         Log.d("FragmentedMedia3Muxer", "setOutput FD, format: $format")
-        val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
+        storedPfd = parcelFileDescriptor // Prevent Garbage Collection from closing the FD prematurely
+        val fos = ParcelFileDescriptor.AutoCloseOutputStream(parcelFileDescriptor)
         fileOutputStream = fos
         @Suppress("DEPRECATION")
         muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
@@ -164,6 +167,7 @@ class FragmentedMedia3Muxer : Muxer {
                 Log.e("FragmentedMedia3Muxer", "Exception closing output stream", e)
             }
             fileOutputStream = null
+            storedPfd = null
         }
     }
 }
