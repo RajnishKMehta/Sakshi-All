@@ -48,7 +48,7 @@ class SakshiVaultRemoteService : Service() {
             Log.d(tag, "Received ping request")
             return Bundle().apply {
                 putBoolean("is_available", true)
-                putString("vault_version", BuildConfig.VERSION_NAME.toString())
+                putString("vault_version", BuildConfig.VERSION_NAME)
                 putLong("timestamp", System.currentTimeMillis())
             }
         }
@@ -89,7 +89,6 @@ class SakshiVaultRemoteService : Service() {
                         applicationContext,
                         fileId,
                         mediaType,
-                        fileExtension,
                         File(vaultPath)
                     )
                 } catch (e: Exception) {
