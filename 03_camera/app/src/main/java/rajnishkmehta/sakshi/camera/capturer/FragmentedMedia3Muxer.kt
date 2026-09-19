@@ -14,53 +14,49 @@ import androidx.media3.common.Format
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
- *
- * This class handles writing captured video and audio streams into a Fragmented MP4 (fMP4) container.
- * It follows the official CameraX architecture for translating Android's [android.media.MediaFormat]
- * to Media3's [Format] in order to correctly initialize tracks for fMP4 muxing.
  */
 @UnstableApi
 class FragmentedMedia3Muxer : Muxer {
 
     private var muxer: FragmentedMp4Muxer? = null
     private var fileOutputStream: FileOutputStream? = null
+    private val lastPresentationTimesUs = mutableMapOf<Int, Long>()
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
+        Log.d("FragmentedMedia3Muxer", "setOutput path: $path, format: $format")
         val fos = FileOutputStream(path)
         fileOutputStream = fos
+        @Suppress("DEPRECATION")
         muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
+        Log.d("FragmentedMedia3Muxer", "setOutput FD, format: $format")
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
         fileOutputStream = fos
+        @Suppress("DEPRECATION")
         muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
     @SuppressLint("RestrictedApi")
     override fun setOrientationDegrees(degrees: Int) {
-        // Not currently exposed by FragmentedMp4Muxer.Builder directly.
+        Log.d("FragmentedMedia3Muxer", "setOrientationDegrees degrees: $degrees")
     }
 
     @SuppressLint("RestrictedApi")
-    override fun setLocation(latitude: Double, longitude: Double) {
-        // Ignored for fragmented MP4.
-    }
+    override fun setLocation(latitude: Double, longitude: Double) { }
 
     @SuppressLint("RestrictedApi")
-    override fun setCaptureFps(captureFps: Int) {
-        // Ignored.
-    }
+    override fun setCaptureFps(captureFps: Int) { }
 
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean {
-        return true
-    }
+    override fun isInterruptionResilient(): Boolean = true
 
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
+        Log.d("FragmentedMedia3Muxer", "addTrack format: $format")
         val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
         val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
@@ -109,22 +105,35 @@ class FragmentedMedia3Muxer : Muxer {
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
         val currentMuxer = muxer ?: return
 
-        // Ensure the ByteBuffer's position and limit match the BufferInfo offset and size
         val originalPosition = byteBuffer.position()
         val originalLimit = byteBuffer.limit()
 
         try {
+            // Log.d("FragmentedMedia3Muxer", "writeSampleData trackIndex: $trackIndex, size: ${bufferInfo.size}, time: ${bufferInfo.presentationTimeUs}, offset: ${bufferInfo.offset}, originalPosition: $originalPosition")
+
+            // Media3 expects position and limit to strictly bound the sample data
             byteBuffer.position(bufferInfo.offset)
             byteBuffer.limit(bufferInfo.offset + bufferInfo.size)
 
+            // Ensure strictly monotonic presentation timestamps
+            var presentationTimeUs = bufferInfo.presentationTimeUs
+            val lastTimeUs = lastPresentationTimesUs[trackIndex] ?: -1L
+            if (presentationTimeUs <= lastTimeUs) {
+                Log.w("FragmentedMedia3Muxer", "Adjusting non-monotonic timestamp for track $trackIndex. Last: $lastTimeUs, Current: $presentationTimeUs")
+                presentationTimeUs = lastTimeUs + 1L
+            }
+            lastPresentationTimesUs[trackIndex] = presentationTimeUs
+
             val media3BufferInfo = Media3BufferInfo(
-                bufferInfo.presentationTimeUs,
+                presentationTimeUs,
                 bufferInfo.size,
                 bufferInfo.flags
             )
             currentMuxer.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
+        } catch (e: Exception) {
+            Log.e("FragmentedMedia3Muxer", "Exception during writeSampleData for track $trackIndex", e)
+            throw e // Let it crash so it can be noticed but logged properly
         } finally {
-            // Restore original position and limit if needed by CameraX
             byteBuffer.position(originalPosition)
             byteBuffer.limit(originalLimit)
         }
@@ -132,23 +141,29 @@ class FragmentedMedia3Muxer : Muxer {
 
     @SuppressLint("RestrictedApi")
     override fun start() {
-        // No-op for Media3 Muxer API (it writes as samples are added).
+        Log.d("FragmentedMedia3Muxer", "start")
     }
 
     @SuppressLint("RestrictedApi")
     override fun stop() {
-        // The Muxer doesn't have an explicit stop, closing it finalizes.
+        Log.d("FragmentedMedia3Muxer", "stop")
     }
 
     @SuppressLint("RestrictedApi")
     override fun release() {
-        muxer?.close()
-        muxer = null
+        Log.d("FragmentedMedia3Muxer", "release")
         try {
-            fileOutputStream?.close()
+            muxer?.close()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("FragmentedMedia3Muxer", "Exception during muxer close", e)
+        } finally {
+            muxer = null
+            try {
+                fileOutputStream?.close()
+            } catch (e: Exception) {
+                Log.e("FragmentedMedia3Muxer", "Exception closing output stream", e)
+            }
+            fileOutputStream = null
         }
-        fileOutputStream = null
     }
 }
