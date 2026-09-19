@@ -120,7 +120,7 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+    override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         Log.d("FragmentedMedia3Muxer", "writeSampleData trackIndex: $trackIndex, size: ${bufferInfo.size}, time: ${bufferInfo.presentationTimeUs}")
         val m = muxer ?: return
         val media3BufferInfo = BufferInfo(
@@ -128,7 +128,7 @@ class FragmentedMedia3Muxer : Muxer {
             bufferInfo.size,
             bufferInfo.flags
         )
-        m.writeSampleData(trackIndex, byteBuf, media3BufferInfo)
+        m.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
     }
 
     @SuppressLint("RestrictedApi")

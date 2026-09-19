@@ -30,7 +30,7 @@ Keeping these responsibilities separate lets the capture app focus on the camera
 
 ## Features
 
-- **Photo & Video Capture:** Capture photos and videos using the device camera (Supports standard MP4 and crash-safe fMP4 containers).
+- **Photo & Video Capture:** Capture photos and videos using the device camera (Supports standard MP4 through CameraX's modern recorder and crash-safe fMP4 containers using Media3).
 - **Photo & Video Transfer:** Send captured photos and videos to Sakshi Vault through the Sakshi SDK.
 - **Local-only:** No internet connection needed.
 - **Sakshi Integration:** Works with the Sakshi SDK and Sakshi Vault as part of the Sakshi ecosystem.
