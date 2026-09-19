@@ -23,17 +23,20 @@ import androidx.media3.common.Format
 class FragmentedMedia3Muxer : Muxer {
 
     private var muxer: FragmentedMp4Muxer? = null
+    private var fileOutputStream: FileOutputStream? = null
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
         val fos = FileOutputStream(path)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        fileOutputStream = fos
+        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        fileOutputStream = fos
+        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
     @SuppressLint("RestrictedApi")
@@ -127,5 +130,11 @@ class FragmentedMedia3Muxer : Muxer {
     override fun release() {
         muxer?.close()
         muxer = null
+        try {
+            fileOutputStream?.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        fileOutputStream = null
     }
 }
