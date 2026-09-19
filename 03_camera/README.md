@@ -37,7 +37,14 @@ Keeping these responsibilities separate lets the capture app focus on the camera
 
 ---
 
-## Architecture
+## Recording Architecture
+
+Sakshi Camera uses modern Jetpack CameraX and Media3 APIs for video recording:
+
+1. **Standard MP4 Recording**: Utilizes the default official CameraX `Recorder` implementation (via platform muxer) without redundant abstractions.
+2. **Fragmented MP4 (fMP4) Recording**: Implements a custom, crash-safe recording pipeline using Media3's `FragmentedMp4Muxer` injected via CameraX's `MuxerFactory` interface, preserving data integrity upon unexpected terminations.
+
+## Ecosystem Architecture
 
 Sakshi Camera is one part of the Sakshi ecosystem:
 

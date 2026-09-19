@@ -44,7 +44,6 @@ import androidx.camera.video.GroupableFeatures
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.camera.video.internal.muxer.MuxerFactory
-import rajnishkmehta.sakshi.camera.capturer.Media3Mp4MuxerFactory
 import rajnishkmehta.sakshi.camera.capturer.FragmentedMedia3MuxerFactory
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
@@ -1559,13 +1558,10 @@ class CamConfig(private val mActivity: MainActivity) {
                 // then has to drain everything the muxer is behind by. The platform muxer, which
                 // is what every release up to 1.5 used, keeps up. Both live in an internal
                 // package, so this has to be re-checked on every camera-video upgrade.
-
                 if (videoFormat == SettingValues.Default.FORMAT_FMP4) {
                     // Use the custom Media3 fragmented MP4 muxer factory for FMP4 format,
                     // providing stable fragmented output as per configured format settings.
                     recorderBuilder.setMuxerFactory(FragmentedMedia3MuxerFactory())
-                } else {
-                    recorderBuilder.setMuxerFactory(Media3Mp4MuxerFactory())
                 }
 
                 if (!usesFeatureGroup) {
