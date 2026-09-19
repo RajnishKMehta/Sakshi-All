@@ -10,8 +10,8 @@ java {
 
 android {
     compileSdk = 37
-    buildToolsVersion = "37.0.0"
-    ndkVersion = "29.0.14206865"
+    compileSdkMinor = 2
+    ndkVersion = "30.0.16248370"
 
     namespace = "rajnishkmehta.sakshi.camera"
 

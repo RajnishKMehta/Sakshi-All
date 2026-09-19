@@ -1,7 +1,7 @@
 [versions]
 sakshi-sdk = "1.0.0-beta.7"
-agp = "9.4.0"
-kotlin = "2.4.10"
+agp = "9.4.1"
+kotlin = "2.4.20"
 coroutines = "1.11.0"
 androidx-core = "1.19.0"
 androidx-annotation = "1.10.0"
