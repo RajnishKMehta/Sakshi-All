@@ -108,12 +108,26 @@ class FragmentedMedia3Muxer : Muxer {
     @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
         val currentMuxer = muxer ?: return
-        val media3BufferInfo = Media3BufferInfo(
-            bufferInfo.presentationTimeUs,
-            bufferInfo.size,
-            bufferInfo.flags
-        )
-        currentMuxer.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
+
+        // Ensure the ByteBuffer's position and limit match the BufferInfo offset and size
+        val originalPosition = byteBuffer.position()
+        val originalLimit = byteBuffer.limit()
+
+        try {
+            byteBuffer.position(bufferInfo.offset)
+            byteBuffer.limit(bufferInfo.offset + bufferInfo.size)
+
+            val media3BufferInfo = Media3BufferInfo(
+                bufferInfo.presentationTimeUs,
+                bufferInfo.size,
+                bufferInfo.flags
+            )
+            currentMuxer.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
+        } finally {
+            // Restore original position and limit if needed by CameraX
+            byteBuffer.position(originalPosition)
+            byteBuffer.limit(originalLimit)
+        }
     }
 
     @SuppressLint("RestrictedApi")
