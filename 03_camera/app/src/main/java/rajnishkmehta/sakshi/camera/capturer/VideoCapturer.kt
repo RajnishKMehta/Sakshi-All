@@ -290,7 +290,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
                     /**
                      * Verifies the output existence using a MediaStore query.
-                     * Avoids read-mode openFileDescriptor checks to prevent permission-related false negatives.
                      */
                     var outputExists = false
                     try {
