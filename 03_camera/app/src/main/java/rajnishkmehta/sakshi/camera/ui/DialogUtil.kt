@@ -3,6 +3,12 @@ package rajnishkmehta.sakshi.camera.ui
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.content.Context
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import rajnishkmehta.sakshi.camera.R
 
 /**
  * When in an activity where the status bar is hidden, the window layoutInDisplayCutoutMode
@@ -25,3 +31,29 @@ fun AlertDialog.showIgnoringShortEdgeMode(): AlertDialog {
 
 fun MaterialAlertDialogBuilder.showIgnoringShortEdgeMode(): AlertDialog =
     this.create().showIgnoringShortEdgeMode()
+
+
+fun Context.showCustomMessageDialog(
+    iconResId: Int,
+    message: String,
+    buttonText: String? = null,
+    onDismiss: (() -> Unit)? = null
+) {
+    val view = LayoutInflater.from(this).inflate(R.layout.custom_message_dialog, null)
+    val dialogIcon = view.findViewById<ImageView>(R.id.dialog_icon)
+    val dialogMessage = view.findViewById<TextView>(R.id.dialog_message)
+    val dialogButton = view.findViewById<Button>(R.id.dialog_button)
+
+    dialogIcon.setImageResource(iconResId)
+    dialogMessage.text = message
+    if (buttonText != null) {
+        dialogButton.text = buttonText
+    }
+
+    val dialog = MaterialAlertDialogBuilder(this).setView(view).setCancelable(false).create()
+    dialogButton.setOnClickListener {
+        dialog.dismiss()
+        onDismiss?.invoke()
+    }
+    dialog.showIgnoringShortEdgeMode()
+}

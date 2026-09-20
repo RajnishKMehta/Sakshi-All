@@ -36,6 +36,7 @@ import rajnishkmehta.sakshi.camera.VIDEO_NAME_PREFIX
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.VideoCaptureActivity
+import rajnishkmehta.sakshi.camera.ui.showCustomMessageDialog
 import rajnishkmehta.sakshi.camera.util.formatVideoDuration
 import rajnishkmehta.sakshi.camera.util.getTreeDocumentUri
 import rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri
@@ -46,6 +47,13 @@ import java.util.Locale
 
 import kotlinx.coroutines.launch
 
+/**
+ * Handles the logic for capturing videos, including setting up the [Recorder],
+ * managing the recording state (start, stop, pause, mute), and saving the resulting file.
+ * Integrates with Sakshi SDK for unified AV sync processing.
+ *
+ * @property mActivity The main activity instance holding the camera UI and lifecycle.
+ */
 class VideoCapturer(private val mActivity: MainActivity) {
 
     val camConfig = mActivity.camConfig
@@ -54,6 +62,8 @@ class VideoCapturer(private val mActivity: MainActivity) {
         private set
 
     private var currentFileId: String? = null
+
+    private var lastMissingOutputUri: android.net.Uri? = null
 
     private val videoFileFormat = ".mp4"
 
@@ -168,6 +178,11 @@ class VideoCapturer(private val mActivity: MainActivity) {
         return null
     }
 
+    /**
+     * Initiates the video recording process. Configures the recorder, creates the recording context,
+     * sets up the pending recording with audio and location (if enabled), and starts the recording.
+     * Also handles integration with SakshiClient for AV sync when starting a new recording.
+     */
     fun startRecording() {
         Log.d("VideoCapturer", "startRecording() called")
         if (camConfig.camera == null) return
@@ -272,11 +287,78 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     }
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
-                    if (videoSyncStarted && fileId != null) {
-                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                            ctx.handleCopyDone(fileId!!)
+
+                    /**
+                     * Verifies the output existence using a MediaStore query.
+                     */
+                    var outputExists = false
+                    try {
+                        val cursor = mActivity.contentResolver.query(recordingCtx.uri, arrayOf(android.provider.MediaStore.MediaColumns._ID), null, null, null)
+                        cursor?.use {
+                            outputExists = it.moveToFirst()
+                        }
+                    } catch (e: Exception) {
+                        /** Defaults to true if the query fails, preventing incorrect missing-output reporting. */
+                        outputExists = true
+                        Log.w("VideoCapturer", "Failed to query output existence", e)
+                    }
+
+                    if (!outputExists) {
+                        Log.e("VideoCapturer", "Recording output is missing/deleted: ${recordingCtx.uri}")
+                        if (lastMissingOutputUri != recordingCtx.uri) {
+                            lastMissingOutputUri = recordingCtx.uri
+                            mActivity.lastFrame = mActivity.previewView.bitmap
+                            mActivity.mainOverlay.visibility = View.VISIBLE
+                            mActivity.lastFrame?.let {
+                                rajnishkmehta.sakshi.camera.util.setBlurBitmapCompat(mActivity.mainOverlay, it)
+                            }
+
+                            mActivity.camConfig.cameraProvider?.unbindAll()
+                            mActivity.previewView.keepScreenOn = false
+
+                            mActivity.showCustomMessageDialog(R.drawable.ic_error, mActivity.getString(R.string.video_deleted_while_recording)) {
+                                mActivity.mainOverlay.visibility = View.GONE
+                                mActivity.mainOverlay.setImageDrawable(null)
+                                mActivity.lastFrame = null
+                                mActivity.camConfig.startCamera(true)
+                            }
+                        }
+                    } else {
+                        if (recordingCtx.isPendingMediaStoreUri) {
+                            try {
+                                /** Publishes the final file by removing the pending flag. */
+                                rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
+                            } catch (e: Exception) {
+                                Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                            }
+                        }
+
+                        /** Evaluates specific finalization states to determine the recording outcome. */
+                        val isExpectedTermination = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NONE ||
+                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED ||
+                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED ||
+                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_SOURCE_INACTIVE
+
+                        val isInsufficientStorage = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_INSUFFICIENT_STORAGE
+                        val isNoValidData = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA
+
+                        if (!isExpectedTermination) {
+                            val message = mActivity.getString(R.string.unable_to_save_video_verbose, event.error)
+                            val icon = if (isInsufficientStorage) R.drawable.info else R.drawable.ic_error
+                            mActivity.showCustomMessageDialog(icon, message)
+                        }
+
+                        /**
+                         * Triggers Vault processing for all recordings except those with no valid data.
+                         * Partially failed recordings are intentionally preserved.
+                         */
+                        if (!isNoValidData && videoSyncStarted && fileId != null) {
+                            if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                                ctx.handleCopyDone(fileId!!)
+                            }
                         }
                     }
+
                     currentFileId = null
                     afterRecordingStops()
                 }
@@ -423,6 +505,9 @@ class VideoCapturer(private val mActivity: MainActivity) {
         mActivity.forceUpdateOrientationSensor()
     }
 
+    /**
+     * Mutes the currently active recording. Does nothing if not recording or audio is disabled.
+     */
     fun muteRecording() {
         if (!isRecording) return
         check(camConfig.includeAudio)
@@ -430,6 +515,9 @@ class VideoCapturer(private val mActivity: MainActivity) {
         recording?.mute(true)
     }
 
+    /**
+     * Unmutes the currently active recording. Does nothing if not recording or audio is disabled.
+     */
     fun unmuteRecording() {
         if (!isRecording) return
         check(camConfig.includeAudio)
@@ -437,6 +525,10 @@ class VideoCapturer(private val mActivity: MainActivity) {
         recording?.mute(false)
     }
 
+    /**
+     * Stops the currently active recording and releases its resources.
+     * Also invokes any pending deferred start actions if a stop was requested immediately after a start.
+     */
     fun stopRecording() {
         Log.d("VideoCapturer", "stopRecording() called")
         cancelDeferredStart?.let {
@@ -473,6 +565,18 @@ private const val STALE_PENDING_RECORDING_AGE = 60 * 60 * 1000L
 // to the user until MediaProvider expires it a week later, and unplayable in the meantime since it
 // has no moov atom. Deleting is the honest outcome. Pending rows are only visible to the app that
 // owns them, so this can never reach another app's in-flight write, and the age cutoff keeps it
+/**
+ * Deletes stale pending recording entries from the MediaStore that are older than the specified maximum age.
+ * This cleans up incomplete files left behind if the application process dies unexpectedly before finalizing them.
+ *
+ * @param context The application context used for content resolver operations.
+ * @param maxAge The maximum age in milliseconds before a pending recording is considered stale.
+ */
+// A recording that dies with its process (swipe-away from Recents, OOM kill, crash) never reaches
+// the Finalize callback that clears IS_PENDING, so it leaves a half-written file that is invisible
+// to the user until MediaProvider expires it a week later, and unplayable in the meantime since it
+// has no moov atom. Deleting is the honest outcome. Pending rows are only visible to the app that
+// owns them, so this can never reach another app's in-flight write, and the age cutoff keeps it
 // clear of a recording that is still being muxed.
 fun deleteStalePendingRecordings(
     context: Context,
@@ -494,6 +598,13 @@ fun deleteStalePendingRecordings(
     }
 }
 
+/**
+ * Retrieves a thumbnail bitmap from the video file at the given URI.
+ *
+ * @param context The context for setting the data source.
+ * @param uri The URI of the video file.
+ * @return The thumbnail bitmap, or null if it could not be generated.
+ */
 @Throws(Exception::class)
 fun getVideoThumbnail(context: Context, uri: Uri?): Bitmap? {
     MediaMetadataRetriever().use {

@@ -2,100 +2,134 @@ package rajnishkmehta.sakshi.camera.capturer
 
 import android.annotation.SuppressLint
 import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
-
-import android.media.MediaCodec
-import androidx.media3.muxer.BufferInfo
+import android.media.MediaCodec.BufferInfo as AndroidBufferInfo
 import android.os.ParcelFileDescriptor
 import androidx.camera.video.internal.muxer.Muxer
 import androidx.media3.muxer.FragmentedMp4Muxer
+import androidx.media3.muxer.BufferInfo as Media3BufferInfo
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import androidx.media3.common.util.UnstableApi
-import androidx.annotation.OptIn
+import androidx.media3.common.Format
+
+import androidx.media3.container.MdtaMetadataEntry
+import androidx.media3.container.Mp4LocationData
+import androidx.media3.container.Mp4OrientationData
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
  *
- * This class handles writing captured video and audio streams into a Fragmented MP4 (fMP4) container.
- * It translates Android's [MediaFormat] to Media3's [androidx.media3.common.Format] to correctly
- * initialize tracks for muxing.
+ * This class translates Android's native media components to Media3 constructs
+ * and manages the lifecycle of Fragmented MP4 (fMP4) muxing. It securely handles
+ * file descriptors and enforces strict presentation timestamp rules required by Media3.
  */
-@OptIn(UnstableApi::class)
+@UnstableApi
 class FragmentedMedia3Muxer : Muxer {
 
     private var muxer: FragmentedMp4Muxer? = null
+    private var fileOutputStream: FileOutputStream? = null
+    private val lastPresentationTimesUs = mutableMapOf<Int, Long>()
+    private var storedPfd: ParcelFileDescriptor? = null
 
-    private var outputSet = false
+    private var orientationDegrees: Int? = null
+    private var location: Pair<Double, Double>? = null
+    private var captureFps: Float? = null
+    private var metadataAdded = false
 
+    /**
+     * Initializes the muxer output to the specified file path.
+     *
+     * @param path The absolute path to the output file.
+     * @param format The container format requested by the caller.
+     */
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
-        Log.d("FragmentedMedia3Muxer", "setOutput path: $path, format: $format")
         val fos = FileOutputStream(path)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
-        outputSet = true
+        fileOutputStream = fos
+        @Suppress("DEPRECATION")
+        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
+    /**
+     * Initializes the muxer output using a parcel file descriptor.
+     * Keeps a strong reference to the descriptor to prevent premature garbage collection.
+     *
+     * @param parcelFileDescriptor The file descriptor for the output.
+     * @param format The container format requested by the caller.
+     */
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
-        Log.d("FragmentedMedia3Muxer", "setOutput FD, format: $format")
+        storedPfd = parcelFileDescriptor
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
-        outputSet = true
+        fileOutputStream = fos
+        @Suppress("DEPRECATION")
+        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
+    /**
+     * Sets the orientation hint for the video track.
+     *
+     * @param degrees The orientation angle in degrees.
+     */
     @SuppressLint("RestrictedApi")
-    override fun setOrientationDegrees(degrees: Int) {
-        // Not currently exposed directly by FragmentedMp4Muxer.Builder without Metadata or Track options,
-        // but typically handled at track level. Can be ignored or implemented if needed.
-    }
+    override fun setOrientationDegrees(degrees: Int) { orientationDegrees = degrees }
 
+    /**
+     * Sets the geographic location metadata.
+     *
+     * @param latitude The latitude coordinate.
+     * @param longitude The longitude coordinate.
+     */
     @SuppressLint("RestrictedApi")
-    override fun setLocation(latitude: Double, longitude: Double) {
-        // Ignored for fragmented MP4
-    }
+    override fun setLocation(latitude: Double, longitude: Double) { location = Pair(latitude, longitude) }
 
+    /**
+     * Sets the capture frames per second.
+     *
+     * @param captureFps The frame rate.
+     */
     @SuppressLint("RestrictedApi")
-    override fun setCaptureFps(captureFps: Int) {
-        // Ignored
-    }
+    override fun setCaptureFps(captureFps: Int) { this.captureFps = captureFps.toFloat() }
 
+    /**
+     * Indicates whether this muxer is resilient to interruptions,
+     * which is true for fragmented MP4 formats.
+     *
+     * @return `true` since fMP4 can be partially recovered on interruption.
+     */
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean {
-        return true
-    }
+    override fun isInterruptionResilient(): Boolean = true
 
+    /**
+     * Translates an Android [android.media.MediaFormat] to a Media3 [Format]
+     * and adds the track to the muxer.
+     *
+     * @param format The format of the track being added.
+     * @return The integer index of the newly added track.
+     */
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
-        Log.d("FragmentedMedia3Muxer", "addTrack format: $format")
-        val m = muxer ?: throw IllegalStateException("Muxer not initialized")
-
-        // Media3 Muxer takes androidx.media3.common.Format.
-        // Wait, FragmentedMp4Muxer has `addTrack(Format format)`. We need to convert MediaFormat to Format.
-        // Or wait, does it? Media3 muxer's addTrack actually takes `Format`.
-        // Let's check how CameraX Media3MuxerImpl does it.
-        // For our test, we might need a workaround or check the exact API.
-
-        // Wait, Media3 1.4.1 FragmentedMp4Muxer addTrack signature:
-        // public TrackToken addTrack(Format format)
-        // We will build a simple Media3 Format from the MediaFormat.
+        val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
         val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
-        val builder = androidx.media3.common.Format.Builder().setSampleMimeType(mimeType)
+        val formatBuilder = Format.Builder().setSampleMimeType(mimeType)
 
         if (format.containsKey(android.media.MediaFormat.KEY_WIDTH)) {
-            builder.setWidth(format.getInteger(android.media.MediaFormat.KEY_WIDTH))
+            formatBuilder.setWidth(format.getInteger(android.media.MediaFormat.KEY_WIDTH))
         }
         if (format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) {
-            builder.setHeight(format.getInteger(android.media.MediaFormat.KEY_HEIGHT))
+            formatBuilder.setHeight(format.getInteger(android.media.MediaFormat.KEY_HEIGHT))
         }
         if (format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
-            builder.setChannelCount(format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT))
+            formatBuilder.setChannelCount(format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT))
         }
         if (format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
-            builder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
+            formatBuilder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
+        }
+        if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
+            formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
         }
 
-        // Get codec specific data (csd-0, csd-1)
         val initializationData = mutableListOf<ByteArray>()
         var csdIndex = 0
         while (true) {
@@ -114,37 +148,91 @@ class FragmentedMedia3Muxer : Muxer {
                 break
             }
         }
-        builder.setInitializationData(initializationData)
+        formatBuilder.setInitializationData(initializationData)
 
-        return m.addTrack(builder.build())
+        if (!metadataAdded) {
+            orientationDegrees?.let { degrees ->
+                currentMuxer.addMetadataEntry(Mp4OrientationData(degrees))
+            }
+            location?.let { loc ->
+                currentMuxer.addMetadataEntry(Mp4LocationData(loc.first.toFloat(), loc.second.toFloat()))
+            }
+            captureFps?.let { fps ->
+                val fpsBytes = ByteBuffer.allocate(4).putInt(java.lang.Float.floatToIntBits(fps)).array()
+                currentMuxer.addMetadataEntry(MdtaMetadataEntry(MdtaMetadataEntry.KEY_ANDROID_CAPTURE_FPS, fpsBytes, MdtaMetadataEntry.TYPE_INDICATOR_FLOAT32))
+            }
+            metadataAdded = true
+        }
+
+        return currentMuxer.addTrack(formatBuilder.build())
     }
 
+    /**
+     * Writes sample data to the specified track.
+     * Adjusts byte buffer boundaries and enforces monotonic presentation timestamps
+     * to satisfy Media3 muxer requirements.
+     *
+     * @param trackIndex The index of the destination track.
+     * @param byteBuffer The buffer containing the encoded sample.
+     * @param bufferInfo The metadata associated with the sample.
+     */
     @SuppressLint("RestrictedApi")
-    override fun writeSampleData(trackIndex: Int, byteBuf: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-        Log.d("FragmentedMedia3Muxer", "writeSampleData trackIndex: $trackIndex, size: ${bufferInfo.size}, time: ${bufferInfo.presentationTimeUs}")
-        val m = muxer ?: return
-        val media3BufferInfo = BufferInfo(
-            bufferInfo.presentationTimeUs,
-            bufferInfo.size,
-            bufferInfo.flags
-        )
-        m.writeSampleData(trackIndex, byteBuf, media3BufferInfo)
+    override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
+        val currentMuxer = muxer ?: return
+
+        val originalPosition = byteBuffer.position()
+        val originalLimit = byteBuffer.limit()
+
+        try {
+            byteBuffer.position(bufferInfo.offset)
+            byteBuffer.limit(bufferInfo.offset + bufferInfo.size)
+
+            var presentationTimeUs = bufferInfo.presentationTimeUs
+            val lastTimeUs = lastPresentationTimesUs[trackIndex] ?: -1L
+            if (presentationTimeUs <= lastTimeUs) {
+                presentationTimeUs = lastTimeUs + 1L
+            }
+            lastPresentationTimesUs[trackIndex] = presentationTimeUs
+
+            val media3BufferInfo = Media3BufferInfo(
+                presentationTimeUs,
+                bufferInfo.size,
+                bufferInfo.flags
+            )
+            currentMuxer.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
+        } finally {
+            byteBuffer.position(originalPosition)
+            byteBuffer.limit(originalLimit)
+        }
     }
 
+    /**
+     * Signals the muxer to start writing.
+     * Media3 muxers process data directly on `writeSampleData`, so this is a no-op.
+     */
     @SuppressLint("RestrictedApi")
-    override fun start() {
-        Log.d("FragmentedMedia3Muxer", "start")
-    }
+    override fun start() { }
 
+    /**
+     * Signals the muxer to stop.
+     * Closing the muxer handles the finalization, so this is a no-op.
+     */
     @SuppressLint("RestrictedApi")
-    override fun stop() {
-        Log.d("FragmentedMedia3Muxer", "stop")
-    }
+    override fun stop() { }
 
+    /**
+     * Closes the muxer and releases associated output streams and file descriptors.
+     */
     @SuppressLint("RestrictedApi")
     override fun release() {
-        Log.d("FragmentedMedia3Muxer", "release")
         muxer?.close()
         muxer = null
+        try {
+            fileOutputStream?.close()
+        } catch (e: Exception) {
+            Log.e("FragmentedMedia3Muxer", "Failed to close output stream", e)
+        }
+        fileOutputStream = null
+        storedPfd = null
     }
 }

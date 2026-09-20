@@ -253,4 +253,5 @@
     <string name="change_vault">Change Vault App</string>
     <string name="fragmented_mp4">Fragmented MP4</string>
     <string name="mp4">MP4</string>
+    <string name="video_deleted_while_recording">The recorded video is no longer available. It may have been deleted by another app while recording.</string>
 </resources>
