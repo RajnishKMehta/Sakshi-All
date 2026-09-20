@@ -188,6 +188,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
         if (camConfig.camera == null) return
         val recorder = camConfig.videoCapture?.output ?: return
         if (isRecording) return
+        lastMissingOutputUri = null
         isRecording = true
 
         val dateString = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())

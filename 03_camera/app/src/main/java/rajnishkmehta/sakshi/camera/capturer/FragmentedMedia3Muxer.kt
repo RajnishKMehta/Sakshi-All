@@ -225,14 +225,17 @@ class FragmentedMedia3Muxer : Muxer {
      */
     @SuppressLint("RestrictedApi")
     override fun release() {
-        muxer?.close()
-        muxer = null
         try {
-            fileOutputStream?.close()
-        } catch (e: Exception) {
-            Log.e("FragmentedMedia3Muxer", "Failed to close output stream", e)
+            muxer?.close()
+        } finally {
+            muxer = null
+            try {
+                fileOutputStream?.close()
+            } catch (e: Exception) {
+                Log.e("FragmentedMedia3Muxer", "Failed to close output stream", e)
+            }
+            fileOutputStream = null
+            storedPfd = null
         }
-        fileOutputStream = null
-        storedPfd = null
     }
 }
