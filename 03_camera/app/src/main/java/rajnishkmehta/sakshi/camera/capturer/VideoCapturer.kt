@@ -288,28 +288,22 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
 
-                    val outputExists = try {
-                        mActivity.contentResolver.openFileDescriptor(recordingCtx.uri, "r")?.use { true } ?: false
+                    /**
+                     * Verifies the output existence using a MediaStore query.
+                     */
+                    var outputExists = false
+                    try {
+                        val cursor = mActivity.contentResolver.query(recordingCtx.uri, arrayOf(android.provider.MediaStore.MediaColumns._ID), null, null, null)
+                        cursor?.use {
+                            outputExists = it.moveToFirst()
+                        }
                     } catch (e: Exception) {
-                        false
+                        /** Defaults to true if the query fails, preventing incorrect missing-output reporting. */
+                        outputExists = true
+                        Log.w("VideoCapturer", "Failed to query output existence", e)
                     }
 
-                    if (outputExists) {
-                        if (recordingCtx.isPendingMediaStoreUri) {
-                            try {
-                                // Remove pending flag
-                                rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
-                            } catch (e: Exception) {
-                                Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
-                            }
-                        }
-
-                        if (videoSyncStarted && fileId != null) {
-                            if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                                ctx.handleCopyDone(fileId!!)
-                            }
-                        }
-                    } else {
+                    if (!outputExists) {
                         Log.e("VideoCapturer", "Recording output is missing/deleted: ${recordingCtx.uri}")
                         if (lastMissingOutputUri != recordingCtx.uri) {
                             lastMissingOutputUri = recordingCtx.uri
@@ -327,6 +321,40 @@ class VideoCapturer(private val mActivity: MainActivity) {
                                 mActivity.mainOverlay.setImageDrawable(null)
                                 mActivity.lastFrame = null
                                 mActivity.camConfig.startCamera(true)
+                            }
+                        }
+                    } else {
+                        if (recordingCtx.isPendingMediaStoreUri) {
+                            try {
+                                /** Publishes the final file by removing the pending flag. */
+                                rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
+                            } catch (e: Exception) {
+                                Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                            }
+                        }
+
+                        /** Evaluates specific finalization states to determine the recording outcome. */
+                        val isExpectedTermination = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NONE ||
+                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED ||
+                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED ||
+                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_SOURCE_INACTIVE
+
+                        val isInsufficientStorage = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_INSUFFICIENT_STORAGE
+                        val isNoValidData = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA
+
+                        if (!isExpectedTermination) {
+                            val message = mActivity.getString(R.string.unable_to_save_video_verbose, event.error)
+                            val icon = if (isInsufficientStorage) R.drawable.info else R.drawable.ic_error
+                            mActivity.showCustomMessageDialog(icon, message)
+                        }
+
+                        /**
+                         * Triggers Vault processing for all recordings except those with no valid data.
+                         * Partially failed recordings are intentionally preserved.
+                         */
+                        if (!isNoValidData && videoSyncStarted && fileId != null) {
+                            if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                                ctx.handleCopyDone(fileId!!)
                             }
                         }
                     }
