@@ -62,6 +62,8 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
     private var currentFileId: String? = null
 
+    private var lastMissingOutputUri: android.net.Uri? = null
+
     private val videoFileFormat = ".mp4"
 
     private var recording: Recording? = null
@@ -285,20 +287,35 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
 
-                    if (recordingCtx.isPendingMediaStoreUri) {
-                        try {
-                            // Remove pending flag
-                            rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
-                        } catch (e: Exception) {
-                            Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                    val outputExists = try {
+                        mActivity.contentResolver.openFileDescriptor(recordingCtx.uri, "r")?.use { true } ?: false
+                    } catch (e: Exception) {
+                        false
+                    }
+
+                    if (outputExists) {
+                        if (recordingCtx.isPendingMediaStoreUri) {
+                            try {
+                                // Remove pending flag
+                                rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
+                            } catch (e: Exception) {
+                                Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                            }
+                        }
+
+                        if (videoSyncStarted && fileId != null) {
+                            if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                                ctx.handleCopyDone(fileId!!)
+                            }
+                        }
+                    } else {
+                        Log.e("VideoCapturer", "Recording output is missing/deleted: ${recordingCtx.uri}")
+                        if (lastMissingOutputUri != recordingCtx.uri) {
+                            lastMissingOutputUri = recordingCtx.uri
+                            mActivity.showMessage(R.string.video_deleted_while_recording)
                         }
                     }
 
-                    if (videoSyncStarted && fileId != null) {
-                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                            ctx.handleCopyDone(fileId!!)
-                        }
-                    }
                     currentFileId = null
                     afterRecordingStops()
                 }
