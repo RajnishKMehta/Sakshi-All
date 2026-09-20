@@ -135,7 +135,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     put(MediaColumns.DISPLAY_NAME, fileName)
                     put(MediaColumns.MIME_TYPE, resolvedMimeType)
                     put(MediaColumns.RELATIVE_PATH, DEFAULT_MEDIA_STORE_CAPTURE_PATH)
-                    put(MediaColumns.IS_PENDING, 0)
+                    put(MediaColumns.IS_PENDING, 1)
                 }
                 uri = contentResolver.insert(CamConfig.videoCollectionUri, contentValues)
                 isPendingMediaStoreUri = true
@@ -272,6 +272,16 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     }
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
+
+                    if (recordingCtx.isPendingMediaStoreUri) {
+                        try {
+                            // Remove pending flag so MediaScanner updates the size and makes it accessible
+                            rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
+                        } catch (e: Exception) {
+                            Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                        }
+                    }
+
                     if (videoSyncStarted && fileId != null) {
                         if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
                             ctx.handleCopyDone(fileId!!)

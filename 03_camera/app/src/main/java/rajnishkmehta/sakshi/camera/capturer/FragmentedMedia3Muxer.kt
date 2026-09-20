@@ -38,7 +38,7 @@ class FragmentedMedia3Muxer : Muxer {
         val fos = FileOutputStream(path)
         fileOutputStream = fos
         @Suppress("DEPRECATION")
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
     /**
@@ -54,7 +54,7 @@ class FragmentedMedia3Muxer : Muxer {
         val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
         fileOutputStream = fos
         @Suppress("DEPRECATION")
-        muxer = FragmentedMp4Muxer.Builder(fos).build()
+        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
     }
 
     /**
@@ -63,8 +63,7 @@ class FragmentedMedia3Muxer : Muxer {
      * @param degrees The orientation angle in degrees.
      */
     @SuppressLint("RestrictedApi")
-    override fun setOrientationDegrees(degrees: Int) {
-    }
+    override fun setOrientationDegrees(degrees: Int) { }
 
     /**
      * Sets the geographic location metadata.
@@ -73,8 +72,7 @@ class FragmentedMedia3Muxer : Muxer {
      * @param longitude The longitude coordinate.
      */
     @SuppressLint("RestrictedApi")
-    override fun setLocation(latitude: Double, longitude: Double) {
-    }
+    override fun setLocation(latitude: Double, longitude: Double) { }
 
     /**
      * Sets the capture frames per second.
@@ -82,8 +80,7 @@ class FragmentedMedia3Muxer : Muxer {
      * @param captureFps The frame rate.
      */
     @SuppressLint("RestrictedApi")
-    override fun setCaptureFps(captureFps: Int) {
-    }
+    override fun setCaptureFps(captureFps: Int) { }
 
     /**
      * Indicates whether this muxer is resilient to interruptions,
