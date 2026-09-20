@@ -288,8 +288,10 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
 
-                    // Don't use read-mode openFileDescriptor for existence check as it can fail due to permissions.
-                    // Use MediaStore query to verify the item is still published.
+                    /**
+                     * Verifies the output existence using a MediaStore query.
+                     * Avoids read-mode openFileDescriptor checks to prevent permission-related false negatives.
+                     */
                     var outputExists = false
                     try {
                         val cursor = mActivity.contentResolver.query(recordingCtx.uri, arrayOf(android.provider.MediaStore.MediaColumns._ID), null, null, null)
@@ -297,7 +299,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                             outputExists = it.moveToFirst()
                         }
                     } catch (e: Exception) {
-                        // If the query fails, we can't definitively say it's deleted. Default to true to prevent false missing-output handling.
+                        /** Defaults to true if the query fails, preventing incorrect missing-output reporting. */
                         outputExists = true
                         Log.w("VideoCapturer", "Failed to query output existence", e)
                     }
@@ -325,14 +327,14 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     } else {
                         if (recordingCtx.isPendingMediaStoreUri) {
                             try {
-                                // Remove pending flag, publishing the final file
+                                /** Publishes the final file by removing the pending flag. */
                                 rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
                             } catch (e: Exception) {
                                 Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
                             }
                         }
 
-                        // Handle specific finalization states
+                        /** Evaluates specific finalization states to determine the recording outcome. */
                         val isExpectedTermination = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NONE ||
                                 event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED ||
                                 event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED ||
@@ -347,8 +349,10 @@ class VideoCapturer(private val mActivity: MainActivity) {
                             mActivity.showCustomMessageDialog(icon, message)
                         }
 
-                        // We trigger Vault processing unless there's absolutely no valid data generated.
-                        // Failed or partially successful recordings are still preserved as evidence.
+                        /**
+                         * Triggers Vault processing for all recordings except those with no valid data.
+                         * Partially failed recordings are intentionally preserved.
+                         */
                         if (!isNoValidData && videoSyncStarted && fileId != null) {
                             if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
                                 ctx.handleCopyDone(fileId!!)
