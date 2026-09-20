@@ -36,6 +36,7 @@ import rajnishkmehta.sakshi.camera.VIDEO_NAME_PREFIX
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.VideoCaptureActivity
+import rajnishkmehta.sakshi.camera.ui.showCustomMessageDialog
 import rajnishkmehta.sakshi.camera.util.formatVideoDuration
 import rajnishkmehta.sakshi.camera.util.getTreeDocumentUri
 import rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri
@@ -61,6 +62,8 @@ class VideoCapturer(private val mActivity: MainActivity) {
         private set
 
     private var currentFileId: String? = null
+
+    private var lastMissingOutputUri: android.net.Uri? = null
 
     private val videoFileFormat = ".mp4"
 
@@ -285,20 +288,49 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
 
-                    if (recordingCtx.isPendingMediaStoreUri) {
-                        try {
-                            // Remove pending flag
-                            rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
-                        } catch (e: Exception) {
-                            Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                    val outputExists = try {
+                        mActivity.contentResolver.openFileDescriptor(recordingCtx.uri, "r")?.use { true } ?: false
+                    } catch (e: Exception) {
+                        false
+                    }
+
+                    if (outputExists) {
+                        if (recordingCtx.isPendingMediaStoreUri) {
+                            try {
+                                // Remove pending flag
+                                rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
+                            } catch (e: Exception) {
+                                Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
+                            }
+                        }
+
+                        if (videoSyncStarted && fileId != null) {
+                            if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                                ctx.handleCopyDone(fileId!!)
+                            }
+                        }
+                    } else {
+                        Log.e("VideoCapturer", "Recording output is missing/deleted: ${recordingCtx.uri}")
+                        if (lastMissingOutputUri != recordingCtx.uri) {
+                            lastMissingOutputUri = recordingCtx.uri
+                            mActivity.lastFrame = mActivity.previewView.bitmap
+                            mActivity.mainOverlay.visibility = View.VISIBLE
+                            mActivity.lastFrame?.let {
+                                rajnishkmehta.sakshi.camera.util.setBlurBitmapCompat(mActivity.mainOverlay, it)
+                            }
+
+                            mActivity.camConfig.cameraProvider?.unbindAll()
+                            mActivity.previewView.keepScreenOn = false
+
+                            mActivity.showCustomMessageDialog(R.drawable.ic_error, mActivity.getString(R.string.video_deleted_while_recording)) {
+                                mActivity.mainOverlay.visibility = View.GONE
+                                mActivity.mainOverlay.setImageDrawable(null)
+                                mActivity.lastFrame = null
+                                mActivity.camConfig.startCamera(true)
+                            }
                         }
                     }
 
-                    if (videoSyncStarted && fileId != null) {
-                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                            ctx.handleCopyDone(fileId!!)
-                        }
-                    }
                     currentFileId = null
                     afterRecordingStops()
                 }

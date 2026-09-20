@@ -143,7 +143,6 @@ open class MainActivity : AppCompatActivity(),
     private var cameraPermissionDialog: AlertDialog? = null
     private var audioPermissionDialog: AlertDialog? = null
     var lastFrame: Bitmap? = null
-        private set
 
     private lateinit var mainFrame: View
     lateinit var rootView: View
