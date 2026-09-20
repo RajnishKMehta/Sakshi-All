@@ -325,6 +325,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
     private val dp16 = 16 * mActivity.resources.displayMetrics.density
     private val dp8 = 8 * mActivity.resources.displayMetrics.density
 
+    // Skinned devices wrap the capture button shape in selectors and layer-lists
     private fun findGradientDrawable(drawable: Drawable?): GradientDrawable? {
         return when (drawable) {
             is GradientDrawable -> drawable
@@ -337,6 +338,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
         }
     }
 
+    // If no shape can be dug out, skip the cosmetic animation rather than crash
     private fun animateCaptureButtonCorners(from: Float, to: Float) {
         val gd = findGradientDrawable(mActivity.captureButton.drawable) ?: return
 
@@ -357,6 +359,8 @@ class VideoCapturer(private val mActivity: MainActivity) {
     }
 
     private fun onRecordingStart() {
+        // TODO: Uncomment this once the main indicator UI gets implemented
+        // mActivity.micOffIcon.visibility = View.GONE
 
         animateCaptureButtonCorners(dp16, dp8)
 
@@ -428,6 +432,10 @@ class VideoCapturer(private val mActivity: MainActivity) {
         }
 
         mActivity.previewView.keepScreenOn = false
+
+        // TODO: Uncomment this once the main indicator UI gets implemented
+        // if (!mActivity.config.includeAudio)
+        //   mActivity.micOffIcon.visibility = View.VISIBLE
 
         mActivity.settingsDialog.includeAudioToggle.isEnabled = true
         mActivity.muteToggle.visibility = View.GONE
