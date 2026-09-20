@@ -313,7 +313,11 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         Log.e("VideoCapturer", "Recording output is missing/deleted: ${recordingCtx.uri}")
                         if (lastMissingOutputUri != recordingCtx.uri) {
                             lastMissingOutputUri = recordingCtx.uri
-                            mActivity.showCustomMessageDialog(R.drawable.ic_error, mActivity.getString(R.string.video_deleted_while_recording))
+                            mActivity.showCustomMessageDialog(R.drawable.ic_error, mActivity.getString(R.string.video_deleted_while_recording)) {
+                                mActivity.camConfig.cameraProvider?.unbindAll()
+                                mActivity.previewView.keepScreenOn = false
+                                mActivity.camConfig.startCamera(true)
+                            }
                         }
                     }
 

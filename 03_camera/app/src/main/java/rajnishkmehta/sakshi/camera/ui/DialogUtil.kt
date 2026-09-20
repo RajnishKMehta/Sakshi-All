@@ -36,7 +36,8 @@ fun MaterialAlertDialogBuilder.showIgnoringShortEdgeMode(): AlertDialog =
 fun Context.showCustomMessageDialog(
     iconResId: Int,
     message: String,
-    buttonText: String? = null
+    buttonText: String? = null,
+    onDismiss: (() -> Unit)? = null
 ) {
     val view = LayoutInflater.from(this).inflate(R.layout.custom_message_dialog, null)
     val dialogIcon = view.findViewById<ImageView>(R.id.dialog_icon)
@@ -49,7 +50,10 @@ fun Context.showCustomMessageDialog(
         dialogButton.text = buttonText
     }
 
-    val dialog = MaterialAlertDialogBuilder(this).setView(view).create()
-    dialogButton.setOnClickListener { dialog.dismiss() }
+    val dialog = MaterialAlertDialogBuilder(this).setView(view).setCancelable(false).create()
+    dialogButton.setOnClickListener {
+        dialog.dismiss()
+        onDismiss?.invoke()
+    }
     dialog.showIgnoringShortEdgeMode()
 }
