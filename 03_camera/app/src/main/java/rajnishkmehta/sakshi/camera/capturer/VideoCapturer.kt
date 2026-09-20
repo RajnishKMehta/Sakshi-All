@@ -36,6 +36,7 @@ import rajnishkmehta.sakshi.camera.VIDEO_NAME_PREFIX
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.VideoCaptureActivity
+import rajnishkmehta.sakshi.camera.ui.showCustomMessageDialog
 import rajnishkmehta.sakshi.camera.util.formatVideoDuration
 import rajnishkmehta.sakshi.camera.util.getTreeDocumentUri
 import rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri
@@ -312,7 +313,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         Log.e("VideoCapturer", "Recording output is missing/deleted: ${recordingCtx.uri}")
                         if (lastMissingOutputUri != recordingCtx.uri) {
                             lastMissingOutputUri = recordingCtx.uri
-                            mActivity.showMessage(R.string.video_deleted_while_recording)
+                            mActivity.showCustomMessageDialog(R.drawable.ic_error, mActivity.getString(R.string.video_deleted_while_recording))
                         }
                     }
 
