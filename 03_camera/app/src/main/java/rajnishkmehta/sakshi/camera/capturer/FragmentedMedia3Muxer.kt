@@ -12,6 +12,10 @@ import java.nio.ByteBuffer
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.Format
 
+import androidx.media3.container.MdtaMetadataEntry
+import androidx.media3.container.Mp4LocationData
+import androidx.media3.container.Mp4OrientationData
+
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
  *
@@ -26,6 +30,11 @@ class FragmentedMedia3Muxer : Muxer {
     private var fileOutputStream: FileOutputStream? = null
     private val lastPresentationTimesUs = mutableMapOf<Int, Long>()
     private var storedPfd: ParcelFileDescriptor? = null
+
+    private var orientationDegrees: Int? = null
+    private var location: Pair<Double, Double>? = null
+    private var captureFps: Float? = null
+    private var metadataAdded = false
 
     /**
      * Initializes the muxer output to the specified file path.
@@ -63,7 +72,7 @@ class FragmentedMedia3Muxer : Muxer {
      * @param degrees The orientation angle in degrees.
      */
     @SuppressLint("RestrictedApi")
-    override fun setOrientationDegrees(degrees: Int) { }
+    override fun setOrientationDegrees(degrees: Int) { orientationDegrees = degrees }
 
     /**
      * Sets the geographic location metadata.
@@ -72,7 +81,7 @@ class FragmentedMedia3Muxer : Muxer {
      * @param longitude The longitude coordinate.
      */
     @SuppressLint("RestrictedApi")
-    override fun setLocation(latitude: Double, longitude: Double) { }
+    override fun setLocation(latitude: Double, longitude: Double) { location = Pair(latitude, longitude) }
 
     /**
      * Sets the capture frames per second.
@@ -80,7 +89,7 @@ class FragmentedMedia3Muxer : Muxer {
      * @param captureFps The frame rate.
      */
     @SuppressLint("RestrictedApi")
-    override fun setCaptureFps(captureFps: Int) { }
+    override fun setCaptureFps(captureFps: Int) { this.captureFps = captureFps.toFloat() }
 
     /**
      * Indicates whether this muxer is resilient to interruptions,
@@ -140,6 +149,20 @@ class FragmentedMedia3Muxer : Muxer {
             }
         }
         formatBuilder.setInitializationData(initializationData)
+
+        if (!metadataAdded) {
+            orientationDegrees?.let { degrees ->
+                currentMuxer.addMetadataEntry(Mp4OrientationData(degrees))
+            }
+            location?.let { loc ->
+                currentMuxer.addMetadataEntry(Mp4LocationData(loc.first.toFloat(), loc.second.toFloat()))
+            }
+            captureFps?.let { fps ->
+                val fpsBytes = ByteBuffer.allocate(4).putInt(java.lang.Float.floatToIntBits(fps)).array()
+                currentMuxer.addMetadataEntry(MdtaMetadataEntry(MdtaMetadataEntry.KEY_ANDROID_CAPTURE_FPS, fpsBytes, MdtaMetadataEntry.TYPE_INDICATOR_FLOAT32))
+            }
+            metadataAdded = true
+        }
 
         return currentMuxer.addTrack(formatBuilder.build())
     }
