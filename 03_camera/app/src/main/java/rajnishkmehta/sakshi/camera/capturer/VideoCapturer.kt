@@ -275,7 +275,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
                     if (recordingCtx.isPendingMediaStoreUri) {
                         try {
-                            // Remove pending flag so MediaScanner updates the size and makes it accessible
+                            // Remove pending flag (if pending = 1)
                             rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri(mActivity.contentResolver, recordingCtx.uri)
                         } catch (e: Exception) {
                             Log.e("VideoCapturer", "Failed to remove IS_PENDING", e)
