@@ -828,6 +828,9 @@ class CamConfig(private val mActivity: MainActivity) {
         if (!commonPref.contains(SettingValues.Key.VAULT_PACKAGE)) {
             editor.putString(SettingValues.Key.VAULT_PACKAGE, SettingValues.Default.VAULT_PACKAGE)
         }
+        // Note: This is a workaround to keep save image/video as previewed 'on' by 
+        // default starting from v73 and 'off' by default for versions before that
+        //
         // If its not a fresh install (before v73)
         if (commonPref.contains(SettingValues.Key.SAVE_IMAGE_AS_PREVIEW)) {
             // If save video as previewed was not previously set
