@@ -46,6 +46,13 @@ import java.util.Locale
 
 import kotlinx.coroutines.launch
 
+/**
+ * Handles the logic for capturing videos, including setting up the [Recorder],
+ * managing the recording state (start, stop, pause, mute), and saving the resulting file.
+ * Integrates with Sakshi SDK for unified AV sync processing.
+ *
+ * @property mActivity The main activity instance holding the camera UI and lifecycle.
+ */
 class VideoCapturer(private val mActivity: MainActivity) {
 
     val camConfig = mActivity.camConfig
@@ -168,6 +175,11 @@ class VideoCapturer(private val mActivity: MainActivity) {
         return null
     }
 
+    /**
+     * Initiates the video recording process. Configures the recorder, creates the recording context,
+     * sets up the pending recording with audio and location (if enabled), and starts the recording.
+     * Also handles integration with SakshiClient for AV sync when starting a new recording.
+     */
     fun startRecording() {
         Log.d("VideoCapturer", "startRecording() called")
         if (camConfig.camera == null) return
@@ -313,7 +325,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
     private val dp16 = 16 * mActivity.resources.displayMetrics.density
     private val dp8 = 8 * mActivity.resources.displayMetrics.density
 
-    // Skinned devices wrap the capture button shape in selectors and layer-lists
     private fun findGradientDrawable(drawable: Drawable?): GradientDrawable? {
         return when (drawable) {
             is GradientDrawable -> drawable
@@ -326,7 +337,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
         }
     }
 
-    // If no shape can be dug out, skip the cosmetic animation rather than crash
     private fun animateCaptureButtonCorners(from: Float, to: Float) {
         val gd = findGradientDrawable(mActivity.captureButton.drawable) ?: return
 
@@ -347,8 +357,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
     }
 
     private fun onRecordingStart() {
-        // TODO: Uncomment this once the main indicator UI gets implemented
-        // mActivity.micOffIcon.visibility = View.GONE
 
         animateCaptureButtonCorners(dp16, dp8)
 
@@ -421,10 +429,6 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
         mActivity.previewView.keepScreenOn = false
 
-        // TODO: Uncomment this once the main indicator UI gets implemented
-        // if (!mActivity.config.includeAudio)
-        //   mActivity.micOffIcon.visibility = View.VISIBLE
-
         mActivity.settingsDialog.includeAudioToggle.isEnabled = true
         mActivity.muteToggle.visibility = View.GONE
 
@@ -433,6 +437,9 @@ class VideoCapturer(private val mActivity: MainActivity) {
         mActivity.forceUpdateOrientationSensor()
     }
 
+    /**
+     * Mutes the currently active recording. Does nothing if not recording or audio is disabled.
+     */
     fun muteRecording() {
         if (!isRecording) return
         check(camConfig.includeAudio)
@@ -440,6 +447,9 @@ class VideoCapturer(private val mActivity: MainActivity) {
         recording?.mute(true)
     }
 
+    /**
+     * Unmutes the currently active recording. Does nothing if not recording or audio is disabled.
+     */
     fun unmuteRecording() {
         if (!isRecording) return
         check(camConfig.includeAudio)
@@ -447,6 +457,10 @@ class VideoCapturer(private val mActivity: MainActivity) {
         recording?.mute(false)
     }
 
+    /**
+     * Stops the currently active recording and releases its resources.
+     * Also invokes any pending deferred start actions if a stop was requested immediately after a start.
+     */
     fun stopRecording() {
         Log.d("VideoCapturer", "stopRecording() called")
         cancelDeferredStart?.let {
@@ -483,6 +497,18 @@ private const val STALE_PENDING_RECORDING_AGE = 60 * 60 * 1000L
 // to the user until MediaProvider expires it a week later, and unplayable in the meantime since it
 // has no moov atom. Deleting is the honest outcome. Pending rows are only visible to the app that
 // owns them, so this can never reach another app's in-flight write, and the age cutoff keeps it
+/**
+ * Deletes stale pending recording entries from the MediaStore that are older than the specified maximum age.
+ * This cleans up incomplete files left behind if the application process dies unexpectedly before finalizing them.
+ *
+ * @param context The application context used for content resolver operations.
+ * @param maxAge The maximum age in milliseconds before a pending recording is considered stale.
+ */
+// A recording that dies with its process (swipe-away from Recents, OOM kill, crash) never reaches
+// the Finalize callback that clears IS_PENDING, so it leaves a half-written file that is invisible
+// to the user until MediaProvider expires it a week later, and unplayable in the meantime since it
+// has no moov atom. Deleting is the honest outcome. Pending rows are only visible to the app that
+// owns them, so this can never reach another app's in-flight write, and the age cutoff keeps it
 // clear of a recording that is still being muxed.
 fun deleteStalePendingRecordings(
     context: Context,
@@ -504,6 +530,13 @@ fun deleteStalePendingRecordings(
     }
 }
 
+/**
+ * Retrieves a thumbnail bitmap from the video file at the given URI.
+ *
+ * @param context The context for setting the data source.
+ * @param uri The URI of the video file.
+ * @return The thumbnail bitmap, or null if it could not be generated.
+ */
 @Throws(Exception::class)
 fun getVideoThumbnail(context: Context, uri: Uri?): Bitmap? {
     MediaMetadataRetriever().use {

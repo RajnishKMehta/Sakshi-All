@@ -7,6 +7,11 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
+/**
+ * A generic dialog fragment that presents a list of single-choice options.
+ * Uses the Fragment Result API to pass the selected option's index back to the calling activity
+ * or fragment. This ensures proper state retention across configuration changes.
+ */
 class OptionsSelectionDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val args = requireArguments()

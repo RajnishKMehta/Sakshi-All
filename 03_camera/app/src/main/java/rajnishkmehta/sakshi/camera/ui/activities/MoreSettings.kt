@@ -29,6 +29,10 @@ import rajnishkmehta.sakshi.camera.util.storageLocationToUiString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 
+/**
+ * Activity for displaying and managing extended camera settings (e.g., location tagging,
+ * audio inclusion, storage location, EXIF data toggles).
+ */
 open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
     private lateinit var camConfig: CamConfig
 

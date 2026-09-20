@@ -69,6 +69,12 @@ import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
 // note that enum constant name is used as a name of a SharedPreferences instance
+/**
+ * Represents the various camera extensions or modes available (e.g., Night, Bokeh, Face Retouch).
+ *
+ * @property extensionMode The extension integer ID from [ExtensionMode].
+ * @property uiName The string resource ID for displaying the mode in the UI.
+ */
 enum class CameraMode(val extensionMode: Int, val uiName: Int) {
     QR_SCAN(ExtensionMode.NONE, R.string.qr_scan_mode),
     AUTO(ExtensionMode.AUTO, R.string.auto_mode),
@@ -80,6 +86,14 @@ enum class CameraMode(val extensionMode: Int, val uiName: Int) {
     VIDEO(ExtensionMode.NONE, R.string.video),
 }
 
+/**
+ * Manages the camera configuration, state, and lifecycle within the application.
+ * This class handles initialization of the [ProcessCameraProvider], camera selection
+ * (front/back), flash modes, aspect ratio, image and video capture settings, and
+ * integrates with UI components and preferences.
+ *
+ * @property mActivity The [MainActivity] instance context.
+ */
 @SuppressLint("UnsafeOptInUsageError")
 class CamConfig(private val mActivity: MainActivity) {
 
@@ -814,10 +828,6 @@ class CamConfig(private val mActivity: MainActivity) {
         if (!commonPref.contains(SettingValues.Key.VAULT_PACKAGE)) {
             editor.putString(SettingValues.Key.VAULT_PACKAGE, SettingValues.Default.VAULT_PACKAGE)
         }
-
-        // Note: This is a workaround to keep save image/video as previewed 'on' by 
-        // default starting from v73 and 'off' by default for versions before that
-        //
         // If its not a fresh install (before v73)
         if (commonPref.contains(SettingValues.Key.SAVE_IMAGE_AS_PREVIEW)) {
             // If save video as previewed was not previously set

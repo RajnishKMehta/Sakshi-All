@@ -115,6 +115,11 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+/**
+ * The primary activity of the Camera application. Handles UI rendering, user interactions,
+ * camera preview display, capturing logic (via [PhotoCapturer] and [VideoCapturer]), and
+ * integration with the Sakshi SDK for cross-app synchronization.
+ */
 open class MainActivity : AppCompatActivity(),
     OnTouchListener,
     OnScaleGestureListener,
@@ -132,9 +137,6 @@ open class MainActivity : AppCompatActivity(),
     lateinit var previewView: PreviewView
     lateinit var previewContainer: ConstraintLayout
     lateinit var bottomOverlay: View
-
-    // Hold a reference to the manual permission dialog to avoid re-creating it if it
-    // is already visible and to dismiss it if the permission gets granted.
     private var cameraPermissionDialog: AlertDialog? = null
     private var audioPermissionDialog: AlertDialog? = null
     var lastFrame: Bitmap? = null
@@ -277,8 +279,6 @@ open class MainActivity : AppCompatActivity(),
             videoCapturer.startRecording()
         }
     }
-
-    // Used to request permission from the user
     private val requestPermissionLauncher = registerForActivityResult(
         RequestMultiplePermissions()
     ) { permissions: Map<String, Boolean> ->
@@ -305,8 +305,6 @@ open class MainActivity : AppCompatActivity(),
             }
         }
     }
-
-    // Used to request permission from the user
     var dirPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
     { result ->
 
@@ -328,8 +326,6 @@ open class MainActivity : AppCompatActivity(),
         val builder = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.audio_permission_dialog_title)
             .setMessage(R.string.audio_permission_dialog_message)
-
-        // Open the settings menu for the current app
         builder.setPositiveButton(R.string.settings) { _: DialogInterface?, _: Int ->
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
             val uri = Uri.fromParts(
@@ -354,8 +350,6 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun animateFocusRing(x: Float, y: Float) {
-
-        // Move the focus ring so that its center is at the tap location (x, y)
         val width = focusRing.width.toFloat()
         focusRing.updateLayoutParams<ConstraintLayout.LayoutParams> {
             updateMargins(
@@ -363,13 +357,10 @@ open class MainActivity : AppCompatActivity(),
                 top = (y - width / 2).roundToInt()
             )
         }
-
-        // Show focus ring
         focusRing.visibility = View.VISIBLE
         focusRing.alpha = 1f
 
         if (areSystemAnimationsEnabled()) {
-            // Animate the focus ring to disappear
             focusRing.animate()
                 .setStartDelay(500)
                 .setDuration(300)
@@ -432,7 +423,7 @@ open class MainActivity : AppCompatActivity(),
                 it.putExtra(InAppGallery.INTENT_KEY_VIDEO_ONLY_MODE, requiresVideoModeOnly)
             }
 
-            if (isThumbnailLoaded) { // indicates that last captured item is accessible
+            if (isThumbnailLoaded) {
                 it.putExtra(InAppGallery.INTENT_KEY_LAST_CAPTURED_ITEM, camConfig.lastCapturedItem)
             }
 
@@ -449,30 +440,20 @@ open class MainActivity : AppCompatActivity(),
 
     private fun checkPermissions() {
         Log.i(TAG, "Checking camera status...")
-
-        // Check if the app has access to the user's camera
         when {
             hasCameraPermission() -> {
-
-                // If the user has manually granted the permission, dismiss the dialog.
                 if (cameraPermissionDialog != null && cameraPermissionDialog!!.isShowing) cameraPermissionDialog!!.cancel()
                 Log.i(TAG, "Permission granted.")
-
-                // Setup the camera since the permission is available
                 camConfig.initializeCamera()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
 
                 Log.i(TAG, "The user has default denied camera permission.")
-
-                // Don't build and show a new dialog if it's already visible
                 if (cameraPermissionDialog != null && cameraPermissionDialog!!.isShowing) return
                 val builder = MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.camera_permission_dialog_title)
                     .setMessage(R.string.camera_permission_dialog_message)
                 val positiveClicked = AtomicBoolean(false)
-
-                // Open the settings menu for the current app
                 builder.setPositiveButton(R.string.settings) { _: DialogInterface?, _: Int ->
                     positiveClicked.set(true)
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -485,19 +466,12 @@ open class MainActivity : AppCompatActivity(),
                 }
                 builder.setNegativeButton(R.string.cancel, null)
                 builder.setOnDismissListener {
-
-                    // The dialog could have either been dismissed by clicking on the
-                    // background or by clicking the cancel button. So in those cases,
-                    // the app should exit as the app depends on the camera permission.
                     if (!positiveClicked.get()) {
                         finish()
                     }
                 }
                 cameraPermissionDialog = builder.showIgnoringShortEdgeMode()
             }
-
-            // Request for the permission (Android will actually popup the permission
-            // dialog in this case)
             else -> {
                 Log.i(TAG, "Requesting permission from user...")
 
@@ -519,7 +493,6 @@ open class MainActivity : AppCompatActivity(),
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        // there are no camera controls in qr mode
         if (camConfig.isQRMode) {
             return super.onKeyUp(keyCode, event)
         }
@@ -531,8 +504,6 @@ open class MainActivity : AppCompatActivity(),
                 captureButton.performClick()
             }
             KeyEvent.KEYCODE_FOCUS -> {
-                // cancel any manual focus
-                // CameraX will start the continuous autofocus (if supported) automatically
                 previewView.controller?.cameraControl?.cancelFocusAndMetering()
             }
             KeyEvent.KEYCODE_ZOOM_IN -> {
@@ -547,7 +518,6 @@ open class MainActivity : AppCompatActivity(),
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            // Pretend as if the event was handled by the app (avoid volume bar from appearing)
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -1757,8 +1727,6 @@ open class MainActivity : AppCompatActivity(),
             requestLocation(application.isAnyLocationProvideActive())
         }
     }
-
-    // Used to request permission from the user
     private val locationPermissionLauncher = registerForActivityResult(
         RequestMultiplePermissions()
     ) {
