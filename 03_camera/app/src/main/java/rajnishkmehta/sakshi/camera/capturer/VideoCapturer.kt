@@ -135,7 +135,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                     put(MediaColumns.DISPLAY_NAME, fileName)
                     put(MediaColumns.MIME_TYPE, resolvedMimeType)
                     put(MediaColumns.RELATIVE_PATH, DEFAULT_MEDIA_STORE_CAPTURE_PATH)
-                    put(MediaColumns.IS_PENDING, 1)
+                    put(MediaColumns.IS_PENDING, 0)
                 }
                 uri = contentResolver.insert(CamConfig.videoCollectionUri, contentValues)
                 isPendingMediaStoreUri = true
