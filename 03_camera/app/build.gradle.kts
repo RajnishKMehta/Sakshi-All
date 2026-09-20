@@ -10,8 +10,8 @@ java {
 
 android {
     compileSdk = 37
-    buildToolsVersion = "37.0.0"
-    ndkVersion = "29.0.14206865"
+    compileSdkMinor = 2
+    ndkVersion = "30.0.16248370"
 
     namespace = "rajnishkmehta.sakshi.camera"
 
@@ -91,6 +91,8 @@ dependencies {
     implementation(libs.zxing.core)
 
     implementation(libs.sakshi.sdk)
+    implementation(libs.androidx.media3.muxer)
+    implementation(libs.androidx.media3.container)
 
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)

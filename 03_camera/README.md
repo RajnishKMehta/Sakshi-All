@@ -30,14 +30,21 @@ Keeping these responsibilities separate lets the capture app focus on the camera
 
 ## Features
 
-- **Photo & Video Capture:** Capture photos and videos using the device camera.
+- **Photo & Video Capture:** Capture photos and videos using the device camera (Supports standard MP4 and crash-safe fMP4 containers).
 - **Photo & Video Transfer:** Send captured photos and videos to Sakshi Vault through the Sakshi SDK.
 - **Local-only:** No internet connection needed.
 - **Sakshi Integration:** Works with the Sakshi SDK and Sakshi Vault as part of the Sakshi ecosystem.
 
 ---
 
-## Architecture
+## Recording Architecture
+
+Sakshi Camera uses modern Jetpack CameraX and Media3 APIs for video recording:
+
+1. **Standard MP4 Recording**: Utilizes the default official CameraX `Recorder` implementation (via platform muxer) without redundant abstractions.
+2. **Fragmented MP4 (fMP4) Recording**: Implements a custom, crash-safe recording pipeline using Media3's `FragmentedMp4Muxer` injected via CameraX's `MuxerFactory` interface, preserving data integrity upon unexpected terminations.
+
+## Ecosystem Architecture
 
 Sakshi Camera is one part of the Sakshi ecosystem:
 

@@ -115,6 +115,11 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+/**
+ * The primary activity of the Camera application. Handles UI rendering, user interactions,
+ * camera preview display, capturing logic (via [PhotoCapturer] and [VideoCapturer]), and
+ * integration with the Sakshi SDK for cross-app synchronization.
+ */
 open class MainActivity : AppCompatActivity(),
     OnTouchListener,
     OnScaleGestureListener,
@@ -132,13 +137,12 @@ open class MainActivity : AppCompatActivity(),
     lateinit var previewView: PreviewView
     lateinit var previewContainer: ConstraintLayout
     lateinit var bottomOverlay: View
-
+    
     // Hold a reference to the manual permission dialog to avoid re-creating it if it
     // is already visible and to dismiss it if the permission gets granted.
     private var cameraPermissionDialog: AlertDialog? = null
     private var audioPermissionDialog: AlertDialog? = null
     var lastFrame: Bitmap? = null
-        private set
 
     private lateinit var mainFrame: View
     lateinit var rootView: View
@@ -329,7 +333,7 @@ open class MainActivity : AppCompatActivity(),
             .setTitle(R.string.audio_permission_dialog_title)
             .setMessage(R.string.audio_permission_dialog_message)
 
-        // Open the settings menu for the current app
+            // Open the settings menu for the current app
         builder.setPositiveButton(R.string.settings) { _: DialogInterface?, _: Int ->
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
             val uri = Uri.fromParts(
@@ -354,7 +358,7 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun animateFocusRing(x: Float, y: Float) {
-
+        
         // Move the focus ring so that its center is at the tap location (x, y)
         val width = focusRing.width.toFloat()
         focusRing.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -472,7 +476,7 @@ open class MainActivity : AppCompatActivity(),
                     .setTitle(R.string.camera_permission_dialog_title)
                     .setMessage(R.string.camera_permission_dialog_message)
                 val positiveClicked = AtomicBoolean(false)
-
+                
                 // Open the settings menu for the current app
                 builder.setPositiveButton(R.string.settings) { _: DialogInterface?, _: Int ->
                     positiveClicked.set(true)
@@ -486,7 +490,6 @@ open class MainActivity : AppCompatActivity(),
                 }
                 builder.setNegativeButton(R.string.cancel, null)
                 builder.setOnDismissListener {
-
                     // The dialog could have either been dismissed by clicking on the
                     // background or by clicking the cancel button. So in those cases,
                     // the app should exit as the app depends on the camera permission.
@@ -496,7 +499,6 @@ open class MainActivity : AppCompatActivity(),
                 }
                 cameraPermissionDialog = builder.showIgnoringShortEdgeMode()
             }
-
             // Request for the permission (Android will actually popup the permission
             // dialog in this case)
             else -> {
@@ -557,6 +559,12 @@ open class MainActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
         resumeOrientationSensor()
+        if (lastVideoFormat == -1) {
+            lastVideoFormat = camConfig.videoFormat
+        } else if (lastVideoFormat != camConfig.videoFormat) {
+            lastVideoFormat = camConfig.videoFormat
+            camConfig.startCamera(forced = true)
+        }
         if (lastVaultPackage != camConfig.vaultPackage) {
             lastVaultPackage = camConfig.vaultPackage
             checkVault()
@@ -1358,6 +1366,7 @@ open class MainActivity : AppCompatActivity(),
     lateinit var camConfig: CamConfig
 
     private var lastVaultPackage: String = ""
+    private var lastVideoFormat: Int = -1
     lateinit var sakshiClient: SakshiClient
     private lateinit var cameraControl: CameraControl
 
@@ -1753,7 +1762,6 @@ open class MainActivity : AppCompatActivity(),
             requestLocation(application.isAnyLocationProvideActive())
         }
     }
-
     // Used to request permission from the user
     private val locationPermissionLauncher = registerForActivityResult(
         RequestMultiplePermissions()
