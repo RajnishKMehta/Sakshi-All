@@ -11,7 +11,6 @@ import rajnishkmehta.sakshi.camera.R
 class VideoCaptureActivity : CaptureActivity() {
 
     private lateinit var whiteOptionCircle: ImageView
-    private lateinit var playPreview: ImageView
 
     private var savedUri: Uri? = null
 
@@ -21,7 +20,7 @@ class VideoCaptureActivity : CaptureActivity() {
         super.onCreate(savedInstanceState)
 
         whiteOptionCircle = findViewById(R.id.white_option_circle)
-        playPreview = findViewById(R.id.play_preview)
+        // playPreview is already initialized in MainActivity
 
         setCaptureButtonIcon(R.drawable.recording, R.string.start_recording)
 
