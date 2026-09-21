@@ -138,17 +138,6 @@ class FragmentedMedia3Muxer : Muxer {
                 formatBuilder.setMaxInputSize(format.getInteger(android.media.MediaFormat.KEY_MAX_INPUT_SIZE))
             }
 
-            // Handle AAC Profile
-            var profile = -1
-            if (format.containsKey(android.media.MediaFormat.KEY_PROFILE)) {
-                profile = format.getInteger(android.media.MediaFormat.KEY_PROFILE)
-            } else if (format.containsKey(android.media.MediaFormat.KEY_AAC_PROFILE)) {
-                profile = format.getInteger(android.media.MediaFormat.KEY_AAC_PROFILE)
-            }
-
-            if (profile != -1 && mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
-                formatBuilder.setCodecs("mp4a.40.$profile")
-            }
         }
 
 
@@ -170,6 +159,43 @@ class FragmentedMedia3Muxer : Muxer {
                 break
             }
         }
+
+        if (initializationData.isEmpty() && mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+            var profile = -1
+            if (format.containsKey(android.media.MediaFormat.KEY_PROFILE)) {
+                profile = format.getInteger(android.media.MediaFormat.KEY_PROFILE)
+            } else if (format.containsKey(android.media.MediaFormat.KEY_AAC_PROFILE)) {
+                profile = format.getInteger(android.media.MediaFormat.KEY_AAC_PROFILE)
+            }
+
+            if (profile != -1 && format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE) && format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+                val sampleRate = format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
+                val channelCount = format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+
+                val sampleRateIndex = when (sampleRate) {
+                    96000 -> 0
+                    88200 -> 1
+                    64000 -> 2
+                    48000 -> 3
+                    44100 -> 4
+                    32000 -> 5
+                    24000 -> 6
+                    22050 -> 7
+                    16000 -> 8
+                    12000 -> 9
+                    11025 -> 10
+                    8000 -> 11
+                    7350 -> 12
+                    else -> 4
+                }
+
+                val config = ByteArray(2)
+                config[0] = ((profile shl 3) or (sampleRateIndex shr 1)).toByte()
+                config[1] = (((sampleRateIndex and 0x01) shl 7) or (channelCount shl 3)).toByte()
+                initializationData.add(config)
+            }
+        }
+
         formatBuilder.setInitializationData(initializationData)
 
         val isVideo = mimeType != null && mimeType.startsWith("video/")
