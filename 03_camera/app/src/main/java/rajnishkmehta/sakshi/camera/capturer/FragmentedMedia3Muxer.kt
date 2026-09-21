@@ -129,6 +129,12 @@ class FragmentedMedia3Muxer : Muxer {
         if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
             formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
         }
+        if (format.containsKey(android.media.MediaFormat.KEY_LANGUAGE)) {
+            formatBuilder.setLanguage(format.getString(android.media.MediaFormat.KEY_LANGUAGE))
+        }
+        if (format.containsKey(android.media.MediaFormat.KEY_MAX_INPUT_SIZE)) {
+            formatBuilder.setMaxInputSize(format.getInteger(android.media.MediaFormat.KEY_MAX_INPUT_SIZE))
+        }
 
         val initializationData = mutableListOf<ByteArray>()
         var csdIndex = 0
@@ -148,9 +154,32 @@ class FragmentedMedia3Muxer : Muxer {
                 break
             }
         }
+
+        if (mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC && initializationData.isEmpty()) {
+            val profile = if (format.containsKey(android.media.MediaFormat.KEY_AAC_PROFILE)) {
+                format.getInteger(android.media.MediaFormat.KEY_AAC_PROFILE)
+            } else {
+                android.media.MediaCodecInfo.CodecProfileLevel.AACObjectLC
+            }
+            val sampleRate = if (format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
+                format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
+            } else {
+                44100
+            }
+            val channelCount = if (format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+                format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+            } else {
+                2
+            }
+            val audioSpecificConfig = getAacAudioSpecificConfig(profile, sampleRate, channelCount)
+            initializationData.add(audioSpecificConfig)
+        }
+
         formatBuilder.setInitializationData(initializationData)
 
-        if (!metadataAdded) {
+        val isVideo = mimeType?.startsWith("video/") == true
+
+        if (isVideo && !metadataAdded) {
             orientationDegrees?.let { degrees ->
                 currentMuxer.addMetadataEntry(Mp4OrientationData(degrees))
             }
@@ -165,6 +194,20 @@ class FragmentedMedia3Muxer : Muxer {
         }
 
         return currentMuxer.addTrack(formatBuilder.build())
+    }
+
+    private fun getAacAudioSpecificConfig(profile: Int, sampleRate: Int, channelCount: Int): ByteArray {
+        val sampleRates = intArrayOf(
+            96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350
+        )
+        var sampleRateIndex = sampleRates.indexOf(sampleRate)
+        if (sampleRateIndex == -1) {
+            sampleRateIndex = 4 // Default to 44100
+        }
+        val config = ByteArray(2)
+        config[0] = (((profile and 0x1F) shl 3) or ((sampleRateIndex shr 1) and 0x07)).toByte()
+        config[1] = (((sampleRateIndex and 0x01) shl 7) or ((channelCount and 0x0F) shl 3)).toByte()
+        return config
     }
 
     /**
