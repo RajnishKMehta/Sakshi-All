@@ -149,9 +149,9 @@ class FragmentedMedia3Muxer : Muxer {
                 val buffer = format.getByteBuffer(csdKey)
                 if (buffer != null) {
                     val bytes = ByteArray(buffer.remaining())
-                    buffer.position(0)
+                    val originalPos = buffer.position()
                     buffer.get(bytes)
-                    buffer.position(0)
+                    buffer.position(originalPos)
                     initializationData.add(bytes)
                 }
                 csdIndex++
@@ -160,7 +160,7 @@ class FragmentedMedia3Muxer : Muxer {
             }
         }
 
-        if (initializationData.isEmpty() && mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+        if (mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
             var profile = -1
             if (format.containsKey(android.media.MediaFormat.KEY_PROFILE)) {
                 profile = format.getInteger(android.media.MediaFormat.KEY_PROFILE)
@@ -192,6 +192,8 @@ class FragmentedMedia3Muxer : Muxer {
                 val config = ByteArray(2)
                 config[0] = ((profile shl 3) or (sampleRateIndex shr 1)).toByte()
                 config[1] = (((sampleRateIndex and 0x01) shl 7) or (channelCount shl 3)).toByte()
+
+                initializationData.clear()
                 initializationData.add(config)
             }
         }

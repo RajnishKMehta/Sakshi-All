@@ -61,6 +61,6 @@ Media3's `FragmentedMp4Muxer` builds `moof`/`traf` boxes based strictly on the p
 The issue has been resolved by:
 1. Updating `FragmentedMedia3Muxer.kt` to extract `KEY_LANGUAGE` and `KEY_MAX_INPUT_SIZE` from the Android `MediaFormat`.
 2. Ensuring video-specific metadata (`Mp4OrientationData`, `KEY_ANDROID_CAPTURE_FPS`, `Mp4LocationData`) is added *only* when the video track is initialized.
-3. Constructing an `AudioSpecificConfig` based on `KEY_PROFILE` (or `KEY_AAC_PROFILE`), sample rate, and channel count, and providing it via `Format.initializationData`. This allows Media3's `esdsBox` builder to correctly populate the codec profile without relying on `setCodecs("mp4a.40.X")`.
+3. Constructing an `AudioSpecificConfig` based on `KEY_PROFILE` (or `KEY_AAC_PROFILE`), sample rate, and channel count, and providing it via `Format.initializationData`. This allows Media3's `esdsBox` builder to correctly populate the codec profile without relying on `setCodecs`.
 
 With these changes, the custom muxer accurately constructs `moof`/`traf` and `esds` boxes for FMP4 files, making the audio track playable.
