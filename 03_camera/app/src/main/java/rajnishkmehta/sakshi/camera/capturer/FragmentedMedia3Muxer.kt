@@ -160,7 +160,7 @@ class FragmentedMedia3Muxer : Muxer {
             }
         }
 
-        if (mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+        if (initializationData.isEmpty() && mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
             var profile = -1
             if (format.containsKey(android.media.MediaFormat.KEY_PROFILE)) {
                 profile = format.getInteger(android.media.MediaFormat.KEY_PROFILE)
@@ -193,7 +193,6 @@ class FragmentedMedia3Muxer : Muxer {
                 config[0] = ((profile shl 3) or (sampleRateIndex shr 1)).toByte()
                 config[1] = (((sampleRateIndex and 0x01) shl 7) or (channelCount shl 3)).toByte()
 
-                initializationData.clear()
                 initializationData.add(config)
             }
         }
