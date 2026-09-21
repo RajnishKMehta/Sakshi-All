@@ -608,8 +608,21 @@ fun deleteStalePendingRecordings(
  */
 @Throws(Exception::class)
 fun getVideoThumbnail(context: Context, uri: Uri?): Bitmap? {
-    MediaMetadataRetriever().use {
-        it.setDataSource(context, uri)
-        return it.frameAtTime
+    if (uri == null) return null
+    android.media.MediaMetadataRetriever().use {
+        try {
+            it.setDataSource(context, uri)
+            // Use getScaledFrameAtTime directly for API 29+ as per guidelines
+            val bitmap = it.getScaledFrameAtTime(-1L, android.media.MediaMetadataRetriever.OPTION_PREVIOUS_SYNC, 320, 320)
+            if (bitmap != null) return bitmap
+        } catch (e: Exception) {
+            rajnishkmehta.sakshi.camera.debug.DebugLogger.e("VideoCapturer", "Failed to get scaled video thumbnail", e)
+        }
+        try {
+            return it.frameAtTime
+        } catch (e: Exception) {
+            rajnishkmehta.sakshi.camera.debug.DebugLogger.e("VideoCapturer", "Failed to get video thumbnail", e)
+            return null
+        }
     }
 }

@@ -168,6 +168,7 @@ open class MainActivity : AppCompatActivity(),
     lateinit var timerView: TextView
     lateinit var thirdOption: View
     lateinit var imagePreview: ShapeableImageView
+    lateinit var videoPlayIcon: ImageView
     lateinit var previewLoader: ProgressBar
     private var isZooming = false
 
@@ -642,6 +643,7 @@ open class MainActivity : AppCompatActivity(),
         thirdOption = binding.thirdOption
         previewLoader = binding.previewLoading
         imagePreview = binding.imagePreview
+        videoPlayIcon = binding.videoPlayIcon
         previewView = binding.preview
         previewView.scaleType = PreviewView.ScaleType.FIT_START
         previewContainer = binding.previewContainer
@@ -1851,6 +1853,7 @@ open class MainActivity : AppCompatActivity(),
         val item = camConfig.lastCapturedItem
         val preview = imagePreview
         preview.setImageBitmap(null)
+        videoPlayIcon.visibility = View.GONE
         isThumbnailLoaded = false
 
         if (item == null) {
@@ -1886,6 +1889,11 @@ open class MainActivity : AppCompatActivity(),
                 mainExecutor.execute {
                     if (isStarted && camConfig.lastCapturedItem == item) {
                         preview.setImageBitmap(bitmap)
+                        if (item.type == ITEM_TYPE_VIDEO) {
+                            videoPlayIcon.visibility = View.VISIBLE
+                        } else {
+                            videoPlayIcon.visibility = View.GONE
+                        }
                         isThumbnailLoaded = true
                     }
                 }

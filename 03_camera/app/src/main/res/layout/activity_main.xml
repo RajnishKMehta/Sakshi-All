@@ -356,6 +356,16 @@
                     android:importantForAccessibility="no"/>
 
                 <ImageView
+                    android:id="@+id/video_play_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/play"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no"
+                    app:tint="@android:color/white" />
+
+                <ImageView
                     android:id="@+id/third_circle"
                     android:layout_width="64dp"
                     android:layout_height="64dp"

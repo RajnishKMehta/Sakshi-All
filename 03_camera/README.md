@@ -28,7 +28,12 @@ Keeping these responsibilities separate lets the capture app focus on the camera
 
 ---
 
+
 ## Features
+
+*   **Photo and Video Capture:** Standard functionalities using modern Android APIs.
+*   **Thumbnail Generation:** Scaled thumbnail extraction for video (including mp4 and fmp4 using native MediaMetadataRetriever) with visual play button indicators for quick identification.
+
 
 - **Photo & Video Capture:** Capture photos and videos using the device camera (Supports standard MP4 and crash-safe fMP4 containers).
 - **Photo & Video Transfer:** Send captured photos and videos to Sakshi Vault through the Sakshi SDK.
