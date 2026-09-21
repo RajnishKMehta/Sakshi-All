@@ -130,6 +130,28 @@ class FragmentedMedia3Muxer : Muxer {
             formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
         }
 
+        if (mimeType != null && mimeType.startsWith("audio/")) {
+            if (format.containsKey(android.media.MediaFormat.KEY_LANGUAGE)) {
+                formatBuilder.setLanguage(format.getString(android.media.MediaFormat.KEY_LANGUAGE))
+            }
+            if (format.containsKey(android.media.MediaFormat.KEY_MAX_INPUT_SIZE)) {
+                formatBuilder.setMaxInputSize(format.getInteger(android.media.MediaFormat.KEY_MAX_INPUT_SIZE))
+            }
+
+            // Handle AAC Profile
+            var profile = -1
+            if (format.containsKey(android.media.MediaFormat.KEY_PROFILE)) {
+                profile = format.getInteger(android.media.MediaFormat.KEY_PROFILE)
+            } else if (format.containsKey(android.media.MediaFormat.KEY_AAC_PROFILE)) {
+                profile = format.getInteger(android.media.MediaFormat.KEY_AAC_PROFILE)
+            }
+
+            if (profile != -1 && mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+                formatBuilder.setCodecs("mp4a.40.$profile")
+            }
+        }
+
+
         val initializationData = mutableListOf<ByteArray>()
         var csdIndex = 0
         while (true) {
@@ -150,7 +172,8 @@ class FragmentedMedia3Muxer : Muxer {
         }
         formatBuilder.setInitializationData(initializationData)
 
-        if (!metadataAdded) {
+        val isVideo = mimeType != null && mimeType.startsWith("video/")
+        if (!metadataAdded && isVideo) {
             orientationDegrees?.let { degrees ->
                 currentMuxer.addMetadataEntry(Mp4OrientationData(degrees))
             }

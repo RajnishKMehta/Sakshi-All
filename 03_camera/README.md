@@ -12,7 +12,7 @@
 </div>
 
 > [!WARNING]
-> **Early Beta:** Sakshi Camera currently supports **photo and video capture and transfer**. Audio functionality is not implemented yet. APIs and behavior may change in future releases.
+> **Early Beta:** Sakshi Camera currently supports **photo and video capture and transfer**. Audio functionality is implemented but APIs and behavior may change in future releases.
 
 **Sakshi Camera** ("Sakshi (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sakshi Android ecosystem.
 
