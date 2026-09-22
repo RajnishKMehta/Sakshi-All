@@ -2,13 +2,20 @@ package rajnishkmehta.sakshi.vault.thumbnail
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.media.ThumbnailUtils
-import android.util.Size
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
+import android.media.MediaMetadataRetriever
+import androidx.annotation.OptIn
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.effect.Presentation
+import androidx.media3.inspector.frame.FrameExtractor
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.guava.await
 import rajnishkmehta.sakshi.vault.AppLog as Log
 
 /**
@@ -17,7 +24,7 @@ import rajnishkmehta.sakshi.vault.AppLog as Log
 object ThumbnailManager {
     private const val TAG = "ThumbnailManager"
     // Sensible small thumbnail size for Portal/gallery preview
-    private val THUMBNAIL_SIZE = Size(320, 320)
+    private const val MAX_DIMENSION = 320
 
     /**
      * Generates a thumbnail for a given source media file and saves it in the private Vault storage.
@@ -26,15 +33,14 @@ object ThumbnailManager {
      * @param context Application context
      * @param fileId Unique file identifier
      * @param mediaType The media type ("PHOTO", "VIDEO", etc.)
-     * @param fileExtension The original file extension
      * @param sourceFile The fully copied source file in vault storage
      * @return The generated thumbnail File, or null if generation was skipped or failed.
      */
+    @OptIn(UnstableApi::class)
     suspend fun generateAndStoreThumbnail(
         context: Context,
         fileId: String,
         mediaType: String,
-        fileExtension: String,
         sourceFile: File
     ): File? = withContext(Dispatchers.IO) {
         if (mediaType != "PHOTO" && mediaType != "VIDEO") {
@@ -55,9 +61,69 @@ object ThumbnailManager {
             Log.d(TAG, "Generating thumbnail for $fileId ($mediaType) at ${thumbnailFile.absolutePath}")
 
             val bitmap: Bitmap = if (mediaType == "PHOTO") {
-                ThumbnailUtils.createImageThumbnail(sourceFile, THUMBNAIL_SIZE, null)
+                val source = ImageDecoder.createSource(sourceFile)
+                ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                    decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+
+                    val width = info.size.width
+                    val height = info.size.height
+                    val maxOriginal = maxOf(1, maxOf(width, height))
+
+                    if (maxOriginal > MAX_DIMENSION) {
+                        val scale = MAX_DIMENSION.toFloat() / maxOriginal
+                        val targetWidth = maxOf(1, (width * scale).toInt())
+                        val targetHeight = maxOf(1, (height * scale).toInt())
+                        decoder.setTargetSize(targetWidth, targetHeight)
+                    }
+                }
             } else {
-                ThumbnailUtils.createVideoThumbnail(sourceFile, THUMBNAIL_SIZE, null)
+                val retriever = MediaMetadataRetriever()
+                var originalWidth = 0
+                var originalHeight = 0
+                try {
+                    retriever.setDataSource(sourceFile.absolutePath)
+                    val widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    val heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    val rotationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+
+                    val w = widthStr?.toIntOrNull() ?: 0
+                    val h = heightStr?.toIntOrNull() ?: 0
+                    val r = rotationStr?.toIntOrNull() ?: 0
+
+                    if (r == 90 || r == 270) {
+                        originalWidth = h
+                        originalHeight = w
+                    } else {
+                        originalWidth = w
+                        originalHeight = h
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to retrieve video metadata for $fileId", e)
+                } finally {
+                    retriever.release()
+                }
+
+                if (originalWidth <= 0 || originalHeight <= 0) {
+                    Log.e(TAG, "Cannot extract video thumbnail: Invalid dimensions for $fileId. Aborting to avoid unbounded extraction.")
+                    return@withContext null
+                }
+
+                val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
+
+                val builder = FrameExtractor.Builder(context, mediaItem)
+
+                val maxOriginal = maxOf(1, maxOf(originalWidth, originalHeight))
+                if (maxOriginal > MAX_DIMENSION) {
+                    val scale = MAX_DIMENSION.toFloat() / maxOriginal
+                    val targetWidth = maxOf(1, (originalWidth * scale).toInt())
+                    val targetHeight = maxOf(1, (originalHeight * scale).toInt())
+                    builder.setEffects(listOf(Presentation.createForWidthAndHeight(targetWidth, targetHeight, Presentation.LAYOUT_SCALE_TO_FIT)))
+                }
+
+                builder.build().use { frameExtractor ->
+                    val frame = frameExtractor.thumbnail.await()
+                    frame.bitmap
+                }
             }
 
             @Suppress("DEPRECATION")
