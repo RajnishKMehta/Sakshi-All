@@ -42,6 +42,14 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
         return destinationFile.absolutePath
     }
 
+    /**
+     * Synchronizes the leading media metadata and appends bytes after [offset].
+     *
+     * For an existing file, up to 128 KiB is rewritten from the start of [inputStream] so
+     * mutable headers, such as MP4 metadata, stay current during incremental copies.
+     *
+     * @return the number of bytes appended after [offset], excluding synchronized header bytes.
+     */
     override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String, fileExtension: String): Long {
         PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
         val destinationPath = getDestinationUri(fileId, mediaType, fileExtension)
