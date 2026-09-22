@@ -76,7 +76,7 @@ class SyncScheduler(
 
     /**
      * Explicitly stops synchronization for the given [fileId] (usually triggered when recording stops).
-     * It performs one final sync pass to ensure all trailing bytes are fully copied before shutting down.
+     * It performs a full copy pass to ensure the entire file is copied correctly before shutting down.
      */
     fun stopSync(fileId: String, callback: ISakshiVaultCallback?) {
         val job = activeJobs.remove(fileId)
@@ -85,13 +85,13 @@ class SyncScheduler(
         coroutineScope.launch {
             job?.cancelAndJoin()
 
-            // Run one final sync pass to copy any last bytes written by the camera
+            // Run one final sync pass to copy the entire file
             try {
                 getMutex(fileId).withLock {
                     val record = database.mediaRecordDao().getRecord(fileId)
                     if (record != null && record.completionState != "COMPLETED") {
                         Log.d(tag, "Performing final sync pass for $fileId")
-                        copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType, record.fileExtension)
+                        copyEngine.copyFile(fileId, record.originalUri, record.mediaType, record.fileExtension)
 
                         val updatedRecord = database.mediaRecordDao().getRecord(fileId)
                         if (updatedRecord != null) {

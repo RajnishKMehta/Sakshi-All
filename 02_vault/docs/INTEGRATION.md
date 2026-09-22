@@ -66,5 +66,5 @@ If you want to understand the inner workings of how the **Vault** responds to th
 2. **Binding**: The SDK binds to the Vault using the action `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE`.
 3. **Data Transfer**:
    - **Photos**: Client sends a `FileCopyRequest` bundle; Vault copies the file and returns a `CopyDoneAck`.
-   - **Videos**: Client sends a `VideoSyncRequest`; Vault performs continuous incremental copying and streams `VideoSyncStatus` updates until completion.
+   - **Videos**: Client sends a `VideoSyncRequest`; Vault performs continuous copying (with a full copy pass at the end) and streams `VideoSyncStatus` updates until completion.
 4. **Resiliency**: The Vault Service acts as a background boundary. Even if the Client App is forcefully closed or the original file deleted, the copied data remains safely in the Vault's storage sandbox.

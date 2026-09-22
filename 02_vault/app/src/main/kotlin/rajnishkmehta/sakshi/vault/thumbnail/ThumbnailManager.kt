@@ -6,16 +6,10 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.media.MediaMetadataRetriever
-import androidx.annotation.OptIn
-import androidx.media3.common.MediaItem
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.effect.Presentation
-import androidx.media3.inspector.frame.FrameExtractor
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.guava.await
 import rajnishkmehta.sakshi.vault.AppLog as Log
 
 /**
@@ -36,7 +30,6 @@ object ThumbnailManager {
      * @param sourceFile The fully copied source file in vault storage
      * @return The generated thumbnail File, or null if generation was skipped or failed.
      */
-    @OptIn(UnstableApi::class)
     suspend fun generateAndStoreThumbnail(
         context: Context,
         fileId: String,
@@ -44,21 +37,21 @@ object ThumbnailManager {
         sourceFile: File
     ): File? = withContext(Dispatchers.IO) {
         if (mediaType != "PHOTO" && mediaType != "VIDEO") {
-            Log.d(TAG, "Skipping thumbnail generation for unsupported media type: $mediaType")
+            Log.d(TAG, "Skipping thumbnail generation for unsupported media type: \$mediaType")
             return@withContext null
         }
 
         if (!sourceFile.exists() || sourceFile.length() == 0L) {
-            Log.e(TAG, "Cannot generate thumbnail: Source file does not exist or is empty ($fileId)")
+            Log.e(TAG, "Cannot generate thumbnail: Source file does not exist or is empty (\$fileId)")
             return@withContext null
         }
 
         try {
-            val thumbnailDir = File(context.filesDir, "media/${mediaType.lowercase()}/thumbnail")
+            val thumbnailDir = File(context.filesDir, "media/\${mediaType.lowercase()}/thumbnail")
             thumbnailDir.mkdirs()
 
-            val thumbnailFile = File(thumbnailDir, "${fileId}.webp")
-            Log.d(TAG, "Generating thumbnail for $fileId ($mediaType) at ${thumbnailFile.absolutePath}")
+            val thumbnailFile = File(thumbnailDir, "\${fileId}.webp")
+            Log.d(TAG, "Generating thumbnail for \$fileId (\$mediaType) at \${thumbnailFile.absolutePath}")
 
             val bitmap: Bitmap = if (mediaType == "PHOTO") {
                 val source = ImageDecoder.createSource(sourceFile)
@@ -98,31 +91,37 @@ object ThumbnailManager {
                         originalHeight = h
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to retrieve video metadata for $fileId", e)
+                    Log.e(TAG, "Failed to retrieve video metadata for \$fileId", e)
                 } finally {
                     retriever.release()
                 }
 
                 if (originalWidth <= 0 || originalHeight <= 0) {
-                    Log.e(TAG, "Cannot extract video thumbnail: Invalid dimensions for $fileId. Aborting to avoid unbounded extraction.")
+                    Log.e(TAG, "Cannot extract video thumbnail: Invalid dimensions for \$fileId. Aborting to avoid unbounded extraction.")
                     return@withContext null
                 }
 
-                val mediaItem = MediaItem.fromUri(Uri.fromFile(sourceFile))
-
-                val builder = FrameExtractor.Builder(context, mediaItem)
-
                 val maxOriginal = maxOf(1, maxOf(originalWidth, originalHeight))
+                var targetWidth = originalWidth
+                var targetHeight = originalHeight
+
                 if (maxOriginal > MAX_DIMENSION) {
                     val scale = MAX_DIMENSION.toFloat() / maxOriginal
-                    val targetWidth = maxOf(1, (originalWidth * scale).toInt())
-                    val targetHeight = maxOf(1, (originalHeight * scale).toInt())
-                    builder.setEffects(listOf(Presentation.createForWidthAndHeight(targetWidth, targetHeight, Presentation.LAYOUT_SCALE_TO_FIT)))
+                    targetWidth = maxOf(1, (originalWidth * scale).toInt())
+                    targetHeight = maxOf(1, (originalHeight * scale).toInt())
                 }
 
-                builder.build().use { frameExtractor ->
-                    val frame = frameExtractor.thumbnail.await()
-                    frame.bitmap
+                val extractRetriever = MediaMetadataRetriever()
+                try {
+                    extractRetriever.setDataSource(sourceFile.absolutePath)
+                    try {
+                        extractRetriever.getScaledFrameAtTime(-1L, MediaMetadataRetriever.OPTION_PREVIOUS_SYNC, targetWidth, targetHeight)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to get scaled frame for \$fileId, falling back to unscaled", e)
+                        extractRetriever.getFrameAtTime(-1L, MediaMetadataRetriever.OPTION_PREVIOUS_SYNC)
+                    } ?: throw Exception("Bitmap extraction returned null")
+                } finally {
+                    extractRetriever.release()
                 }
             }
 
@@ -145,14 +144,14 @@ object ThumbnailManager {
             }
 
             if (!compressSuccess) {
-                Log.e(TAG, "Failed to compress thumbnail for $fileId")
+                Log.e(TAG, "Failed to compress thumbnail for \$fileId")
                 return@withContext null
             }
 
-            Log.d(TAG, "Successfully generated thumbnail for $fileId")
+            Log.d(TAG, "Successfully generated thumbnail for \$fileId")
             return@withContext thumbnailFile
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to generate thumbnail for $fileId", e)
+            Log.e(TAG, "Failed to generate thumbnail for \$fileId", e)
             return@withContext null
         }
     }

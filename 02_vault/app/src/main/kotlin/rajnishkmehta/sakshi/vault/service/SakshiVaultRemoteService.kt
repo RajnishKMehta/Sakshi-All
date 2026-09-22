@@ -131,7 +131,7 @@ class SakshiVaultRemoteService : Service() {
         }
 
         /**
-         * Cancels the active sync loop for the video and schedules a final incremental copy
+         * Cancels the active sync loop for the video and schedules a final full copy pass
          * to sync any remaining trailing bytes before marking as complete.
          */
         override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
