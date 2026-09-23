@@ -176,13 +176,16 @@ class SakshiVaultRemoteService : Service() {
         }
 
 
+
         override fun listMedia(): Bundle {
             Log.d(tag, "Received listMedia query")
             val records = runBlocking {
                 database?.mediaRecordDao()?.getAllRecords() ?: emptyList()
             }
 
-            val groups = records.groupBy { it.mediaType.lowercase() }
+            val validRecords = records.filter { it.completionState == "COMPLETED" || it.completionState == "FAILED" }
+
+            val groups = validRecords.groupBy { it.mediaType.lowercase() }
             val result = groups.mapValues { (_, list) ->
                 list.map { record ->
                     MediaItem(record.fileId, record.createdTime)
@@ -195,7 +198,6 @@ class SakshiVaultRemoteService : Service() {
                 putString("media_list_json", jsonString)
             }
         }
-
         override fun isAVSynced(fileId: String): Bundle {
             Log.d(tag, "Received isAVSynced query: fileId=$fileId")
             val record = runBlocking {
