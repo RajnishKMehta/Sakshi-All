@@ -12,8 +12,8 @@ ksp = "2.3.12"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 
 # Room
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 
 # Sakshi SDK
 sakshi-sdk = { group = "io.github.rajnishkmehta.sakshi", name = "sakshi-sdk", version.ref = "sakshi" }
