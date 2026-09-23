@@ -77,6 +77,13 @@ public interface SakshiClient {
     public suspend fun isAVSynced(fileId: String): SakshiResult<RecordingQueryResponse>
 
     /**
+     * Lists all stored media files grouped by media type in JSON format.
+     *
+     * @return [SakshiResult] containing the raw JSON string on success or [SakshiError] on failure.
+     */
+    public suspend fun listMedia(): SakshiResult<String>
+
+    /**
      * Explicitly disconnects from Vault IPC service and releases internal resources.
      */
     public fun disconnect()

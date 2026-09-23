@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -95,8 +96,20 @@ dependencies {
 
     // Media3
     implementation(libs.androidx.media3.inspector.frame)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 }
 
 room3 {
     schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

@@ -1,4 +1,6 @@
 [versions]
+kotlinx-serialization = "1.12.0-RC"
+kotlinx-serialization-plugin = "2.4.20"
 agp = "9.4.1"
 room = "3.0.2"
 sakshi = "1.0.0-beta.7"
@@ -9,6 +11,9 @@ androidx-core = "1.19.0"
 ksp = "2.3.12"
 
 [libraries]
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.10.2" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "1.10.2" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 
 # Room
@@ -27,6 +32,7 @@ kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 androidx-media3-inspector-frame = { group = "androidx.media3", name = "media3-inspector-frame", version.ref = "media3" }
 
 [plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinx-serialization-plugin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -63,4 +63,9 @@ interface ISakshiVaultService {
      * @return Bundle containing query response (existence status, progress, last offset).
      */
     Bundle isAVSynced(in String fileId);
+
+    /**
+     * Lists all stored media files grouped by media type in JSON format.
+     */
+    Bundle listMedia();
 }
