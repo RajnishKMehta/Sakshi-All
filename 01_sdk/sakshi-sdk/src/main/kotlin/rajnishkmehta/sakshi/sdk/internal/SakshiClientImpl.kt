@@ -323,6 +323,7 @@ internal class SakshiClientImpl(
     }
 
 
+
     override suspend fun listMedia(): SakshiResult<String> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
@@ -332,7 +333,9 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         return try {
-            val resBundle = service.listMedia()
+            val resBundle = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                service.listMedia()
+            }
             val json = resBundle.getString("media_list_json")
             if (json != null) {
                 SakshiResult.Success(json)
@@ -348,7 +351,6 @@ internal class SakshiClientImpl(
             )
         }
     }
-
     override fun disconnect() {
         serviceConnection.disconnect()
     }

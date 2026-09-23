@@ -177,10 +177,12 @@ class SakshiVaultRemoteService : Service() {
 
 
 
+
         override fun listMedia(): Bundle {
             Log.d(tag, "Received listMedia query")
             val records = runBlocking {
-                database?.mediaRecordDao()?.getAllRecords() ?: emptyList()
+                val db = database ?: throw IllegalStateException("VaultDatabase is not initialized")
+                db.mediaRecordDao().getAllRecords()
             }
 
             val validRecords = records.filter { it.completionState == "COMPLETED" || it.completionState == "FAILED" }
