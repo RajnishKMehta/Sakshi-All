@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.mockk)
 }
 
 tasks.withType<Test> {
