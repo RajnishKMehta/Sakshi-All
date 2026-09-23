@@ -59,7 +59,7 @@ class CopyEngine(
     /**
      * Performs a single incremental copy pass for a media file (video/audio).
      * Resumes from the last copied offset stored in the database, appends newly written bytes to vault storage,
-     * and updates the offset and state in the database.
+     * synchronizes file headers, and updates the offset and state in the database.
      *
      * @param fileId Unique identifier for the media file.
      * @param sourceUriStr Source URI string of the media.
