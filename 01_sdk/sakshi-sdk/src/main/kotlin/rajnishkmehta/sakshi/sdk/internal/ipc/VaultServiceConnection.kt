@@ -81,8 +81,13 @@ internal class VaultServiceConnection(
             }
         }
 
-        val service = withTimeoutOrNull(config.connectionTimeoutMs) {
-            deferred.await()
+        val service = try {
+            withTimeoutOrNull(config.connectionTimeoutMs) {
+                deferred.await()
+            }
+        } catch (e: Exception) {
+            unbindInternal()
+            return SakshiResult.Failure(SakshiError.ServiceUnavailable("Service binding failed: ${e.message}"))
         }
 
         return if (service != null) {
@@ -107,6 +112,11 @@ internal class VaultServiceConnection(
         val vaultService = ISakshiVaultService.Stub.asInterface(service)
         boundService = vaultService
         connectionDeferred?.complete(vaultService)
+    }
+
+    override fun onNullBinding(name: ComponentName?) {
+        connectionDeferred?.completeExceptionally(IllegalStateException("Vault service returned a null binder indicating initialization failure"))
+        clearServiceState()
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
