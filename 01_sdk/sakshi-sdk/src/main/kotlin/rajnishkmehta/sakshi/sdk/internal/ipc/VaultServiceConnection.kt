@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -81,8 +82,16 @@ internal class VaultServiceConnection(
             }
         }
 
-        val service = withTimeoutOrNull(config.connectionTimeoutMs) {
-            deferred.await()
+        val service = try {
+            withTimeoutOrNull(config.connectionTimeoutMs) {
+                deferred.await()
+            }
+        } catch (e: CancellationException) {
+            unbindInternal()
+            throw e
+        } catch (e: Exception) {
+            unbindInternal()
+            return SakshiResult.Failure(SakshiError.ServiceUnavailable("Service binding failed: ${e.message}"))
         }
 
         return if (service != null) {
@@ -107,6 +116,11 @@ internal class VaultServiceConnection(
         val vaultService = ISakshiVaultService.Stub.asInterface(service)
         boundService = vaultService
         connectionDeferred?.complete(vaultService)
+    }
+
+    override fun onNullBinding(name: ComponentName?) {
+        connectionDeferred?.completeExceptionally(IllegalStateException("Vault service returned a null binder indicating initialization failure"))
+        clearServiceState()
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {

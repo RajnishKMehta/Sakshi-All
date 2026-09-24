@@ -154,28 +154,35 @@ import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 
-class SakshiVaultRemoteService : Service() {
-    private val binder = object : ISakshiVaultService.Stub() {
-        override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = avSyncBundle.getString("file_id", "")
-            val sourceUriStr = avSyncBundle.getString("uri", "")
+class SakshiVaultServiceBinder : ISakshiVaultService.Stub() {
 
-            // Vault copies bytes incrementally...
-            val totalCopied = performVaultCopy(fileId)
+    override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
+        val fileId = avSyncBundle.getString("file_id", "")
+        val sourceUriStr = avSyncBundle.getString("uri", "")
 
-            // Vault sends CopyDoneAck back to Client app
-            VaultResponder.sendCopyDone(
-                callback,
-                CopyDoneAck(
-                    fileId = fileId,
-                    originalUri = if (sourceUriStr.isNullOrEmpty()) null else Uri.parse(sourceUriStr),
-                    totalCopiedBytes = totalCopied
-                )
+        // Vault copies bytes incrementally...
+        val totalCopied = performVaultCopy(fileId)
+
+        // Vault sends CopyDoneAck back to Client app
+        VaultResponder.sendCopyDone(
+            callback,
+            CopyDoneAck(
+                fileId = fileId,
+                originalUri = if (sourceUriStr.isNullOrEmpty()) null else Uri.parse(sourceUriStr),
+                totalCopiedBytes = totalCopied
             )
-        }
-        // ...
+        )
     }
-    override fun onBind(intent: Intent?): IBinder = binder
+    // ...
+}
+
+class SakshiVaultRemoteService : Service() {
+    private var binder: SakshiVaultServiceBinder? = null
+    override fun onCreate() {
+        super.onCreate()
+        binder = SakshiVaultServiceBinder()
+    }
+    override fun onBind(intent: Intent?): IBinder? = binder
 }
 ```
 

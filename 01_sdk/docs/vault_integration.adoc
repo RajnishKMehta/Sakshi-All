@@ -31,7 +31,7 @@ In the Vault application's `AndroidManifest.xml`, declare the remote IPC service
 
 == 3. Implementing `ISakshiVaultService.Stub`
 
-The Vault service extends `Service` and returns the AIDL stub implementation in `onBind`:
+The Vault service extends `Service` and returns the AIDL stub implementation in `onBind`. The AIDL stub is implemented in a separate binder class:
 
 [source,kotlin]
 ----
@@ -49,104 +49,113 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 import rajnishkmehta.sakshi.vault.BuildConfig
 
-class SakshiVaultRemoteService : Service() {
+class SakshiVaultServiceBinder(
+    // Dependencies passed via constructor
+) : ISakshiVaultService.Stub() {
 
-    private val binder = object : ISakshiVaultService.Stub() {
-
-        override fun ping(requestBundle: Bundle): Bundle {
-            return Bundle().apply {
-                putBoolean("is_available", true)
-                putString("vault_version", BuildConfig.VERSION_NAME.toString())
-                putLong("timestamp", System.currentTimeMillis())
-            }
-        }
-
-        override fun copyFile(fileBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = fileBundle.getString("file_id", "")
-            val uriStr = fileBundle.getString("uri", "")
-            val mediaType = fileBundle.getString("media_type", "OTHER") // example: "PHOTO"
-            val fileExtension = fileBundle.getString("file_extension", "bin") // example: "jpg"
-            val timestampEpochMs = fileBundle.getLong("timestamp", System.currentTimeMillis())
-            val metadata = fileBundle.keySet()
-                .filter { it.startsWith("meta_") }
-                .associate { it.removePrefix("meta_") to (fileBundle.getString(it) ?: "") }
-
-            // Perform Vault file saving logic
-            val copiedBytes = saveFileToVaultStorage(fileId, uriStr, mediaType, fileExtension)
-
-            // Send CopyDoneAck back to client app
-            val copyDoneAck = CopyDoneAck(
-                fileId = fileId,
-                originalUri = if (uriStr.isNullOrEmpty()) null else Uri.parse(uriStr),
-                totalCopiedBytes = copiedBytes,
-                timestampEpochMs = System.currentTimeMillis()
-            )
-            VaultResponder.sendFileCopyAck(callback, copyDoneAck)
-        }
-
-        override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-            val fileId = avSyncBundle.getString("file_id", "")
-            val sourceUriStr = avSyncBundle.getString("uri", "")
-            val mediaType = avSyncBundle.getString("media_type", "OTHER") // example: "VIDEO"
-            val fileExtension = avSyncBundle.getString("file_extension", "bin") // example: "mp4"
-            val startTimestampEpochMs = avSyncBundle.getLong("timestamp", System.currentTimeMillis())
-            val metadata = avSyncBundle.keySet()
-                .filter { it.startsWith("meta_") }
-                .associate { it.removePrefix("meta_") to (avSyncBundle.getString(it) ?: "") }
-
-            // 1. Emit Initializing status
-            VaultResponder.sendAVSyncStatus(
-                callback,
-                AVSyncStatus(fileId, AVSyncStatus.State.INITIALIZING)
-            )
-
-            // 2. Vault scheduler begins incremental copy pass
-            val copiedBytes = performIncrementalCopy(fileId, sourceUriStr, mediaType, fileExtension)
-
-            // 3. Emit Copy Done Acknowledgement when finished
-            val copyDoneAck = CopyDoneAck(
-                fileId = fileId,
-                originalUri = if (sourceUriStr.isNullOrEmpty()) null else Uri.parse(sourceUriStr), // Original source URI provided by client
-                totalCopiedBytes = copiedBytes,
-                timestampEpochMs = System.currentTimeMillis()
-            )
-            VaultResponder.sendCopyDone(callback, copyDoneAck)
-        }
-
-
-        override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
-            pauseVaultAVSyncScheduler(fileId)
-            VaultResponder.sendAVSyncStatus(
-                callback,
-                AVSyncStatus(fileId, AVSyncStatus.State.PAUSED)
-            )
-        }
-
-        override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
-            resumeVaultAVSyncScheduler(fileId)
-            VaultResponder.sendAVSyncStatus(
-                callback,
-                AVSyncStatus(fileId, AVSyncStatus.State.SYNCING)
-            )
-        }
-
-        override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
-            stopVaultAVSyncScheduler(fileId)
-            VaultResponder.sendCopyDone(callback, copyDoneAck)
-        }
-
-        override fun isAVSynced(fileId: String): Bundle {
-            val record = getMediaRecordFromDatabase(fileId)
-            return Bundle().apply {
-                putBoolean("exists", record != null)
-                putString("sync_state", record?.state?.name ?: "IDLE_WAITING")
-                putLong("offset_bytes", record?.lastCopiedOffset ?: 0L)
-                putBoolean("is_completed", record?.isCompleted ?: false)
-            }
+    override fun ping(requestBundle: Bundle): Bundle {
+        return Bundle().apply {
+            putBoolean("is_available", true)
+            putString("vault_version", BuildConfig.VERSION_NAME.toString())
+            putLong("timestamp", System.currentTimeMillis())
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder = binder
+    override fun copyFile(fileBundle: Bundle, callback: ISakshiVaultCallback) {
+        val fileId = fileBundle.getString("file_id", "")
+        val uriStr = fileBundle.getString("uri", "")
+        val mediaType = fileBundle.getString("media_type", "OTHER") // example: "PHOTO"
+        val fileExtension = fileBundle.getString("file_extension", "bin") // example: "jpg"
+        val timestampEpochMs = fileBundle.getLong("timestamp", System.currentTimeMillis())
+        val metadata = fileBundle.keySet()
+            .filter { it.startsWith("meta_") }
+            .associate { it.removePrefix("meta_") to (fileBundle.getString(it) ?: "") }
+
+        // Perform Vault file saving logic
+        val copiedBytes = saveFileToVaultStorage(fileId, uriStr, mediaType, fileExtension)
+
+        // Send CopyDoneAck back to client app
+        val copyDoneAck = CopyDoneAck(
+            fileId = fileId,
+            originalUri = if (uriStr.isNullOrEmpty()) null else Uri.parse(uriStr),
+            totalCopiedBytes = copiedBytes,
+            timestampEpochMs = System.currentTimeMillis()
+        )
+        VaultResponder.sendFileCopyAck(callback, copyDoneAck)
+    }
+
+    override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
+        val fileId = avSyncBundle.getString("file_id", "")
+        val sourceUriStr = avSyncBundle.getString("uri", "")
+        val mediaType = avSyncBundle.getString("media_type", "OTHER") // example: "VIDEO"
+        val fileExtension = avSyncBundle.getString("file_extension", "bin") // example: "mp4"
+        val startTimestampEpochMs = avSyncBundle.getLong("timestamp", System.currentTimeMillis())
+        val metadata = avSyncBundle.keySet()
+            .filter { it.startsWith("meta_") }
+            .associate { it.removePrefix("meta_") to (avSyncBundle.getString(it) ?: "") }
+
+        // 1. Emit Initializing status
+        VaultResponder.sendAVSyncStatus(
+            callback,
+            AVSyncStatus(fileId, AVSyncStatus.State.INITIALIZING)
+        )
+
+        // 2. Vault scheduler begins incremental copy pass
+        val copiedBytes = performIncrementalCopy(fileId, sourceUriStr, mediaType, fileExtension)
+
+        // 3. Emit Copy Done Acknowledgement when finished
+        val copyDoneAck = CopyDoneAck(
+            fileId = fileId,
+            originalUri = if (sourceUriStr.isNullOrEmpty()) null else Uri.parse(sourceUriStr), // Original source URI provided by client
+            totalCopiedBytes = copiedBytes,
+            timestampEpochMs = System.currentTimeMillis()
+        )
+        VaultResponder.sendCopyDone(callback, copyDoneAck)
+    }
+
+    override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
+        pauseVaultAVSyncScheduler(fileId)
+        VaultResponder.sendAVSyncStatus(
+            callback,
+            AVSyncStatus(fileId, AVSyncStatus.State.PAUSED)
+        )
+    }
+
+    override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
+        resumeVaultAVSyncScheduler(fileId)
+        VaultResponder.sendAVSyncStatus(
+            callback,
+            AVSyncStatus(fileId, AVSyncStatus.State.SYNCING)
+        )
+    }
+
+    override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
+        stopVaultAVSyncScheduler(fileId)
+        VaultResponder.sendCopyDone(callback, copyDoneAck)
+    }
+
+    override fun isAVSynced(fileId: String): Bundle {
+        val record = getMediaRecordFromDatabase(fileId)
+        return Bundle().apply {
+            putBoolean("exists", record != null)
+            putString("sync_state", record?.state?.name ?: "IDLE_WAITING")
+            putLong("offset_bytes", record?.lastCopiedOffset ?: 0L)
+            putBoolean("is_completed", record?.isCompleted ?: false)
+        }
+    }
+}
+
+class SakshiVaultRemoteService : Service() {
+    private var binder: SakshiVaultServiceBinder? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        binder = SakshiVaultServiceBinder(
+            // pass dependencies
+        )
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = binder
 }
 ----
 
