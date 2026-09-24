@@ -204,6 +204,11 @@ class SakshiVaultServiceBinder(
         }
     }
 
+    override fun getMedia(mediaType: String, fileId: String): String {
+        Log.d(tag, "Received getMedia query for mediaType=$mediaType, fileId=$fileId")
+        return "content://${applicationContext.packageName}.mediaprovider/media/{mediaType}/{fileId}"
+    }
+
     override fun getThumbnail(): String {
         Log.d(tag, "Received getThumbnail query")
         return "content://${applicationContext.packageName}.thumbnailprovider/media/{mediaType}/thumbnail/{fileId}.webp"

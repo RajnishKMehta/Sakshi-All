@@ -167,3 +167,18 @@ Vault developers use `VaultResponder` helpers to respond cleanly without handlin
 * `VaultResponder.sendAVSyncStatus(callback, avSyncStatus)`
 * `VaultResponder.sendCopyDone(callback, copyDoneAck)`
 * `VaultResponder.sendError(callback, sakshiError)`
+
+== Accessing Media
+The SDK provides the `getMedia(mediaType, fileId)` API to retrieve the ContentProvider URI template for a specific media file.
+
+[source,kotlin]
+----
+val mediaUriTemplateResult = sakshiClient.getMedia("VIDEO", "file123")
+if (mediaUriTemplateResult is SakshiResult.Success) {
+    val template = mediaUriTemplateResult.data
+    // template: content://<authority>/media/{mediaType}/{fileId}
+    // {mediaType} and {fileId} remain placeholders in the returned template.
+}
+----
+
+The Vault app exposes a ContentProvider to access the media files securely without exposing file paths. The ContentProvider requires `mediaType` and `fileId` and resolves the correct MIME type dynamically based on the stored file extension.

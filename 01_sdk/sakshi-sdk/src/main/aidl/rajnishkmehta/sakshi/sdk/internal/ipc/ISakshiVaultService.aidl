@@ -74,4 +74,10 @@ interface ISakshiVaultService {
      * The returned template will contain {mediaType} and {fileId} placeholders.
      */
     String getThumbnail();
+    /**
+     * Retrieves the ContentProvider URI for accessing a specific media file.
+     * The returned URI does not contain the file extension.
+     */
+    String getMedia(in String mediaType, in String fileId);
+
 }
