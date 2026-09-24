@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -46,6 +47,10 @@ android {
                 keyPassword = System.getenv("KEY_PASSWORD")
             }
         }
+    }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 
     buildTypes {
@@ -95,8 +100,21 @@ dependencies {
 
     // Media3
     implementation(libs.androidx.media3.inspector.frame)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 }
 
 room3 {
     schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.mockk)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
