@@ -84,6 +84,13 @@ public interface SakshiClient {
     public suspend fun listMedia(): SakshiResult<String>
 
     /**
+     * Retrieves the ContentProvider URI template for accessing media thumbnails.
+     *
+     * @return [SakshiResult] containing the URI template string on success or [SakshiError] on failure.
+     */
+    public suspend fun getThumbnail(): SakshiResult<String>
+
+    /**
      * Explicitly disconnects from Vault IPC service and releases internal resources.
      */
     public fun disconnect()

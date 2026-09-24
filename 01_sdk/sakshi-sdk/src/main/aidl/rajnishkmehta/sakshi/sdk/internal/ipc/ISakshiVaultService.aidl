@@ -68,4 +68,10 @@ interface ISakshiVaultService {
      * Lists all stored media files grouped by media type in JSON format.
      */
     Bundle listMedia();
+
+    /**
+     * Retrieves the ContentProvider URI template for accessing media thumbnails.
+     * The returned template will contain {mediaType} and {fileId} placeholders.
+     */
+    String getThumbnail();
 }
