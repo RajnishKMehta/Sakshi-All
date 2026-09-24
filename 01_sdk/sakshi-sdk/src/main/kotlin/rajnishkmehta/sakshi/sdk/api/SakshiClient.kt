@@ -97,6 +97,12 @@ public interface SakshiClient {
      */
     public suspend fun getMedia(mediaType: String, fileId: String): SakshiResult<String>
 
+    /**
+     * Retrieves the ContentProvider URI template for accessing media thumbnails.
+     *
+     * @return [SakshiResult] containing the URI template string on success or [SakshiError] on failure.
+     */
+
     public suspend fun getThumbnail(): SakshiResult<String>
 
     /**
