@@ -41,7 +41,7 @@ class MediaProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        return null // Not supported
+        throw SecurityException("Write access is not allowed")
     }
 
     override fun getType(uri: Uri): String? {
@@ -62,11 +62,11 @@ class MediaProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        return null // Not supported
+        throw SecurityException("Write access is not allowed")
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        return 0 // Not supported
+        throw SecurityException("Write access is not allowed")
     }
 
     override fun update(
@@ -75,7 +75,7 @@ class MediaProvider : ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String>?
     ): Int {
-        return 0 // Not supported
+        throw SecurityException("Write access is not allowed")
     }
 
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
