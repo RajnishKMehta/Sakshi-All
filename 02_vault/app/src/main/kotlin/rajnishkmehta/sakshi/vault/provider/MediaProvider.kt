@@ -7,16 +7,13 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.webkit.MimeTypeMap
-import kotlinx.coroutines.runBlocking
 import rajnishkmehta.sakshi.vault.AppLog as Log
-import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import java.io.File
 import java.io.FileNotFoundException
 
 class MediaProvider : ContentProvider() {
 
     private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-    private var database: VaultDatabase? = null
 
     companion object {
         private const val MEDIA_URI_CODE = 1
@@ -27,10 +24,6 @@ class MediaProvider : ContentProvider() {
         val authority = "${context?.packageName}.mediaprovider"
         // Pattern: content://<authority>/media/{mediaType}/{fileId}
         uriMatcher.addURI(authority, "media/*/*", MEDIA_URI_CODE)
-
-        context?.let {
-            database = VaultDatabase.getDatabase(it)
-        }
         return true
     }
 
@@ -52,12 +45,20 @@ class MediaProvider : ContentProvider() {
         val pathSegments = uri.pathSegments
         if (pathSegments.size < 3) return null
 
+        val mediaType = pathSegments[1].lowercase()
         val fileId = pathSegments[2]
 
-        val db = database ?: return null
-        val record = runBlocking { db.mediaRecordDao().getRecord(fileId) } ?: return null
+        val context = context ?: return null
+        val mediaDir = File(context.filesDir, "media/$mediaType")
+        val matchingFiles = mediaDir.listFiles { _, name ->
+            name.startsWith("$fileId.")
+        }
 
-        val extension = record.fileExtension.lowercase()
+        if (matchingFiles == null || matchingFiles.isEmpty()) {
+            return null
+        }
+
+        val extension = matchingFiles[0].extension.lowercase()
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
     }
 
@@ -99,29 +100,27 @@ class MediaProvider : ContentProvider() {
             throw SecurityException("Path traversal is not allowed")
         }
 
-        val db = database ?: throw IllegalStateException("Database not initialized")
-        val record = runBlocking { db.mediaRecordDao().getRecord(fileId) }
-            ?: throw FileNotFoundException("Record not found for fileId: $fileId")
-
-        if (record.mediaType.lowercase() != mediaType) {
-            throw FileNotFoundException("Media type mismatch")
-        }
-
         val context = context ?: throw IllegalStateException("Context is null")
+        val mediaDir = File(context.filesDir, "media/$mediaType")
 
-        // Use the vault path from the database if available
-        val filePath = record.vaultPath ?: run {
-            // Fallback to recalculating the path
-            val mediaDir = File(context.filesDir, "media/$mediaType")
-            val fileName = "${fileId}.${record.fileExtension}"
-            File(mediaDir, fileName).absolutePath
+        if (!mediaDir.exists() || !mediaDir.isDirectory) {
+            throw FileNotFoundException("Media directory not found for type: $mediaType")
         }
 
-        val mediaFile = File(filePath)
+        // Find the matching file inside the corresponding mediaType directory using the fileId, regardless of its extension
+        val matchingFiles = mediaDir.listFiles { _, name ->
+            name.startsWith("$fileId.")
+        }
+
+        if (matchingFiles == null || matchingFiles.isEmpty()) {
+            throw FileNotFoundException("Media not found: $uri")
+        }
+
+        val mediaFile = matchingFiles[0]
 
         // Path traversal protection
         val canonicalPath = mediaFile.canonicalPath
-        val expectedDir = File(context.filesDir, "media/$mediaType").canonicalPath
+        val expectedDir = mediaDir.canonicalPath
         if (!canonicalPath.startsWith(expectedDir)) {
             throw SecurityException("Path traversal is not allowed")
         }
