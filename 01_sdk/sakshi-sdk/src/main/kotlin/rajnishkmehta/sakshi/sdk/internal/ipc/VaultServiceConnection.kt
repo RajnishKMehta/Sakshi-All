@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -85,6 +86,9 @@ internal class VaultServiceConnection(
             withTimeoutOrNull(config.connectionTimeoutMs) {
                 deferred.await()
             }
+        } catch (e: CancellationException) {
+            unbindInternal()
+            throw e
         } catch (e: Exception) {
             unbindInternal()
             return SakshiResult.Failure(SakshiError.ServiceUnavailable("Service binding failed: ${e.message}"))
