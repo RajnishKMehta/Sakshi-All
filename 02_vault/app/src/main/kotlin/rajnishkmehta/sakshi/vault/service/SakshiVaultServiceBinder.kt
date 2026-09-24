@@ -203,4 +203,9 @@ class SakshiVaultServiceBinder(
             putBoolean("is_completed", record?.completionState == "COMPLETED")
         }
     }
+
+    override fun getThumbnail(): String {
+        Log.d(tag, "Received getThumbnail query")
+        return "content://${applicationContext.packageName}.thumbnailprovider/media/{mediaType}/thumbnail/{fileId}.webp"
+    }
 }

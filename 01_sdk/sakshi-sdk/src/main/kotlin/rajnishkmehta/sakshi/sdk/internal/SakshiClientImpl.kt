@@ -353,6 +353,29 @@ internal class SakshiClientImpl(
             )
         }
     }
+
+    override suspend fun getThumbnail(): SakshiResult<String> {
+        val serviceResult = serviceConnection.getService()
+        if (serviceResult.isFailure) {
+            return SakshiResult.Failure(serviceResult.errorOrNull()!!)
+        }
+
+        val service = serviceResult.getOrNull()!!
+
+        return try {
+            val template = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                service.thumbnail
+            }
+            SakshiResult.Success(template)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            SakshiResult.Failure(
+                SakshiError.IpcError(message = e.message ?: "Failed to get thumbnail template", cause = e)
+            )
+        }
+    }
+
     override fun disconnect() {
         serviceConnection.disconnect()
     }

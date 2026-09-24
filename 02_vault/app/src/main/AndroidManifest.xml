@@ -17,6 +17,12 @@
             </intent-filter>
         </service>
 
+        <provider
+            android:name=".provider.ThumbnailProvider"
+            android:authorities="${applicationId}.thumbnailprovider"
+            android:exported="true"
+            android:grantUriPermissions="true" />
+
     </application>
 
 </manifest>

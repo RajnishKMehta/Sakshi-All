@@ -139,6 +139,20 @@ coroutineScope.launch {
         }
     }
 }
+
+// 4. Retrieve Thumbnail URI template
+coroutineScope.launch {
+    val result = client.getThumbnail()
+    when (result) {
+        is SakshiResult.Success -> {
+            val uriTemplate = result.data
+            println("Thumbnail URI Template: $uriTemplate")
+        }
+        is SakshiResult.Failure -> {
+            println("Failed to get thumbnail template: ${result.error.message}")
+        }
+    }
+}
 ```
 
 ### B. Vault App Example (Service Side)

@@ -153,3 +153,22 @@ if (response != null && response.exists) {
     println("Recording exists in Vault! Completed: ${response.isCompleted}, Last Offset: ${response.lastCopiedOffsetBytes}")
 }
 ----
+
+== 8. Accessing Thumbnails
+
+To access thumbnails for copied media, retrieve the ContentProvider URI template and replace the `{mediaType}` and `{fileId}` placeholders:
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+val thumbnailResult = client.getThumbnail()
+if (thumbnailResult.isSuccess) {
+    val template = thumbnailResult.getOrNull()!!
+    val fileId = "photo_2026_1001"
+    val mediaType = "PHOTO"
+    val actualUriStr = template.replace("{mediaType}", mediaType.lowercase()).replace("{fileId}", fileId)
+    val actualUri = android.net.Uri.parse(actualUriStr)
+    // Use actualUri with ContentResolver to read the thumbnail image
+}
+----
