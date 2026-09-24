@@ -342,6 +342,8 @@ internal class SakshiClientImpl(
             } else {
                 SakshiResult.Failure(SakshiError.Unknown("No JSON returned from vault", null))
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
                 SakshiError.IpcError(
