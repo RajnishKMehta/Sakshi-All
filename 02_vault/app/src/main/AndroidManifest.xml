@@ -22,6 +22,11 @@
             android:authorities="${applicationId}.thumbnailprovider"
             android:exported="true" />
 
+        <provider
+            android:name=".provider.MediaProvider"
+            android:authorities="${applicationId}.mediaprovider"
+            android:exported="true" />
+
     </application>
 
 </manifest>

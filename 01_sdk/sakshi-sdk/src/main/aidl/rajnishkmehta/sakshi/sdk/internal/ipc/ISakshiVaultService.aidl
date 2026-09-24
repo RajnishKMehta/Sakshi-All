@@ -8,6 +8,7 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback;
  */
 interface ISakshiVaultService {
 
+
     /**
      * Performs a health check / ping operation with Vault application.
      *
@@ -15,6 +16,7 @@ interface ISakshiVaultService {
      * @return Bundle containing availability status, Vault version, and timestamp.
      */
     Bundle ping(in Bundle requestBundle);
+
 
     /**
      * Sends a file payload/URI reference to Vault for ingestion.
@@ -24,6 +26,7 @@ interface ISakshiVaultService {
      */
     void copyFile(in Bundle fileBundle, in ISakshiVaultCallback callback);
 
+
     /**
      * Notifies Vault to start audio/video synchronization for a recording.
      *
@@ -31,6 +34,7 @@ interface ISakshiVaultService {
      * @param callback Callback to receive progress updates, acknowledgements, or errors.
      */
     void startAVSync(in Bundle avSyncBundle, in ISakshiVaultCallback callback);
+
 
     /**
      * Notifies Vault to stop audio/video synchronization for a specific file ID.
@@ -40,6 +44,7 @@ interface ISakshiVaultService {
      */
     void stopAVSync(in String fileId, in ISakshiVaultCallback callback);
 
+
     /**
      * Notifies Vault to pause audio/video synchronization for a specific file ID.
      *
@@ -47,6 +52,7 @@ interface ISakshiVaultService {
      * @param callback Callback to receive confirmation or errors.
      */
     void pauseAVSync(in String fileId, in ISakshiVaultCallback callback);
+
 
     /**
      * Notifies Vault to resume audio/video synchronization for a specific file ID.
@@ -56,6 +62,7 @@ interface ISakshiVaultService {
      */
     void resumeAVSync(in String fileId, in ISakshiVaultCallback callback);
 
+
     /**
      * Queries Vault to determine whether an audio/video recording exists or is actively syncing.
      *
@@ -64,14 +71,23 @@ interface ISakshiVaultService {
      */
     Bundle isAVSynced(in String fileId);
 
+
     /**
      * Lists all stored media files grouped by media type in JSON format.
      */
     Bundle listMedia();
+
 
     /**
      * Retrieves the ContentProvider URI template for accessing media thumbnails.
      * The returned template will contain {mediaType} and {fileId} placeholders.
      */
     String getThumbnail();
+
+    /**
+     * Retrieves the ContentProvider URI for accessing a specific media file.
+     * The returned URI does not contain the file extension.
+     */
+    String getMedia(in String mediaType, in String fileId);
+
 }
