@@ -2,7 +2,6 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package rajnishkmehta.sakshi.camera.ui
 
 import android.app.Dialog
