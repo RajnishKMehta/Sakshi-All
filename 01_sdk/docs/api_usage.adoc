@@ -172,3 +172,23 @@ if (thumbnailResult.isSuccess) {
     // Use actualUri with ContentResolver to read the thumbnail image
 }
 ----
+
+== 9. Accessing Media Files
+
+To access original media files, retrieve the ContentProvider URI template using the `getMedia` API and replace the `{mediaType}` and `{fileId}` placeholders:
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+val mediaResult = client.getMedia("PHOTO", "photo_2026_1001")
+if (mediaResult.isSuccess) {
+    val template = mediaResult.getOrNull()!!
+    val fileId = "photo_2026_1001"
+    val mediaType = "PHOTO"
+    // The getMedia API returns a literal URI template string where {mediaType} and {fileId} remain as unreplaced string placeholders.
+    val actualUriStr = template.replace("{mediaType}", mediaType.lowercase()).replace("{fileId}", fileId)
+    val actualUri = android.net.Uri.parse(actualUriStr)
+    // Use actualUri with ContentResolver to read the media file
+}
+----
