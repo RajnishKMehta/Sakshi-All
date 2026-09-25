@@ -5,14 +5,12 @@
 [![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Camera?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Camera/releases)
 [![Build Status](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml)
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?logo=mit)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-Camera?logo=apache&logoColor=DDC06F)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
 
 </div>
 
-> [!WARNING]
-> **Early Beta:** Sakshi Camera currently supports **photo and video capture and transfer**. APIs and behavior may change in future releases.
 
 **Sakshi Camera** ("Sakshi (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sakshi Android ecosystem.
 
@@ -105,4 +103,4 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [C
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache-2.0. See the [LICENSE](LICENSE) file for details.

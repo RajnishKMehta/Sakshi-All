@@ -1,3 +1,7 @@
+/*
+ * Copyright 2026 Rajnish Kumar
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package rajnishkmehta.sakshi.sdk.internal.ipc
 
 import android.content.ComponentName

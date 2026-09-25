@@ -1,3 +1,7 @@
+/*
+ * Copyright 2026 Rajnish Kumar
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import org.gradle.plugins.signing.Sign
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.JavadocJar
