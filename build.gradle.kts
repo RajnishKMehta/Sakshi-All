@@ -17,6 +17,12 @@ tasks.register("debug") {
         gradle.includedBuild("03_camera")
             .task(":app:assembleDebug")
     )
+
+    // 04_portal
+    dependsOn(
+        gradle.includedBuild("04_portal")
+            .task(":app:assembleDebug")
+    )
 }
 
 // ########### check ###########
@@ -38,6 +44,12 @@ tasks.register("check") {
         gradle.includedBuild("03_camera")
             .task(":app:check")
     )
+
+    // 04_portal
+    dependsOn(
+        gradle.includedBuild("04_portal")
+            .task(":app:check")
+    )
 }
 
 // ########### Release ###########
@@ -57,6 +69,12 @@ tasks.register("release") {
     // 03_camera
     dependsOn(
         gradle.includedBuild("03_camera")
+            .task(":app:assembleRelease")
+    )
+
+    // 04_portal
+    dependsOn(
+        gradle.includedBuild("04_portal")
             .task(":app:assembleRelease")
     )
 }
