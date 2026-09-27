@@ -1,0 +1,47 @@
+name: Build Portal
+
+on:
+  workflow_dispatch:
+  push:
+    branches: main
+    paths:
+      - '04_portal/**'
+  pull_request:
+   paths:
+     - '04_portal/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+ contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew 04_portal/gradlew
+
+      - name: Build Portal
+        run: cd 04_portal && ./gradlew check assembleDebug
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: Portal APKs
+          path: "**/build/outputs/apk/**/*.apk"
+          if-no-files-found: error
