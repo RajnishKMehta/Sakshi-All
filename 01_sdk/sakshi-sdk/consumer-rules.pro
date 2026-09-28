@@ -1,4 +1,4 @@
-# Proguard/R8 rules consumed by applications integrating Sakshi SDK.
+# Proguard/R8 rules consumed by applications integrating Sakshi SDK
 
 # Don't keep the whole API package.
 # Unused models and request/response classes can still be removed by R8.
