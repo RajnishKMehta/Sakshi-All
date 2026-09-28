@@ -97,8 +97,8 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 actions = {
                     Box {
@@ -106,7 +106,7 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                         androidx.compose.material3.DropdownMenu(
