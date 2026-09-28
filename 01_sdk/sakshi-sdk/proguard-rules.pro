@@ -1,6 +1,6 @@
 # ProGuard rules for Sakshi SDK library internal build
 
-# Preserve public API package classes and methods
+# Preserve public API package classes and methods in the release AAR
 -keep class rajnishkmehta.sakshi.sdk.api.** { *; }
 -keep interface rajnishkmehta.sakshi.sdk.api.** { *; }
 -keepclassmembers class rajnishkmehta.sakshi.sdk.api.** { *; }

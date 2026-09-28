@@ -1,6 +1,6 @@
 [versions]
 mockk = "1.13.10"
-sakshi-sdk = "1.0.0-beta.7"
+sakshi-sdk = "1.0.0-RC.0"
 agp = "9.4.1"
 kotlin = "2.4.20"
 coroutines = "1.11.0"

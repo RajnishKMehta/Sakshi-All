@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.6")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.0")
 }
 ```
 
@@ -78,7 +78,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-beta.6")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.0")
 }
 ```
 
@@ -93,7 +93,6 @@ dependencies {
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.models.*
-import rajnishkmehta.sakshi.sdk.api.SakshiClient
 
 val client = SakshiClient.create(context)
 
@@ -113,7 +112,7 @@ coroutineScope.launch {
 
 // 2. Start AVSync (returns Flow<SakshiResult<AVSyncStatus>>)
 coroutineScope.launch {
-    client.startAVSync(AVSyncRequest(fileId = "rec_999", uri = avUri)).collect { result ->
+    client.startAVSync(AVSyncRequest(fileId = "rec_999", uri = avUri, mediaType = "VIDEO", fileExtension = "mp4")).collect { result ->
         when (result) {
             is SakshiResult.Success -> {
                 val status = result.data
@@ -126,7 +125,14 @@ coroutineScope.launch {
     }
 }
 
-// 3. Stop AVSync and Receive Copy Completion Acknowledgement (returns SakshiResult<CopyDoneAck>)
+// 3. Pause & Resume AVSync
+coroutineScope.launch {
+    client.pauseAVSync("rec_999") // Pauses ongoing sync
+    // ... later ...
+    client.resumeAVSync("rec_999") // Resumes sync
+}
+
+// 4. Stop AVSync and Receive Copy Completion Acknowledgement
 coroutineScope.launch {
     val result: SakshiResult<CopyDoneAck> = client.stopAVSync("rec_999")
     when (result) {
@@ -140,18 +146,24 @@ coroutineScope.launch {
     }
 }
 
-// 4. Retrieve Thumbnail URI template
+// 5. Retrieve Thumbnail & Media URI template
 coroutineScope.launch {
-    val result = client.getThumbnail()
-    when (result) {
-        is SakshiResult.Success -> {
-            val uriTemplate = result.data
-            println("Thumbnail URI Template: $uriTemplate")
-        }
-        is SakshiResult.Failure -> {
-            println("Failed to get thumbnail template: ${result.error.message}")
-        }
+    val thumbnailResult = client.getThumbnail() // content://<authority>/media/{mediaType}/thumbnail/{fileId}
+    val mediaResult = client.getMedia("PHOTO", "photo_001") // content://<authority>/media/photo/photo_001
+}
+
+// 6. List Media
+coroutineScope.launch {
+    val result = client.listMedia()
+    if (result is SakshiResult.Success) {
+        println("Media JSON: ${result.data}")
     }
+}
+
+// 7. Disconnect in lifecycle cleanup
+override fun onDestroy() {
+    super.onDestroy()
+    client.disconnect()
 }
 ```
 

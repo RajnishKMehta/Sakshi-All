@@ -1,6 +1,6 @@
 = Sakshi SDK Architecture & Design Specification
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.6, 2026-09-04
+v1.0.0-RC.0, 2026-09-28
 :description: System architecture and design specification for the Sakshi SDK.
 :keywords: sakshi, sdk, architecture, design, ipc, android, binder, aidl
 :toc: left
@@ -56,7 +56,9 @@ Sakshi SDK (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android clien
 Client applications initiate requests to transfer media or start incremental synchronization sessions:
 * Initiates ping health checks.
 * Submits photo requests (`FileCopyRequest`).
-* Signals start of audio/video recordings (`SakshiClient.startAVSync` accepts `AVSyncRequest`) and stop (`SakshiClient.stopAVSync` accepts `fileId`).
+* Signals start of audio/video recordings (`SakshiClient.startAVSync` accepts `AVSyncRequest`), pause (`SakshiClient.pauseAVSync`), resume (`SakshiClient.resumeAVSync`), and stop (`SakshiClient.stopAVSync` accepts `fileId`).
+* Queries media existence via `SakshiClient.isAVSynced` or `SakshiClient.listMedia`.
+* Disconnects to release resources (`SakshiClient.disconnect`).
 * Observes status updates and copy completion acknowledgements (`CopyDoneAck`).
 
 === 2.2 Vault Application Side (External Service)
