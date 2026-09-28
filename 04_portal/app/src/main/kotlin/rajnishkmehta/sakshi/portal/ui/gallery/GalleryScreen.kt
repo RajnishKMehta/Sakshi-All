@@ -222,7 +222,7 @@ fun MediaItem(item: DummyMediaItem) {
             )
         } else if (item.type == MediaType.AUDIO) {
             Icon(
-                painter = painterResource(R.drawable.ic_audio_file),
+                painter = painterResource(R.drawable.ic_audio),
                 contentDescription = "Audio",
                 tint = Color.White,
                 modifier = Modifier
