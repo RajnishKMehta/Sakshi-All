@@ -18,9 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.AudioFile
+import androidx.compose.ui.res.painterResource
+import rajnishkmehta.sakshi.portal.R
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import rajnishkmehta.sakshi.portal.R
 
 enum class MediaType {
     ALL, PHOTO, VIDEO, AUDIO, OTHER
@@ -97,16 +94,16 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 actions = {
                     Box {
                         IconButton(onClick = { showMenu = true }) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
+                                painter = painterResource(R.drawable.ic_more_vert),
                                 contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                         androidx.compose.material3.DropdownMenu(
@@ -216,7 +213,7 @@ fun MediaItem(item: DummyMediaItem) {
     ) {
         if (item.type == MediaType.VIDEO) {
             Icon(
-                imageVector = Icons.Default.PlayArrow,
+                painter = painterResource(android.R.drawable.ic_media_play),
                 contentDescription = "Video",
                 tint = Color.White,
                 modifier = Modifier
@@ -225,7 +222,7 @@ fun MediaItem(item: DummyMediaItem) {
             )
         } else if (item.type == MediaType.AUDIO) {
             Icon(
-                imageVector = Icons.Default.AudioFile,
+                painter = painterResource(R.drawable.ic_audio),
                 contentDescription = "Audio",
                 tint = Color.White,
                 modifier = Modifier
@@ -234,7 +231,7 @@ fun MediaItem(item: DummyMediaItem) {
             )
         } else if (item.type == MediaType.OTHER) {
             Icon(
-                imageVector = Icons.Default.PlayArrow,
+                painter = painterResource(android.R.drawable.ic_media_play),
                 contentDescription = "Other File",
                 tint = Color.White,
                 modifier = Modifier
