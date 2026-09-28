@@ -21,10 +21,8 @@
 #-renamesourcefileattribute SourceFile
 
 # Compose Rules
--keep class androidx.compose.** { *; }
 
 # DataStore Rules
--keep class androidx.datastore.** { *; }
 
 # General rules for Kotlin Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
