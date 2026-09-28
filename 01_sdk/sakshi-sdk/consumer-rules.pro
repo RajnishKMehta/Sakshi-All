@@ -1,10 +1,10 @@
-# Proguard/R8 rules consumed by applications integrating Sakshi SDK
+# R8 rules for apps using the Sakshi SDK.
 
-# Do not globally keep all classes in rajnishkmehta.sakshi.sdk.api.**
-# Let R8 strip out unused models, requests, and results if the consumer app does not use them.
+# Don't keep the whole API package.
+# Unused models and request/response classes can still be removed by R8.
 
-# We only need to preserve AIDL IPC interfaces, since those map directly to the Binder
-# transactions and might be accessed reflectively or dynamically by the OS across process boundaries.
+# Keep the AIDL interfaces and generated Stub classes.
+# These are used for Binder IPC between the app and the Vault process.
 -keep interface rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService { *; }
 -keep interface rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback { *; }
 -keep class rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService$Stub { *; }
