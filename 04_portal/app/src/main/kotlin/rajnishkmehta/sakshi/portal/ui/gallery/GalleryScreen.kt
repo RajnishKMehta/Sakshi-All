@@ -20,6 +20,12 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.AudioFile
+import androidx.compose.material.icons.filled.InsertDriveFile
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -44,7 +50,7 @@ import kotlinx.coroutines.delay
 import rajnishkmehta.sakshi.portal.R
 
 enum class MediaType {
-    ALL, PHOTO, VIDEO
+    ALL, PHOTO, VIDEO, AUDIO, OTHER
 }
 
 data class DummyMediaItem(
@@ -70,7 +76,7 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
         val dummyData = List(30) { index ->
             DummyMediaItem(
                 id = index.toString(),
-                type = if (index % 3 == 0) MediaType.VIDEO else MediaType.PHOTO,
+                type = when (index % 4) { 0 -> MediaType.VIDEO; 1 -> MediaType.AUDIO; 2 -> MediaType.OTHER; else -> MediaType.PHOTO },
                 aspectRatio = if (index % 2 == 0) 1.5f else 0.75f
             )
         }
@@ -98,7 +104,8 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FilterChip(
@@ -115,6 +122,16 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
                     selected = selectedType == MediaType.VIDEO,
                     onClick = { selectedType = MediaType.VIDEO },
                     label = { Text("Videos") }
+                )
+                FilterChip(
+                    selected = selectedType == MediaType.AUDIO,
+                    onClick = { selectedType = MediaType.AUDIO },
+                    label = { Text("Audio") }
+                )
+                FilterChip(
+                    selected = selectedType == MediaType.OTHER,
+                    onClick = { selectedType = MediaType.OTHER },
+                    label = { Text("Other") }
                 )
             }
 
@@ -158,16 +175,35 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun MediaItem(item: DummyMediaItem) {
+    val aspectRatio = if (item.type == MediaType.AUDIO || item.type == MediaType.OTHER) 1f else item.aspectRatio
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(item.aspectRatio)
+            .aspectRatio(aspectRatio)
             .background(Color.LightGray)
     ) {
         if (item.type == MediaType.VIDEO) {
             Icon(
                 imageVector = Icons.Default.PlayArrow,
                 contentDescription = "Video",
+                tint = Color.White,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(32.dp)
+            )
+        } else if (item.type == MediaType.AUDIO) {
+            Icon(
+                imageVector = Icons.Default.AudioFile,
+                contentDescription = "Audio",
+                tint = Color.White,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(32.dp)
+            )
+        } else if (item.type == MediaType.OTHER) {
+            Icon(
+                imageVector = Icons.Default.InsertDriveFile,
+                contentDescription = "Other File",
                 tint = Color.White,
                 modifier = Modifier
                     .align(Alignment.Center)
