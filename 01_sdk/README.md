@@ -160,8 +160,11 @@ coroutineScope.launch {
     }
 }
 
-// 7. Disconnect
-client.disconnect()
+// 7. Disconnect in lifecycle cleanup
+override fun onDestroy() {
+    super.onDestroy()
+    client.disconnect()
+}
 ```
 
 ### B. Vault App Example (Service Side)

@@ -1,6 +1,6 @@
 = Sakshi SDK Client API Usage Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-RC.0, 2026-09-04
+v1.0.0-RC.0, 2026-09-28
 :description: Guide for developers building client applications using the Sakshi SDK.
 :keywords: sakshi, sdk, client, api, android, camera, audio, integration
 :toc: left
@@ -113,13 +113,10 @@ lifecycleScope.launch {
     }
 }
 
-// Pause AVSync
+// Pause and Resume AVSync sequentially
 lifecycleScope.launch {
     client.pauseAVSync("av_rec_999")
-}
-
-// Resume AVSync
-lifecycleScope.launch {
+    // ... wait or do other tasks ...
     client.resumeAVSync("av_rec_999")
 }
 ----

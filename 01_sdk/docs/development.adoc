@@ -1,6 +1,6 @@
 = Sakshi SDK Development & Contribution Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-RC.0, 2026-09-04
+v1.0.0-RC.0, 2026-09-28
 :description: Development and contribution guidelines for the Sakshi SDK.
 :keywords: sakshi, sdk, development, build, gradle, contribution, guidelines
 :toc: left
