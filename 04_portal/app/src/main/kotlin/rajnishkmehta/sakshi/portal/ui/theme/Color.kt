@@ -7,6 +7,9 @@ package rajnishkmehta.sakshi.portal.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val PrimaryColor = Color(0xFF18287F)
+val PrimaryDarkColor = Color(0xFF5A6BBF)
+val PrimaryContainer = Color(0xFFE0E5FF)
+val PrimaryContainerDark = Color(0xFF00125B)
 val SecondaryColor = Color(0xFFF4A79D)
 val BackgroundDark = Color(0xFF000000)
 val BackgroundLight = Color(0xFFF5F7FA)

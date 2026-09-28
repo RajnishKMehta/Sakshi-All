@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryColor,
+    primary = PrimaryDarkColor,
     secondary = SecondaryColor,
     background = BackgroundDark,
     surface = SurfaceColor,
@@ -51,14 +51,7 @@ fun PortalTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            val dynamicScheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            // Preserve brand colors while using dynamic colors for the rest
-            dynamicScheme.copy(
-                primary = PrimaryColor,
-                secondary = SecondaryColor,
-                onPrimary = OnPrimary,
-                onSecondary = OnSecondary
-            )
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
         darkTheme -> DarkColorScheme

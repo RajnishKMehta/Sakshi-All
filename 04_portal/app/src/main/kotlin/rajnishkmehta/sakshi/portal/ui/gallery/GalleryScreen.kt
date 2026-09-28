@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.AudioFile
-import androidx.compose.material.icons.filled.InsertDriveFile
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -35,11 +34,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.Switch
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,9 +71,10 @@ sealed interface GalleryUiState {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(modifier: Modifier = Modifier) {
+fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {}) {
     var selectedType by remember { mutableStateOf(MediaType.ALL) }
     var uiState by remember { mutableStateOf<GalleryUiState>(GalleryUiState.Loading) }
+    var isDynamicColorEnabled by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         delay(1000) // Simulate network/db load
@@ -83,6 +88,9 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
         uiState = GalleryUiState.Success(dummyData)
     }
 
+
+    var showMenu by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -91,10 +99,34 @@ fun GalleryScreen(modifier: Modifier = Modifier) {
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                ),
+                actions = {
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        androidx.compose.material3.DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Settings") },
+                                onClick = {
+                                    showMenu = false
+                                    onSettingsClick()
+                                }
+                            )
+                        }
+                    }
+                }
             )
         }
-    ) { innerPadding ->
+    )
+ { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -202,7 +234,7 @@ fun MediaItem(item: DummyMediaItem) {
             )
         } else if (item.type == MediaType.OTHER) {
             Icon(
-                imageVector = Icons.Default.InsertDriveFile,
+                imageVector = Icons.Default.PlayArrow,
                 contentDescription = "Other File",
                 tint = Color.White,
                 modifier = Modifier
