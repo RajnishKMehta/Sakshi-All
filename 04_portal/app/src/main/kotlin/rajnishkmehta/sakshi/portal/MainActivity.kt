@@ -6,6 +6,7 @@ package rajnishkmehta.sakshi.portal
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +27,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
             var currentScreen by remember { mutableStateOf(Screen.Gallery) }
+
+            BackHandler(enabled = currentScreen != Screen.Gallery) {
+                currentScreen = Screen.Gallery
+            }
 
             PortalTheme(useDynamicColor = useDynamicColor) {
                 when (currentScreen) {
