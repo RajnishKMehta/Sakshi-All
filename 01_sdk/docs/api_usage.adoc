@@ -1,6 +1,6 @@
 = Sakshi SDK Client API Usage Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.6, 2026-09-04
+v1.0.0-RC.0, 2026-09-04
 :description: Guide for developers building client applications using the Sakshi SDK.
 :keywords: sakshi, sdk, client, api, android, camera, audio, integration
 :toc: left
@@ -112,6 +112,16 @@ lifecycleScope.launch {
         }
     }
 }
+
+// Pause AVSync
+lifecycleScope.launch {
+    client.pauseAVSync("av_rec_999")
+}
+
+// Resume AVSync
+lifecycleScope.launch {
+    client.resumeAVSync("av_rec_999")
+}
 ----
 
 == 6. Stopping AVSync and Receiving Copy Done Acknowledgement
@@ -191,4 +201,34 @@ if (mediaResult.isSuccess) {
     val actualUri = android.net.Uri.parse(actualUriStr)
     // Use actualUri with ContentResolver to read the media file
 }
+----
+
+== 10. Listing Media
+
+Retrieve a JSON array containing all media records indexed by Vault:
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+lifecycleScope.launch {
+    val result = client.listMedia()
+    when (result) {
+        is SakshiResult.Success -> {
+            println("Media List JSON: ${result.data}")
+        }
+        is SakshiResult.Failure -> {
+            println("Failed to list media: ${result.error.message}")
+        }
+    }
+}
+----
+
+== 11. Disconnecting
+
+When the client component is destroyed, disconnect the client to avoid memory leaks and unbind the service:
+
+[source,kotlin]
+----
+client.disconnect()
 ----

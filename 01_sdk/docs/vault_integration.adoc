@@ -1,6 +1,6 @@
 = Sakshi SDK Vault Integration & Developer Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-beta.6, 2026-09-04
+v1.0.0-RC.0, 2026-09-04
 :description: Guide for Vault developers to integrate with the Sakshi SDK.
 :keywords: sakshi, sdk, vault, service, binder, integration, guide
 :toc: left
@@ -143,6 +143,15 @@ class SakshiVaultServiceBinder(
             putBoolean("is_completed", record?.isCompleted ?: false)
         }
     }
+
+
+    override fun listMedia(): Bundle {
+        val mediaJson = getMediaListAsJson()
+        return Bundle().apply {
+            putString("media_list", mediaJson)
+        }
+    }
+
 }
 
 class SakshiVaultRemoteService : Service() {

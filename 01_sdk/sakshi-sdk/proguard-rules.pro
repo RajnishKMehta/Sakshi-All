@@ -1,9 +1,9 @@
 # ProGuard rules for Sakshi SDK library internal build
 
-# Preserve public API package classes and methods
--keep class rajnishkmehta.sakshi.sdk.api.** { *; }
--keep interface rajnishkmehta.sakshi.sdk.api.** { *; }
--keepclassmembers class rajnishkmehta.sakshi.sdk.api.** { *; }
+# Do not globally keep all classes in rajnishkmehta.sakshi.sdk.api.**
+# By default, building the release AAR without stripping is handled by library defaults,
+# but if the user shrinks their app, we want the shrinking to apply.
+# We only strictly preserve the AIDL IPC layer as the IPC bridge.
 
 # Preserve AIDL IPC interfaces and stub implementations
 -keep interface rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService { *; }
