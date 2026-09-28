@@ -18,9 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.AudioFile
+import androidx.compose.ui.res.painterResource
+import rajnishkmehta.sakshi.portal.R
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -104,7 +102,7 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
                     Box {
                         IconButton(onClick = { showMenu = true }) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
+                                painter = painterResource(R.drawable.ic_more_vert),
                                 contentDescription = "Settings",
                                 tint = MaterialTheme.colorScheme.onBackground
                             )
@@ -216,7 +214,7 @@ fun MediaItem(item: DummyMediaItem) {
     ) {
         if (item.type == MediaType.VIDEO) {
             Icon(
-                imageVector = Icons.Default.PlayArrow,
+                painter = painterResource(android.R.drawable.ic_media_play),
                 contentDescription = "Video",
                 tint = Color.White,
                 modifier = Modifier
@@ -225,7 +223,7 @@ fun MediaItem(item: DummyMediaItem) {
             )
         } else if (item.type == MediaType.AUDIO) {
             Icon(
-                imageVector = Icons.Default.AudioFile,
+                painter = painterResource(R.drawable.ic_audio_file),
                 contentDescription = "Audio",
                 tint = Color.White,
                 modifier = Modifier
@@ -234,7 +232,7 @@ fun MediaItem(item: DummyMediaItem) {
             )
         } else if (item.type == MediaType.OTHER) {
             Icon(
-                imageVector = Icons.Default.PlayArrow,
+                painter = painterResource(android.R.drawable.ic_media_play),
                 contentDescription = "Other File",
                 tint = Color.White,
                 modifier = Modifier
