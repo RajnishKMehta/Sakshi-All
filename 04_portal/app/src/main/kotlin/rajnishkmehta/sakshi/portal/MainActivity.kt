@@ -5,11 +5,18 @@
 package rajnishkmehta.sakshi.portal
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import rajnishkmehta.sakshi.portal.ui.gallery.GalleryScreen
+import rajnishkmehta.sakshi.portal.ui.theme.PortalTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Implementation pending
+        setContent {
+            PortalTheme {
+                GalleryScreen()
+            }
+        }
     }
 }
