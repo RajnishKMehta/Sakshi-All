@@ -26,5 +26,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sakshi-Portal"
 include(":app")
-include(":01_sdk_sakshi_sdk")
-project(":01_sdk_sakshi_sdk").projectDir = File(settingsDir, "../01_sdk/sakshi-sdk")
