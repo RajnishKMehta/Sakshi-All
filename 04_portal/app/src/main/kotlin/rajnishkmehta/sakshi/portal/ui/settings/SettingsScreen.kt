@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import rajnishkmehta.sakshi.portal.BuildConfig
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 
@@ -113,6 +114,7 @@ fun SettingsScreen(
                 Switch(
                     checked = useDynamicColor,
                     onCheckedChange = { isChecked ->
+                        try { Log.i(tag = "SettingsScreen", message = "Material You (Dynamic Colors) changed to $isChecked") } catch (e: Exception) {}
                         coroutineScope.launch {
                             repository.setUseDynamicColor(isChecked)
                         }
