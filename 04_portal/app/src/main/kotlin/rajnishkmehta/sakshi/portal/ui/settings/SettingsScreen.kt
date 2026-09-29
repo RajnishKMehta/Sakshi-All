@@ -4,6 +4,8 @@
  */
 package rajnishkmehta.sakshi.portal.ui.settings
 
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,9 +30,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
+import rajnishkmehta.sakshi.portal.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +44,7 @@ fun SettingsScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val useDynamicColor by repository.useDynamicColorFlow.collectAsState(initial = true)
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -67,8 +72,32 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            if (BuildConfig.DEBUG) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            try {
+                                val intent = Intent(context, Class.forName("rajnishkmehta.sakshi.portal.debug.DebugLogsActivity"))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Debug Logs", style = MaterialTheme.typography.bodyLarge)
+                        Text("View and export application logs", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {

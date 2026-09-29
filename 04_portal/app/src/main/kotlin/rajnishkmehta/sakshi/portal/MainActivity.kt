@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        rajnishkmehta.sakshi.portal.debug.DebugLogger.init(applicationContext)
         val settingsRepository = SettingsRepository(applicationContext)
 
         setContent {
