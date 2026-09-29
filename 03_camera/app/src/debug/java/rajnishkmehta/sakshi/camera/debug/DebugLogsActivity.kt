@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.android.material.appbar.MaterialToolbar
+import android.content.ClipData
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import rajnishkmehta.sakshi.camera.R
@@ -174,6 +175,7 @@ class DebugLogsActivity : AppCompatActivity() {
 
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
+                clipData = ClipData.newRawUri("", uri)
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }

@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import android.content.ClipData
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -54,6 +55,7 @@ class DebugLogsActivity : ComponentActivity() {
 
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
+                clipData = ClipData.newRawUri("", uri)
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }

@@ -21,6 +21,7 @@ import java.util.Locale
  */
 object DebugLogger {
     private const val TAG = "SakshiCamera"
+    @Volatile
     private var logsDir: File? = null
 
     /**
@@ -64,7 +65,7 @@ object DebugLogger {
         } else {
             Log.d(tag, message)
         }
-        writeToFile("info_logs.txt", "DEBUG", tag, message, throwable)
+        writeToFile("debug_logs.txt", "DEBUG", tag, message, throwable)
         writeToFile("all_logs.txt", "DEBUG", tag, message, throwable)
     }
 
@@ -135,23 +136,24 @@ object DebugLogger {
      * @param throwable An optional exception.
      */
     @JvmStatic
+    @Synchronized
     private fun writeToFile(fileName: String, level: String, tag: String, message: String, throwable: Throwable? = null) {
-        if (logsDir == null) return
+        val dir = logsDir ?: return
         try {
-            var file = File(logsDir, fileName)
+            var file = File(dir, fileName)
             if (file.exists() && file.length() >= 512 * 1024) {
                 val nameWithoutExt = fileName.substringBeforeLast(".")
                 val ext = fileName.substringAfterLast(".", "")
                 val extWithDot = if (ext.isNotEmpty()) ".$ext" else ""
 
                 var n = 1
-                var rotatedFile = File(logsDir, "${nameWithoutExt}_$n$extWithDot")
+                var rotatedFile = File(dir, "${nameWithoutExt}_$n$extWithDot")
                 while (rotatedFile.exists()) {
                     n++
-                    rotatedFile = File(logsDir, "${nameWithoutExt}_$n$extWithDot")
+                    rotatedFile = File(dir, "${nameWithoutExt}_$n$extWithDot")
                 }
                 file.renameTo(rotatedFile)
-                file = File(logsDir, fileName)
+                file = File(dir, fileName)
             }
 
             val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(Date())
