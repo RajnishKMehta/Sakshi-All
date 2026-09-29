@@ -67,9 +67,10 @@ fun VaultSelectionBottomSheet(
                     .padding(bottom = 16.dp)
             )
 
+            val downloadUrl = stringResource(id = R.string.vault_download_url)
             Button(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.vault_download_url)))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
                     try {
                         context.startActivity(intent)
                     } catch (e: Exception) {
