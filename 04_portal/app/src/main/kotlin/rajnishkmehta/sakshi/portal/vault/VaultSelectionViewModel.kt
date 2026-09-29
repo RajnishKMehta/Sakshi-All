@@ -1,0 +1,81 @@
+/*
+ * Copyright 2026 Rajnish Kumar
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package rajnishkmehta.sakshi.portal.vault
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import rajnishkmehta.sakshi.sdk.api.SakshiClient
+import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
+import rajnishkmehta.sakshi.sdk.api.SakshiError
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
+
+class VaultSelectionViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = AppDiscoveryRepository(application)
+    private var allApps: List<AppInfo> = emptyList()
+
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState
+
+    init {
+        loadApps()
+    }
+
+    private fun loadApps() {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            allApps = repository.getInstalledApplications()
+            _uiState.value = UiState.Success(allApps)
+        }
+    }
+
+    fun filter(query: String) {
+        val currentState = _uiState.value
+        if (currentState is UiState.Success || currentState is UiState.Filtering) {
+            val filtered = if (query.isEmpty()) {
+                allApps
+            } else {
+                allApps.filter {
+                    it.name.contains(query, ignoreCase = true) ||
+                    it.packageName.contains(query, ignoreCase = true)
+                }
+            }
+            _uiState.value = UiState.Filtering(filtered)
+        }
+    }
+
+    fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            try { Log.i("VaultSelectionViewModel", "Verifying vault app: $packageName") } catch (e: Exception) {}
+            val config = SakshiClientConfig(
+                vaultPackageName = packageName,
+                connectionTimeoutMs = 5000L
+            )
+            val tempClient = SakshiClient.create(getApplication(), config)
+            val result = tempClient.pingVault()
+            tempClient.disconnect()
+
+            if (result.isSuccess) {
+                try { Log.i("VaultSelectionViewModel", "Vault verified successfully: $packageName") } catch (e: Exception) {}
+                onResult(true, null)
+            } else {
+                val err = result.errorOrNull()
+                val message = err?.message ?: "Unknown error"
+                try { Log.e("VaultSelectionViewModel", "Vault verification failed: $message") } catch (e: Exception) {}
+                onResult(false, message)
+            }
+        }
+    }
+
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val apps: List<AppInfo>) : UiState()
+        data class Filtering(val apps: List<AppInfo>) : UiState()
+    }
+}

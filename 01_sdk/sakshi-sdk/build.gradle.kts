@@ -2,14 +2,8 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
-import org.gradle.plugins.signing.Sign
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.SourcesJar
-
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.maven.publish)
+    id("com.android.library")
 }
 
 android {
@@ -48,94 +42,9 @@ android {
     }
 }
 
-kotlin {
-    jvmToolchain(21)
-
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-        freeCompilerArgs.add("-Xexplicit-api=strict")
-    }
-}
-
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.androidx.annotation)
-    implementation(libs.androidx.core.ktx)
-    testImplementation(libs.junit.jupiter)
-    testRuntimeOnly(libs.junit.platform.launcher)
-    testImplementation(libs.mockk)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("androidx.annotation:annotation:1.9.1")
+    implementation("androidx.core:core-ktx:1.19.1")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
-mavenPublishing {
-    coordinates(
-        "io.github.rajnishkmehta.sakshi",
-        "sakshi-sdk",
-        libs.versions.sakshi.sdk.get()
-    )
-
-    publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
-
-    tasks.withType<Sign>().configureEach {
-        onlyIf {
-            val graph = gradle.taskGraph.allTasks
-            val hasLocal = graph.any { it.name.contains("publishToMavenLocal", ignoreCase = true) }
-            val hasCentral = graph.any { it.name.contains("publishToMavenCentral", ignoreCase = true) }
-            !(hasLocal && !hasCentral)
-        }
-    }
-
-    configure(
-        AndroidSingleVariantLibrary(
-            javadocJar = JavadocJar.Empty(),
-            sourcesJar = SourcesJar.Sources(),
-            variant = "release"
-        )
-    )
-
-    pom {
-        name.set("Sakshi SDK")
-        description.set(
-            "Official Android SDK for building secure integrations with the Sakshi ecosystem through a modern IPC communication layer."
-        )
-        url.set("https://github.com/RajnishKMehta/sakshi-sdk")
-
-        licenses {
-            license {
-                name.set("Apache License, Version 2.0")
-                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-            }
-        }
-
-        developers {
-            developer {
-                id.set("rajnishkmehta")
-                name.set("Rajnish")
-                email.set("RajnishKMehta@proton.me")
-            }
-        }
-
-        scm {
-            connection.set("scm:git:github.com/RajnishKMehta/sakshi-sdk.git")
-            developerConnection.set(
-                "scm:git:ssh://github.com/RajnishKMehta/sakshi-sdk.git"
-            )
-            url.set("https://github.com/RajnishKMehta/sakshi-sdk")
-        }
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "githubPackages"
-            url = uri("https://maven.pkg.github.com/RajnishKMehta/sakshi-sdk")
-            credentials(PasswordCredentials::class)
-        }
-    }
-}

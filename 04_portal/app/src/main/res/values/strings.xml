@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sākṣī Portal</string>
+    <string name="vault_download_url">https://github.com/RajnishKMehta/sakshi-vault/releases/latest</string>
+    <string name="vault_download_error">Could not open browser for download.</string>
 </resources>

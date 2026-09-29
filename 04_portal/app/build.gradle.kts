@@ -79,6 +79,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":01_sdk_sakshi_sdk"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
