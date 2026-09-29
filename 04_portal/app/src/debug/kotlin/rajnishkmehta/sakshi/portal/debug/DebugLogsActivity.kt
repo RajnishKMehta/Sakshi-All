@@ -12,10 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -84,7 +80,7 @@ fun DebugLogsScreen(
                 title = { Text("Debug Logs") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(painter = painterResource(id = android.R.drawable.ic_menu_revert), contentDescription = "Back")
                     }
                 }
             )
@@ -212,11 +208,11 @@ fun LogFileRow(
         }
 
         IconButton(onClick = onExport) {
-            Icon(Icons.Default.Share, contentDescription = "Share")
+            Icon(painter = painterResource(id = android.R.drawable.ic_menu_share), contentDescription = "Share")
         }
 
         IconButton(onClick = onDelete) {
-            Icon(Icons.Default.Delete, contentDescription = "Delete")
+            Icon(painter = painterResource(id = android.R.drawable.ic_menu_delete), contentDescription = "Delete")
         }
     }
 }
