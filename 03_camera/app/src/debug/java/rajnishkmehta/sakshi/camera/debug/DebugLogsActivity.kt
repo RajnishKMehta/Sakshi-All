@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.android.material.appbar.MaterialToolbar
+import android.content.ClipData
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import rajnishkmehta.sakshi.camera.R
@@ -109,8 +110,8 @@ class DebugLogsActivity : AppCompatActivity() {
             }
 
             val sizeView = TextView(this).apply {
-                val sizeKb = file.length() / 1024
-                text = "${sizeKb} KB"
+                val length = file.length()
+                text = if (length < 1024) "$length Bytes" else "${length / 1024} KB"
                 textSize = 12f
                 setTextColor(primaryTextColor)
             }
@@ -174,6 +175,7 @@ class DebugLogsActivity : AppCompatActivity() {
 
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
+                clipData = ClipData.newRawUri("", uri)
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
