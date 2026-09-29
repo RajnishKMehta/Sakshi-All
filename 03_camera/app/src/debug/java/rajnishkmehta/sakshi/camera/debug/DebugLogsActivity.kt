@@ -109,8 +109,8 @@ class DebugLogsActivity : AppCompatActivity() {
             }
 
             val sizeView = TextView(this).apply {
-                val sizeKb = file.length() / 1024
-                text = "${sizeKb} KB"
+                val length = file.length()
+                text = if (length < 1024) "$length Bytes" else "${length / 1024} KB"
                 textSize = 12f
                 setTextColor(primaryTextColor)
             }

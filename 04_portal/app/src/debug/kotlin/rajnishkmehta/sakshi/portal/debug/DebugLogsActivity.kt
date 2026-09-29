@@ -204,7 +204,8 @@ fun LogFileRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = file.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = "${file.length() / 1024} KB", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val length = file.length()
+            Text(text = if (length < 1024) "$length Bytes" else "${length / 1024} KB", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         IconButton(onClick = onExport) {

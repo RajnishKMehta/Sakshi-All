@@ -5,11 +5,11 @@
 package rajnishkmehta.sakshi.portal
 
 import android.app.Application
-import rajnishkmehta.sakshi.portal.debug.DebugLogger
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
 class PortalApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        DebugLogger.init(this)
+        Log.init(this)
     }
 }
