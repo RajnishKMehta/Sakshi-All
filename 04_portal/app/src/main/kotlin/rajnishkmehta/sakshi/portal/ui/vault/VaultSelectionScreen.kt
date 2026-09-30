@@ -233,12 +233,18 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
 
 @Composable
 fun AppItem(app: AppInfo, onClick: () -> Unit) {
+    // Adaptive Icons require a valid Canvas to draw onto when converting to a Bitmap,
+    // and relying on intrinsic dimensions directly can sometimes cause issues or crash
+    // if the drawable is a vector or solid color without fixed bounds on some API levels.
+    // We use a safe fallback size and ensure ARGB_8888 config.
     val bitmap = remember(app.icon) {
-        // App icons might not have valid intrinsic dimensions if they are solid color drawables or misconfigured,
-        // but typically launcher icons do. Providing fallback dimensions just in case.
         val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
         val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
-        app.icon.toBitmap(width = width, height = height).asImageBitmap()
+        val bmp = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        app.icon.setBounds(0, 0, canvas.width, canvas.height)
+        app.icon.draw(canvas)
+        bmp.asImageBitmap()
     }
 
     Row(
