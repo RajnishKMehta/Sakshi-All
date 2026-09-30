@@ -12,11 +12,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 import rajnishkmehta.sakshi.portal.ui.gallery.GalleryScreen
 import rajnishkmehta.sakshi.portal.ui.settings.SettingsScreen
+import rajnishkmehta.sakshi.portal.ui.vault.VaultSelectionScreen
 import rajnishkmehta.sakshi.portal.ui.theme.PortalTheme
+import rajnishkmehta.sakshi.sdk.api.SakshiClient
+import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,9 +32,30 @@ class MainActivity : ComponentActivity() {
 
         val settingsRepository = SettingsRepository(applicationContext)
 
+        lifecycleScope.launch {
+            val vaultPackage = settingsRepository.vaultPackageFlow.firstOrNull()
+            if (vaultPackage != null) {
+                Log.i(tag = "MainActivity", message = "Pinging vault: \$vaultPackage")
+                val config = SakshiClientConfig(
+                    vaultPackageName = vaultPackage,
+                    connectionTimeoutMs = 5000L
+                )
+                val client = SakshiClient.create(applicationContext, config)
+                val result = client.pingVault()
+                if (result.isSuccess) {
+                    Log.i(tag = "MainActivity", message = "Ping success")
+                } else {
+                    val err = result.errorOrNull()
+                    Log.e(tag = "MainActivity", message = "Ping failed: \${err?.message}")
+                }
+                client.disconnect()
+            }
+        }
+
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
             var currentScreen by remember { mutableStateOf(Screen.Gallery) }
+            val coroutineScope = rememberCoroutineScope()
 
             BackHandler(enabled = currentScreen != Screen.Gallery) {
                 currentScreen = Screen.Gallery
@@ -41,8 +70,18 @@ class MainActivity : ComponentActivity() {
                     }
                     Screen.Settings -> {
                         SettingsScreen(
+                            onVaultSelectionClick = { currentScreen = Screen.VaultSelection },
                             repository = settingsRepository,
                             onBackClick = { currentScreen = Screen.Gallery }
+                        )
+                    }
+                    Screen.VaultSelection -> {
+                        VaultSelectionScreen(
+                            onAppSelected = { packageName ->
+                                coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
+                                currentScreen = Screen.Settings
+                            },
+                            onBackClick = { currentScreen = Screen.Settings }
                         )
                     }
                 }
@@ -52,5 +91,5 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screen {
-    Gallery, Settings
+    Gallery, Settings, VaultSelection
 }
