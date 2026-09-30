@@ -76,22 +76,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
             var currentScreen by remember { mutableStateOf(Screen.Gallery) }
+            var previousScreen by remember { mutableStateOf(Screen.Gallery) }
             val coroutineScope = rememberCoroutineScope()
 
             BackHandler(enabled = currentScreen != Screen.Gallery) {
-                currentScreen = Screen.Gallery
+                currentScreen = previousScreen
             }
 
             PortalTheme(useDynamicColor = useDynamicColor) {
                 when (currentScreen) {
                     Screen.Gallery -> {
                         GalleryScreen(
-                            onSettingsClick = { currentScreen = Screen.Settings }
+                            onSettingsClick = {
+                                previousScreen = currentScreen
+                                currentScreen = Screen.Settings
+                            }
                         )
                     }
                     Screen.Settings -> {
                         SettingsScreen(
-                            onVaultSelectionClick = { currentScreen = Screen.VaultSelection },
+                            onVaultSelectionClick = {
+                                previousScreen = currentScreen
+                                currentScreen = Screen.VaultSelection
+                            },
                             repository = settingsRepository,
                             onBackClick = { currentScreen = Screen.Gallery }
                         )
@@ -100,9 +107,9 @@ class MainActivity : ComponentActivity() {
                         VaultSelectionScreen(
                             onAppSelected = { packageName ->
                                 coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
-                                currentScreen = Screen.Settings
+                                currentScreen = previousScreen
                             },
-                            onBackClick = { currentScreen = Screen.Settings }
+                            onBackClick = { currentScreen = previousScreen }
                         )
                     }
                 }

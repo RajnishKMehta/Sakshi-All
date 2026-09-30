@@ -41,6 +41,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -67,6 +72,8 @@ fun VaultSelectionScreen(
     var isVerifying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        searchQuery = ""
+        viewModel.filter("")
         try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
     }
 
@@ -88,6 +95,25 @@ fun VaultSelectionScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.vault_download_url)))
+                        try {
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
+                            } else {
+                                Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(android.R.drawable.stat_sys_download),
+                            contentDescription = "Download Vault"
                         )
                     }
                 },
