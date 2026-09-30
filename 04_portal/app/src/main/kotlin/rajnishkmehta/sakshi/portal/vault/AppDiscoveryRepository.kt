@@ -35,6 +35,7 @@ class AppDiscoveryRepository(private val context: Context) {
                     hasLauncherActivity = launcherPackages.contains(appInfo.packageName)
                 )
             }
+            .distinctBy { it.packageName }
             .sortedWith(
                 compareBy<AppInfo> { it.packageName != "rajnishkmehta.sakshi.vault" } // Vault first
                     .thenBy { it.hasLauncherActivity } // Non-launcher (background) apps next

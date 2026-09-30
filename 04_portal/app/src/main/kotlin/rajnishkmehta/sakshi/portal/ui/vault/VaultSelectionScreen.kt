@@ -189,7 +189,7 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
         }
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(apps) { app ->
+            items(items = apps, key = { it.packageName }) { app ->
                 AppItem(app = app, onClick = { onAppClick(app) })
             }
         }

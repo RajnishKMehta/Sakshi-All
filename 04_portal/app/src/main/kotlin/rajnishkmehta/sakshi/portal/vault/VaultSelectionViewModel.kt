@@ -71,11 +71,13 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             )
             val tempClient = SakshiClient.create(getApplication(), config)
 
-            val result = withContext(Dispatchers.IO) {
-                tempClient.pingVault()
+            val result = try {
+                withContext(Dispatchers.IO) {
+                    tempClient.pingVault()
+                }
+            } finally {
+                tempClient.disconnect()
             }
-
-            tempClient.disconnect()
 
             if (result.isSuccess) {
                 try { Log.i(tag = "VaultSelectionViewModel", message = "Verification success") } catch (e: Exception) {}
