@@ -30,6 +30,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.portal.vault.AppInfo
 import rajnishkmehta.sakshi.portal.vault.VaultSelectionViewModel
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +60,10 @@ fun VaultSelectionScreen(
 
     var searchQuery by remember { mutableStateOf("") }
     var isVerifying by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
+    }
 
     Scaffold(
         topBar = {
@@ -109,16 +115,19 @@ fun VaultSelectionScreen(
                     }
                     is VaultSelectionViewModel.UiState.Success -> {
                         AppList(
-                            apps = state.apps,
+                            apps = state.apps.sortedWith(compareBy<AppInfo> { it.packageName != "rajnishkmehta.sakshi.vault" }.thenBy { !it.hasLauncherActivity }.thenBy { it.name }),
                             onAppClick = { app ->
                                 if (!isVerifying) {
                                     isVerifying = true
+                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: \${app.packageName}") } catch (e: Exception) {}
                                     viewModel.verifyVaultApp(app.packageName) { isSuccess, error ->
                                         isVerifying = false
                                         if (isSuccess) {
+                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: \${app.packageName}") } catch (e: Exception) {}
                                             onAppSelected(app.packageName)
                                         } else {
-                                            Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
+                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for \${app.packageName}: \$error") } catch (e: Exception) {}
+                                            Toast.makeText(context, "Failed to connect: \$error", Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 }
@@ -127,16 +136,19 @@ fun VaultSelectionScreen(
                     }
                     is VaultSelectionViewModel.UiState.Filtering -> {
                         AppList(
-                            apps = state.apps,
+                            apps = state.apps.sortedWith(compareBy<AppInfo> { it.packageName != "rajnishkmehta.sakshi.vault" }.thenBy { !it.hasLauncherActivity }.thenBy { it.name }),
                             onAppClick = { app ->
                                 if (!isVerifying) {
                                     isVerifying = true
+                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: \${app.packageName}") } catch (e: Exception) {}
                                     viewModel.verifyVaultApp(app.packageName) { isSuccess, error ->
                                         isVerifying = false
                                         if (isSuccess) {
+                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: \${app.packageName}") } catch (e: Exception) {}
                                             onAppSelected(app.packageName)
                                         } else {
-                                            Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
+                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for \${app.packageName}: \$error") } catch (e: Exception) {}
+                                            Toast.makeText(context, "Failed to connect: \$error", Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 }

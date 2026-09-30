@@ -33,9 +33,31 @@ class MainActivity : ComponentActivity() {
         val settingsRepository = SettingsRepository(applicationContext)
 
         lifecycleScope.launch {
-            val vaultPackage = settingsRepository.vaultPackageFlow.firstOrNull()
-            if (vaultPackage != null) {
-                Log.i(tag = "MainActivity", message = "Pinging vault: \$vaultPackage")
+            var vaultPackage = settingsRepository.vaultPackageFlow.firstOrNull()
+
+            if (vaultPackage == null) {
+                // First time launch: try default vault
+                vaultPackage = "rajnishkmehta.sakshi.vault"
+                try { Log.i(tag = "MainActivity", message = "First launch, pinging default vault: \$vaultPackage") } catch (e: Exception) {}
+
+                val config = SakshiClientConfig(
+                    vaultPackageName = vaultPackage,
+                    connectionTimeoutMs = 5000L
+                )
+                val client = SakshiClient.create(applicationContext, config)
+                val result = client.pingVault()
+
+                if (result.isSuccess) {
+                    try { Log.i(tag = "MainActivity", message = "Default vault ping success, setting as default") } catch (e: Exception) {}
+                    settingsRepository.setVaultPackage(vaultPackage)
+                } else {
+                    val err = result.errorOrNull()
+                    try { Log.e(tag = "MainActivity", message = "Default vault ping failed: \${err?.message}, leaving unset") } catch (e: Exception) {}
+                    // Do not save it, leave it as null
+                }
+                client.disconnect()
+            } else {
+                try { Log.i(tag = "MainActivity", message = "Pinging saved vault: \$vaultPackage") } catch (e: Exception) {}
                 val config = SakshiClientConfig(
                     vaultPackageName = vaultPackage,
                     connectionTimeoutMs = 5000L
@@ -43,10 +65,10 @@ class MainActivity : ComponentActivity() {
                 val client = SakshiClient.create(applicationContext, config)
                 val result = client.pingVault()
                 if (result.isSuccess) {
-                    Log.i(tag = "MainActivity", message = "Ping success")
+                    try { Log.i(tag = "MainActivity", message = "Ping success") } catch (e: Exception) {}
                 } else {
                     val err = result.errorOrNull()
-                    Log.e(tag = "MainActivity", message = "Ping failed: \${err?.message}")
+                    try { Log.e(tag = "MainActivity", message = "Ping failed: \${err?.message}") } catch (e: Exception) {}
                 }
                 client.disconnect()
             }

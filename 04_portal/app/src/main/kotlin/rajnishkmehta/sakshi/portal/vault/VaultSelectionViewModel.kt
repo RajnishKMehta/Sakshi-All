@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
 class VaultSelectionViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -29,6 +30,7 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
     private fun loadApps() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
+            try { Log.i(tag = "VaultSelectionViewModel", message = "Loading apps...") } catch (e: Exception) {}
             allApps = repository.getInstalledApplications()
             _uiState.value = UiState.Success(allApps)
         }
@@ -51,6 +53,7 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
 
     fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
+            try { Log.i(tag = "VaultSelectionViewModel", message = "Verifying vault app: \$packageName") } catch (e: Exception) {}
             val config = SakshiClientConfig(
                 vaultPackageName = packageName,
                 connectionTimeoutMs = 5000L
@@ -60,10 +63,12 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             tempClient.disconnect()
 
             if (result.isSuccess) {
+                try { Log.i(tag = "VaultSelectionViewModel", message = "Verification success") } catch (e: Exception) {}
                 onResult(true, null)
             } else {
                 val err = result.errorOrNull()
                 val message = err?.message ?: "Unknown error"
+                try { Log.e(tag = "VaultSelectionViewModel", message = "Verification failed: \$message") } catch (e: Exception) {}
                 onResult(false, message)
             }
         }
