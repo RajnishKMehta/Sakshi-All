@@ -36,6 +36,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -198,6 +203,14 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
 
 @Composable
 fun AppItem(app: AppInfo, onClick: () -> Unit) {
+    val bitmap = remember(app.icon) {
+        // App icons might not have valid intrinsic dimensions if they are solid color drawables or misconfigured,
+        // but typically launcher icons do. Providing fallback dimensions just in case.
+        val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
+        val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
+        app.icon.toBitmap(width = width, height = height).asImageBitmap()
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,11 +218,10 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.sym_def_app_icon),
-            contentDescription = "App Icon Placeholder",
-            modifier = Modifier.size(48.dp),
-            tint = Color.Unspecified
+        Image(
+            bitmap = bitmap,
+            contentDescription = "App Icon",
+            modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
