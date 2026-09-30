@@ -44,6 +44,7 @@ import androidx.core.graphics.drawable.toBitmap
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 
 
 import androidx.compose.ui.Alignment
@@ -51,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import rajnishkmehta.sakshi.portal.R
@@ -99,16 +101,18 @@ fun VaultSelectionScreen(
                     }
                 },
                 actions = {
+                    val downloadUrl = stringResource(id = R.string.vault_download_url)
+                    val downloadError = stringResource(id = R.string.vault_download_error)
                     IconButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.vault_download_url)))
+                        val intent = Intent(Intent.ACTION_VIEW, downloadUrl.toUri())
                         try {
                             if (intent.resolveActivity(context.packageManager) != null) {
                                 context.startActivity(intent)
                             } else {
-                                Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, downloadError, Toast.LENGTH_SHORT).show()
                             }
                         } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, downloadError, Toast.LENGTH_SHORT).show()
                         }
                     }) {
                         Icon(
