@@ -7,9 +7,12 @@ package rajnishkmehta.sakshi.portal.vault
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
@@ -22,6 +25,8 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
+
+    private var verificationJob: Job? = null
 
     init {
         loadApps()
@@ -51,15 +56,25 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    fun cancelVerification() {
+        verificationJob?.cancel()
+        verificationJob = null
+    }
+
     fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
-        viewModelScope.launch {
-            try { Log.i(tag = "VaultSelectionViewModel", message = "Verifying vault app: \$packageName") } catch (e: Exception) {}
+        cancelVerification()
+        verificationJob = viewModelScope.launch {
+            try { Log.i(tag = "VaultSelectionViewModel", message = "Verifying vault app: $packageName") } catch (e: Exception) {}
             val config = SakshiClientConfig(
                 vaultPackageName = packageName,
                 connectionTimeoutMs = 5000L
             )
             val tempClient = SakshiClient.create(getApplication(), config)
-            val result = tempClient.pingVault()
+
+            val result = withContext(Dispatchers.IO) {
+                tempClient.pingVault()
+            }
+
             tempClient.disconnect()
 
             if (result.isSuccess) {
@@ -68,7 +83,7 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             } else {
                 val err = result.errorOrNull()
                 val message = err?.message ?: "Unknown error"
-                try { Log.e(tag = "VaultSelectionViewModel", message = "Verification failed: \$message") } catch (e: Exception) {}
+                try { Log.e(tag = "VaultSelectionViewModel", message = "Verification failed: $message") } catch (e: Exception) {}
                 onResult(false, message)
             }
         }

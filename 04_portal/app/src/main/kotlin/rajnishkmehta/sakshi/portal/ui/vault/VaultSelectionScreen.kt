@@ -5,7 +5,6 @@
 package rajnishkmehta.sakshi.portal.ui.vault
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,12 +65,21 @@ fun VaultSelectionScreen(
         try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.cancelVerification()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Select Vault App") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = {
+                        viewModel.cancelVerification()
+                        onBackClick()
+                    }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back"
@@ -115,19 +124,19 @@ fun VaultSelectionScreen(
                     }
                     is VaultSelectionViewModel.UiState.Success -> {
                         AppList(
-                            apps = state.apps.sortedWith(compareBy<AppInfo> { it.packageName != "rajnishkmehta.sakshi.vault" }.thenBy { !it.hasLauncherActivity }.thenBy { it.name }),
+                            apps = state.apps,
                             onAppClick = { app ->
                                 if (!isVerifying) {
                                     isVerifying = true
-                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: \${app.packageName}") } catch (e: Exception) {}
+                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: ${app.packageName}") } catch (e: Exception) {}
                                     viewModel.verifyVaultApp(app.packageName) { isSuccess, error ->
                                         isVerifying = false
                                         if (isSuccess) {
-                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: \${app.packageName}") } catch (e: Exception) {}
+                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
                                             onAppSelected(app.packageName)
                                         } else {
-                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for \${app.packageName}: \$error") } catch (e: Exception) {}
-                                            Toast.makeText(context, "Failed to connect: \$error", Toast.LENGTH_LONG).show()
+                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
+                                            Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 }
@@ -136,19 +145,19 @@ fun VaultSelectionScreen(
                     }
                     is VaultSelectionViewModel.UiState.Filtering -> {
                         AppList(
-                            apps = state.apps.sortedWith(compareBy<AppInfo> { it.packageName != "rajnishkmehta.sakshi.vault" }.thenBy { !it.hasLauncherActivity }.thenBy { it.name }),
+                            apps = state.apps,
                             onAppClick = { app ->
                                 if (!isVerifying) {
                                     isVerifying = true
-                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: \${app.packageName}") } catch (e: Exception) {}
+                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: ${app.packageName}") } catch (e: Exception) {}
                                     viewModel.verifyVaultApp(app.packageName) { isSuccess, error ->
                                         isVerifying = false
                                         if (isSuccess) {
-                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: \${app.packageName}") } catch (e: Exception) {}
+                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
                                             onAppSelected(app.packageName)
                                         } else {
-                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for \${app.packageName}: \$error") } catch (e: Exception) {}
-                                            Toast.makeText(context, "Failed to connect: \$error", Toast.LENGTH_LONG).show()
+                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
+                                            Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 }
@@ -198,7 +207,7 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
     ) {
         Icon(
             painter = painterResource(id = android.R.drawable.sym_def_app_icon),
-            contentDescription = "App Icon",
+            contentDescription = "App Icon Placeholder",
             modifier = Modifier.size(48.dp),
             tint = Color.Unspecified
         )

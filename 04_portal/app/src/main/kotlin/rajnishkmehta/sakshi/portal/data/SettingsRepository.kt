@@ -49,4 +49,12 @@ class SettingsRepository(private val context: Context) {
             }
         }
     }
+
+    suspend fun setVaultPackageIfUnset(packageName: String) {
+        context.dataStore.edit { preferences ->
+            if (!preferences.contains(VAULT_PACKAGE_KEY)) {
+                preferences[VAULT_PACKAGE_KEY] = packageName
+            }
+        }
+    }
 }

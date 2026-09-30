@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
             if (vaultPackage == null) {
                 // First time launch: try default vault
                 vaultPackage = "rajnishkmehta.sakshi.vault"
-                try { Log.i(tag = "MainActivity", message = "First launch, pinging default vault: \$vaultPackage") } catch (e: Exception) {}
+                try { Log.i(tag = "MainActivity", message = "First launch, pinging default vault: $vaultPackage") } catch (e: Exception) {}
 
                 val config = SakshiClientConfig(
                     vaultPackageName = vaultPackage,
@@ -49,15 +49,14 @@ class MainActivity : ComponentActivity() {
 
                 if (result.isSuccess) {
                     try { Log.i(tag = "MainActivity", message = "Default vault ping success, setting as default") } catch (e: Exception) {}
-                    settingsRepository.setVaultPackage(vaultPackage)
+                    settingsRepository.setVaultPackageIfUnset(vaultPackage)
                 } else {
                     val err = result.errorOrNull()
-                    try { Log.e(tag = "MainActivity", message = "Default vault ping failed: \${err?.message}, leaving unset") } catch (e: Exception) {}
-                    // Do not save it, leave it as null
+                    try { Log.e(tag = "MainActivity", message = "Default vault ping failed: ${err?.message}, leaving unset") } catch (e: Exception) {}
                 }
                 client.disconnect()
             } else {
-                try { Log.i(tag = "MainActivity", message = "Pinging saved vault: \$vaultPackage") } catch (e: Exception) {}
+                try { Log.i(tag = "MainActivity", message = "Pinging saved vault: $vaultPackage") } catch (e: Exception) {}
                 val config = SakshiClientConfig(
                     vaultPackageName = vaultPackage,
                     connectionTimeoutMs = 5000L
@@ -68,7 +67,7 @@ class MainActivity : ComponentActivity() {
                     try { Log.i(tag = "MainActivity", message = "Ping success") } catch (e: Exception) {}
                 } else {
                     val err = result.errorOrNull()
-                    try { Log.e(tag = "MainActivity", message = "Ping failed: \${err?.message}") } catch (e: Exception) {}
+                    try { Log.e(tag = "MainActivity", message = "Ping failed: ${err?.message}") } catch (e: Exception) {}
                 }
                 client.disconnect()
             }
