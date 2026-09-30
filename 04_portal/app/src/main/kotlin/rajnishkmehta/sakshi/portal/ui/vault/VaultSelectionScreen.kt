@@ -237,7 +237,7 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
     // and relying on intrinsic dimensions directly can sometimes cause issues or crash
     // if the drawable is a vector or solid color without fixed bounds on some API levels.
     // We use a safe fallback size and ensure ARGB_8888 config.
-    val bitmap = remember(app.icon) {
+    val bitmap = remember(app.packageName) {
         val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
         val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
         val bmp = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
