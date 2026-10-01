@@ -218,11 +218,16 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
     var iconDrawable by remember { mutableStateOf<Drawable?>(null) }
 
     LaunchedEffect(app.packageName) {
+        try { Log.d(tag = "VaultSelection", message = "LaunchedEffect started for: ${app.packageName}") } catch (e: Exception) {}
         withContext(Dispatchers.IO) {
             try {
                 val pm = context.packageManager
                 val icon = pm.getApplicationIcon(app.packageName)
-                iconDrawable = icon
+                try { Log.d(tag = "VaultSelection", message = "Icon loaded for ${app.packageName}: type ${icon.javaClass.simpleName}") } catch (e: Exception) {}
+                // Update state on Main thread
+                withContext(Dispatchers.Main) {
+                    iconDrawable = icon
+                }
             } catch (e: Exception) {
                 try { Log.e(tag = "VaultSelection", message = "Failed to load icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
             }
@@ -252,8 +257,10 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
 
                         override fun DrawScope.onDraw() {
                             try {
+                                val w = size.width.toInt().takeIf { it > 0 } ?: intrinsicSize.width.toInt()
+                                val h = size.height.toInt().takeIf { it > 0 } ?: intrinsicSize.height.toInt()
                                 drawIntoCanvas { canvas ->
-                                    d.setBounds(0, 0, size.width.toInt(), size.height.toInt())
+                                    d.setBounds(0, 0, w, h)
                                     d.draw(canvas.nativeCanvas)
                                 }
                             } catch (e: Exception) {
