@@ -7,6 +7,10 @@ package rajnishkmehta.sakshi.camera.vault
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -40,9 +44,23 @@ class VaultAppAdapter(
         private val packageView: TextView = itemView.findViewById(R.id.app_package)
 
         fun bind(appInfo: AppInfo) {
-            iconView.setImageDrawable(appInfo.icon)
             nameView.text = appInfo.name
             packageView.text = appInfo.packageName
+
+            iconView.setImageResource(android.R.drawable.sym_def_app_icon)
+
+            CoroutineScope(Dispatchers.Main).launch {
+                val icon = withContext(Dispatchers.IO) {
+                    try {
+                        itemView.context.packageManager.getApplicationIcon(appInfo.packageName)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                if (icon != null) {
+                    iconView.setImageDrawable(icon)
+                }
+            }
 
             itemView.setOnClickListener {
                 onClick(appInfo)

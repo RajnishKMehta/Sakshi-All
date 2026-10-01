@@ -51,6 +51,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.portal.vault.AppInfo
@@ -207,6 +209,21 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
 
 @Composable
 fun AppItem(app: AppInfo, onClick: () -> Unit) {
+    val context = LocalContext.current
+    var iconDrawable by remember { mutableStateOf<Drawable?>(null) }
+
+    LaunchedEffect(app.packageName) {
+        withContext(Dispatchers.IO) {
+            try {
+                val pm = context.packageManager
+                val icon = pm.getApplicationIcon(app.packageName)
+                iconDrawable = icon
+            } catch (e: Exception) {
+                try { Log.e(tag = "VaultSelection", message = "Failed to load icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
+            }
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -217,31 +234,33 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
         val defaultIcon = painterResource(id = android.R.drawable.sym_def_app_icon)
 
         // Custom Painter for Drawable
-        val painter = remember(app.icon) {
-            try {
-                try { Log.i(tag = "VaultSelection", message = "Creating painter for ${app.packageName}, icon type: ${app.icon.javaClass.simpleName}") } catch (e: Exception) {}
-                object : Painter() {
-                    override val intrinsicSize: Size
-                        get() = Size(
-                            app.icon.intrinsicWidth.toFloat().takeIf { it > 0f } ?: 144f,
-                            app.icon.intrinsicHeight.toFloat().takeIf { it > 0f } ?: 144f
-                        )
+        val painter = remember(iconDrawable) {
+            val d = iconDrawable
+            if (d != null) {
+                try {
+                    object : Painter() {
+                        override val intrinsicSize: Size
+                            get() = Size(
+                                d.intrinsicWidth.toFloat().takeIf { it > 0f } ?: 144f,
+                                d.intrinsicHeight.toFloat().takeIf { it > 0f } ?: 144f
+                            )
 
-                    override fun DrawScope.onDraw() {
-                        try {
-                            drawIntoCanvas { canvas ->
-                                app.icon.setBounds(0, 0, size.width.toInt(), size.height.toInt())
-                                app.icon.draw(canvas.nativeCanvas)
+                        override fun DrawScope.onDraw() {
+                            try {
+                                drawIntoCanvas { canvas ->
+                                    d.setBounds(0, 0, size.width.toInt(), size.height.toInt())
+                                    d.draw(canvas.nativeCanvas)
+                                }
+                            } catch (e: Exception) {
+                                try { Log.e(tag = "VaultSelection", message = "Error rendering icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                             }
-                        } catch (e: Exception) {
-                            try { Log.e(tag = "VaultSelection", message = "Error rendering icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                         }
                     }
+                } catch (e: Exception) {
+                    try { Log.e(tag = "VaultSelection", message = "Error creating painter for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
+                    null
                 }
-            } catch (e: Exception) {
-                try { Log.e(tag = "VaultSelection", message = "Error creating painter for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
-                null
-            }
+            } else null
         }
 
         if (painter != null) {

@@ -29,14 +29,9 @@ class AppDiscoveryRepository(private val context: Context) {
         allPackages
             .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 } // Filter out system apps
             .map { appInfo ->
-                val icon = pm.getApplicationIcon(appInfo)
-                try {
-                    Log.i(tag = "VaultSelection", message = "AppDiscoveryRepository: Loaded icon for ${appInfo.packageName}, type: ${icon.javaClass.simpleName}, width: ${icon.intrinsicWidth}, height: ${icon.intrinsicHeight}")
-                } catch (e: Exception) {}
                 AppInfo(
                     name = pm.getApplicationLabel(appInfo).toString(),
                     packageName = appInfo.packageName,
-                    icon = icon,
                     hasLauncherActivity = launcherPackages.contains(appInfo.packageName)
                 )
             }
