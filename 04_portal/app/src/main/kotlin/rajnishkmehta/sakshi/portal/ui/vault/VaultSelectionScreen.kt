@@ -108,15 +108,15 @@ fun VaultSelectionScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.vault_download_url)))
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.resources.getString(R.string.vault_download_url)))
                         try {
                             if (intent.resolveActivity(context.packageManager) != null) {
                                 context.startActivity(intent)
                             } else {
-                                Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.resources.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
                             }
                         } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.resources.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
                         }
                     }) {
                         Icon(
