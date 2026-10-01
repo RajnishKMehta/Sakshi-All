@@ -129,11 +129,13 @@ fun VaultSelectionScreen(
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
+                try { Log.d(tag = "VaultSelection", message = "Current UI State: ${uiState.javaClass.simpleName}") } catch (e: Exception) {}
                 when (val state = uiState) {
                     is VaultSelectionViewModel.UiState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                     is VaultSelectionViewModel.UiState.Success -> {
+                        try { Log.i(tag = "VaultSelection", message = "State is Success, rendering AppList") } catch (e: Exception) {}
                         AppList(
                             apps = state.apps,
                             onAppClick = { app ->
@@ -194,13 +196,16 @@ fun VaultSelectionScreen(
 
 @Composable
 fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
+    try { Log.i(tag = "VaultSelection", message = "AppList called with ${apps.size} apps") } catch (e: Exception) {}
     if (apps.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No apps found")
         }
     } else {
+        try { Log.i(tag = "VaultSelection", message = "Initializing LazyColumn") } catch (e: Exception) {}
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(items = apps, key = { it.packageName }) { app ->
+                try { Log.d(tag = "VaultSelection", message = "LazyColumn item for: ${app.packageName}") } catch (e: Exception) {}
                 AppItem(app = app, onClick = { onAppClick(app) })
             }
         }

@@ -36,8 +36,13 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try { Log.i(tag = "VaultSelectionViewModel", message = "Loading apps...") } catch (e: Exception) {}
-            allApps = repository.getInstalledApplications()
-            _uiState.value = UiState.Success(allApps)
+            try {
+                allApps = repository.getInstalledApplications()
+                try { Log.i(tag = "VaultSelectionViewModel", message = "Apps loaded: ${allApps.size}") } catch (e: Exception) {}
+                _uiState.value = UiState.Success(allApps)
+            } catch (e: Exception) {
+                try { Log.e(tag = "VaultSelectionViewModel", message = "Error loading apps: ${e.message}") } catch (logE: Exception) {}
+            }
         }
     }
 
