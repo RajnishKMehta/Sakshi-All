@@ -75,34 +75,45 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
-            var currentScreen by remember { mutableStateOf(Screen.Gallery) }
+            var backStack by remember { mutableStateOf(listOf(Screen.Gallery)) }
+            val currentScreen = backStack.last()
             val coroutineScope = rememberCoroutineScope()
 
-            BackHandler(enabled = currentScreen != Screen.Gallery) {
-                currentScreen = Screen.Gallery
+            fun navigateTo(screen: Screen) {
+                backStack = backStack + screen
+            }
+
+            fun navigateBack() {
+                if (backStack.size > 1) {
+                    backStack = backStack.dropLast(1)
+                }
+            }
+
+            BackHandler(enabled = backStack.size > 1) {
+                navigateBack()
             }
 
             PortalTheme(useDynamicColor = useDynamicColor) {
                 when (currentScreen) {
                     Screen.Gallery -> {
                         GalleryScreen(
-                            onSettingsClick = { currentScreen = Screen.Settings }
+                            onSettingsClick = { navigateTo(Screen.Settings) }
                         )
                     }
                     Screen.Settings -> {
                         SettingsScreen(
-                            onVaultSelectionClick = { currentScreen = Screen.VaultSelection },
+                            onVaultSelectionClick = { navigateTo(Screen.VaultSelection) },
                             repository = settingsRepository,
-                            onBackClick = { currentScreen = Screen.Gallery }
+                            onBackClick = { navigateBack() }
                         )
                     }
                     Screen.VaultSelection -> {
                         VaultSelectionScreen(
                             onAppSelected = { packageName ->
                                 coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
-                                currentScreen = Screen.Settings
+                                navigateBack()
                             },
-                            onBackClick = { currentScreen = Screen.Settings }
+                            onBackClick = { navigateBack() }
                         )
                     }
                 }
