@@ -23,7 +23,7 @@ class AppDiscoveryRepository(private val context: Context) {
         val launcherResolveInfos = pm.queryIntentActivities(mainIntent, 0)
         val launcherPackages = launcherResolveInfos.map { it.activityInfo.packageName }.toSet()
 
-        val allPackages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        val allPackages = pm.getInstalledApplications(0)
 
         allPackages
             .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 } // Filter out system apps
