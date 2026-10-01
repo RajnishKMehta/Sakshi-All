@@ -4,6 +4,7 @@
  */
 package rajnishkmehta.sakshi.portal.ui.vault
 
+import androidx.core.content.ContextCompat
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -233,17 +234,28 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
 
 @Composable
 fun AppItem(app: AppInfo, onClick: () -> Unit) {
-    // Adaptive Icons require a valid Canvas to draw onto when converting to a Bitmap,
-    // and relying on intrinsic dimensions directly can sometimes cause issues or crash
-    // if the drawable is a vector or solid color without fixed bounds on some API levels.
-    // We use a safe fallback size and ensure ARGB_8888 config.
-    // Safe fallback for icon loading
-    val defaultIcon = painterResource(id = android.R.drawable.sym_def_app_icon)
+    val context = LocalContext.current
+
     val imageBitmap = remember(app.packageName) {
         try {
-            val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
-            val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
-            app.icon.toBitmap(width, height).asImageBitmap()
+            val pm = context.packageManager
+            val icon = pm.getApplicationIcon(app.packageName)
+            val width = if (icon.intrinsicWidth > 0) icon.intrinsicWidth else 144
+            val height = if (icon.intrinsicHeight > 0) icon.intrinsicHeight else 144
+            icon.toBitmap(width, height).asImageBitmap()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    val defaultBitmap = remember {
+        try {
+            val drawable = ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            if (drawable != null) {
+                val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 144
+                val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 144
+                drawable.toBitmap(width, height).asImageBitmap()
+            } else null
         } catch (e: Exception) {
             null
         }
@@ -262,13 +274,14 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
                 contentDescription = "App Icon",
                 modifier = Modifier.size(48.dp)
             )
-        } else {
-            Icon(
-                painter = defaultIcon,
+        } else if (defaultBitmap != null) {
+            Image(
+                bitmap = defaultBitmap,
                 contentDescription = "App Icon",
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
+                modifier = Modifier.size(48.dp)
             )
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {

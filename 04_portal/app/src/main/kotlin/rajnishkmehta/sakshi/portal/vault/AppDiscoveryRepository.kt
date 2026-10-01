@@ -31,7 +31,6 @@ class AppDiscoveryRepository(private val context: Context) {
                 AppInfo(
                     name = pm.getApplicationLabel(appInfo).toString(),
                     packageName = appInfo.packageName,
-                    icon = pm.getApplicationIcon(appInfo),
                     hasLauncherActivity = launcherPackages.contains(appInfo.packageName)
                 )
             }
