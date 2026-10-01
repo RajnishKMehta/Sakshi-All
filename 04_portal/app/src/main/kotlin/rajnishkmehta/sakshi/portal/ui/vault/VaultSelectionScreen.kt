@@ -5,6 +5,10 @@
 package rajnishkmehta.sakshi.portal.ui.vault
 
 import android.widget.Toast
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,6 +78,8 @@ fun VaultSelectionScreen(
     var isVerifying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        searchQuery = ""
+        viewModel.filter("")
         // try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
     }
 
@@ -90,11 +96,32 @@ fun VaultSelectionScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.cancelVerification()
+                        searchQuery = ""
+                        viewModel.filter("")
                         onBackClick()
                     }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.vault_download_url)))
+                        try {
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
+                            } else {
+                                Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(context, context.getString(R.string.vault_download_error), Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_download),
+                            contentDescription = "Download Vault"
                         )
                     }
                 },
@@ -147,6 +174,8 @@ fun VaultSelectionScreen(
                                         isVerifying = false
                                         if (isSuccess) {
                                             // try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
+                                            searchQuery = ""
+                                            viewModel.filter("")
                                             onAppSelected(app.packageName)
                                         } else {
                                             // try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
@@ -168,6 +197,8 @@ fun VaultSelectionScreen(
                                         isVerifying = false
                                         if (isSuccess) {
                                             // try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
+                                            searchQuery = ""
+                                            viewModel.filter("")
                                             onAppSelected(app.packageName)
                                         } else {
                                             // try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
