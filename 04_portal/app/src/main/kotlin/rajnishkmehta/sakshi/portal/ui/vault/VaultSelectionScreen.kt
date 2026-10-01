@@ -36,6 +36,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
@@ -233,19 +235,26 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
 
 @Composable
 fun AppItem(app: AppInfo, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val pm = context.packageManager
     // Adaptive Icons require a valid Canvas to draw onto when converting to a Bitmap,
     // and relying on intrinsic dimensions directly can sometimes cause issues or crash
     // if the drawable is a vector or solid color without fixed bounds on some API levels.
     // We use a safe fallback size and ensure ARGB_8888 config.
     // Safe fallback for icon loading
     val defaultIcon = painterResource(id = android.R.drawable.sym_def_app_icon)
-    val imageBitmap = remember(app.packageName) {
-        try {
-            val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
-            val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
-            app.icon.toBitmap(width, height).asImageBitmap()
-        } catch (e: Exception) {
-            null
+    var imageBitmap by remember(app.packageName) { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+
+    LaunchedEffect(app.packageName) {
+        withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val icon = pm.getApplicationIcon(app.packageName)
+                val width = if (icon.intrinsicWidth > 0) icon.intrinsicWidth else 144
+                val height = if (icon.intrinsicHeight > 0) icon.intrinsicHeight else 144
+                imageBitmap = icon.toBitmap(width, height).asImageBitmap()
+            } catch (e: Exception) {
+                // Keep default null
+            }
         }
     }
 
@@ -256,9 +265,10 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (imageBitmap != null) {
+        val currentBitmap = imageBitmap
+        if (currentBitmap != null) {
             Image(
-                bitmap = imageBitmap,
+                bitmap = currentBitmap,
                 contentDescription = "App Icon",
                 modifier = Modifier.size(48.dp)
             )
