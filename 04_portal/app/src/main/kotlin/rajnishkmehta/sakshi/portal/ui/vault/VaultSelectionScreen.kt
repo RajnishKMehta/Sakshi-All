@@ -49,6 +49,7 @@ import androidx.compose.ui.geometry.Size
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -216,6 +217,7 @@ fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
 fun AppItem(app: AppInfo, onClick: () -> Unit) {
     val context = LocalContext.current
     var iconDrawable by remember { mutableStateOf<Drawable?>(null) }
+    var useFallback by remember { mutableStateOf(false) }
 
     LaunchedEffect(app.packageName) {
         try { Log.d(tag = "VaultSelection", message = "LaunchedEffect started for: ${app.packageName}") } catch (e: Exception) {}
@@ -224,12 +226,14 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
                 val pm = context.packageManager
                 val icon = pm.getApplicationIcon(app.packageName)
                 try { Log.d(tag = "VaultSelection", message = "Icon loaded for ${app.packageName}: type ${icon.javaClass.simpleName}") } catch (e: Exception) {}
-                // Update state on Main thread
                 withContext(Dispatchers.Main) {
                     iconDrawable = icon
                 }
             } catch (e: Exception) {
                 try { Log.e(tag = "VaultSelection", message = "Failed to load icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
+                withContext(Dispatchers.Main) {
+                    useFallback = true
+                }
             }
         }
     }
@@ -241,11 +245,16 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val defaultIcon = painterResource(id = android.R.drawable.sym_def_app_icon)
+        // Fallback default app icon (rendered as raw Drawable because it's AdaptiveIconDrawable)
+        val defaultDrawable = remember {
+            ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+        }
+
+        val targetDrawable = iconDrawable ?: (if (useFallback || iconDrawable == null) defaultDrawable else null)
 
         // Custom Painter for Drawable
-        val painter = remember(iconDrawable) {
-            val d = iconDrawable
+        val painter = remember(targetDrawable) {
+            val d = targetDrawable
             if (d != null) {
                 try {
                     object : Painter() {
@@ -282,12 +291,8 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
                 modifier = Modifier.size(48.dp)
             )
         } else {
-            Icon(
-                painter = defaultIcon,
-                contentDescription = "App Icon Placeholder",
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
-            )
+            // Invisible placeholder to keep space
+            Spacer(modifier = Modifier.size(48.dp))
         }
 
         Spacer(modifier = Modifier.width(16.dp))
