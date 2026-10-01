@@ -35,9 +35,14 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
     private fun loadApps() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            try { Log.i(tag = "VaultSelectionViewModel", message = "Loading apps...") } catch (e: Exception) {}
-            allApps = repository.getInstalledApplications()
-            _uiState.value = UiState.Success(allApps)
+            // try { Log.i(tag = "VaultSelectionViewModel", message = "Loading apps...") } catch (e: Exception) {}
+            try {
+                allApps = repository.getInstalledApplications()
+                // try { Log.i(tag = "VaultSelectionViewModel", message = "Apps loaded: ${allApps.size}") } catch (e: Exception) {}
+                _uiState.value = UiState.Success(allApps)
+            } catch (e: Exception) {
+                // try { Log.e(tag = "VaultSelectionViewModel", message = "Error loading apps: ${e.message}") } catch (logE: Exception) {}
+            }
         }
     }
 
@@ -64,7 +69,7 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
     fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
         cancelVerification()
         verificationJob = viewModelScope.launch {
-            try { Log.i(tag = "VaultSelectionViewModel", message = "Verifying vault app: $packageName") } catch (e: Exception) {}
+            // try { Log.i(tag = "VaultSelectionViewModel", message = "Verifying vault app: $packageName") } catch (e: Exception) {}
             val config = SakshiClientConfig(
                 vaultPackageName = packageName,
                 connectionTimeoutMs = 5000L
@@ -80,12 +85,12 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
             }
 
             if (result.isSuccess) {
-                try { Log.i(tag = "VaultSelectionViewModel", message = "Verification success") } catch (e: Exception) {}
+                // try { Log.i(tag = "VaultSelectionViewModel", message = "Verification success") } catch (e: Exception) {}
                 onResult(true, null)
             } else {
                 val err = result.errorOrNull()
                 val message = err?.message ?: "Unknown error"
-                try { Log.e(tag = "VaultSelectionViewModel", message = "Verification failed: $message") } catch (e: Exception) {}
+                // try { Log.e(tag = "VaultSelectionViewModel", message = "Verification failed: $message") } catch (e: Exception) {}
                 onResult(false, message)
             }
         }
