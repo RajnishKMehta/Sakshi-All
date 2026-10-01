@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
             PortalTheme(useDynamicColor = useDynamicColor) {
                 NavDisplay(
                     backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
+                    onBack = { if (backStack.size > 1) backStack.removeLastOrNull() else finish() },
                     entryProvider = entryProvider {
                         entry<GalleryScreenRoute> {
                             GalleryScreen(
