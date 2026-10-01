@@ -74,7 +74,7 @@ fun VaultSelectionScreen(
     var isVerifying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
+        // try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
     }
 
     DisposableEffect(Unit) {
@@ -130,26 +130,26 @@ fun VaultSelectionScreen(
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                try { Log.d(tag = "VaultSelection", message = "Current UI State: ${uiState.javaClass.simpleName}") } catch (e: Exception) {}
+                // try { Log.d(tag = "VaultSelection", message = "Current UI State: ${uiState.javaClass.simpleName}") } catch (e: Exception) {}
                 when (val state = uiState) {
                     is VaultSelectionViewModel.UiState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                     is VaultSelectionViewModel.UiState.Success -> {
-                        try { Log.i(tag = "VaultSelection", message = "State is Success, rendering AppList") } catch (e: Exception) {}
+                        // try { Log.i(tag = "VaultSelection", message = "State is Success, rendering AppList") } catch (e: Exception) {}
                         AppList(
                             apps = state.apps,
                             onAppClick = { app ->
                                 if (!isVerifying) {
                                     isVerifying = true
-                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: ${app.packageName}") } catch (e: Exception) {}
+                                    // try { Log.i(tag = "VaultSelection", message = "Pinging selected app: ${app.packageName}") } catch (e: Exception) {}
                                     viewModel.verifyVaultApp(app.packageName) { isSuccess, error ->
                                         isVerifying = false
                                         if (isSuccess) {
-                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
+                                            // try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
                                             onAppSelected(app.packageName)
                                         } else {
-                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
+                                            // try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
                                             Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
                                         }
                                     }
@@ -163,14 +163,14 @@ fun VaultSelectionScreen(
                             onAppClick = { app ->
                                 if (!isVerifying) {
                                     isVerifying = true
-                                    try { Log.i(tag = "VaultSelection", message = "Pinging selected app: ${app.packageName}") } catch (e: Exception) {}
+                                    // try { Log.i(tag = "VaultSelection", message = "Pinging selected app: ${app.packageName}") } catch (e: Exception) {}
                                     viewModel.verifyVaultApp(app.packageName) { isSuccess, error ->
                                         isVerifying = false
                                         if (isSuccess) {
-                                            try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
+                                            // try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
                                             onAppSelected(app.packageName)
                                         } else {
-                                            try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
+                                            // try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
                                             Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
                                         }
                                     }
@@ -197,16 +197,16 @@ fun VaultSelectionScreen(
 
 @Composable
 fun AppList(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
-    try { Log.i(tag = "VaultSelection", message = "AppList called with ${apps.size} apps") } catch (e: Exception) {}
+    // try { Log.i(tag = "VaultSelection", message = "AppList called with ${apps.size} apps") } catch (e: Exception) {}
     if (apps.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No apps found")
         }
     } else {
-        try { Log.i(tag = "VaultSelection", message = "Initializing LazyColumn") } catch (e: Exception) {}
+        // try { Log.i(tag = "VaultSelection", message = "Initializing LazyColumn") } catch (e: Exception) {}
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(items = apps, key = { it.packageName }) { app ->
-                try { Log.d(tag = "VaultSelection", message = "LazyColumn item for: ${app.packageName}") } catch (e: Exception) {}
+                // try { Log.d(tag = "VaultSelection", message = "LazyColumn item for: ${app.packageName}") } catch (e: Exception) {}
                 AppItem(app = app, onClick = { onAppClick(app) })
             }
         }
@@ -220,17 +220,17 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
     var useFallback by remember { mutableStateOf(false) }
 
     LaunchedEffect(app.packageName) {
-        try { Log.d(tag = "VaultSelection", message = "LaunchedEffect started for: ${app.packageName}") } catch (e: Exception) {}
+        // try { Log.d(tag = "VaultSelection", message = "LaunchedEffect started for: ${app.packageName}") } catch (e: Exception) {}
         withContext(Dispatchers.IO) {
             try {
                 val pm = context.packageManager
                 val icon = pm.getApplicationIcon(app.packageName)
-                try { Log.d(tag = "VaultSelection", message = "Icon loaded for ${app.packageName}: type ${icon.javaClass.simpleName}") } catch (e: Exception) {}
+                // try { Log.d(tag = "VaultSelection", message = "Icon loaded for ${app.packageName}: type ${icon.javaClass.simpleName}") } catch (e: Exception) {}
                 withContext(Dispatchers.Main) {
                     iconDrawable = icon
                 }
             } catch (e: Exception) {
-                try { Log.e(tag = "VaultSelection", message = "Failed to load icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
+                // try { Log.e(tag = "VaultSelection", message = "Failed to load icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                 withContext(Dispatchers.Main) {
                     useFallback = true
                 }
@@ -273,12 +273,12 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
                                     d.draw(canvas.nativeCanvas)
                                 }
                             } catch (e: Exception) {
-                                try { Log.e(tag = "VaultSelection", message = "Error rendering icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
+                                // try { Log.e(tag = "VaultSelection", message = "Error rendering icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    try { Log.e(tag = "VaultSelection", message = "Error creating painter for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
+                    // try { Log.e(tag = "VaultSelection", message = "Error creating painter for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                     null
                 }
             } else null
