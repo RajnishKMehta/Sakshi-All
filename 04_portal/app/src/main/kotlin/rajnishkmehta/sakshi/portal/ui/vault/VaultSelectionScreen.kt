@@ -219,6 +219,7 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
         // Custom Painter for Drawable
         val painter = remember(app.icon) {
             try {
+                try { Log.i(tag = "VaultSelection", message = "Creating painter for ${app.packageName}, icon type: ${app.icon.javaClass.simpleName}") } catch (e: Exception) {}
                 object : Painter() {
                     override val intrinsicSize: Size
                         get() = Size(
@@ -227,13 +228,18 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
                         )
 
                     override fun DrawScope.onDraw() {
-                        drawIntoCanvas { canvas ->
-                            app.icon.setBounds(0, 0, size.width.toInt(), size.height.toInt())
-                            app.icon.draw(canvas.nativeCanvas)
+                        try {
+                            drawIntoCanvas { canvas ->
+                                app.icon.setBounds(0, 0, size.width.toInt(), size.height.toInt())
+                                app.icon.draw(canvas.nativeCanvas)
+                            }
+                        } catch (e: Exception) {
+                            try { Log.e(tag = "VaultSelection", message = "Error rendering icon for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                         }
                     }
                 }
             } catch (e: Exception) {
+                try { Log.e(tag = "VaultSelection", message = "Error creating painter for ${app.packageName}: ${e.message}") } catch (logE: Exception) {}
                 null
             }
         }

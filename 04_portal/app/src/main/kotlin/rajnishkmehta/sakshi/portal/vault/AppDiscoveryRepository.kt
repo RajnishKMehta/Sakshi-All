@@ -10,6 +10,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
 class AppDiscoveryRepository(private val context: Context) {
 
@@ -23,15 +24,19 @@ class AppDiscoveryRepository(private val context: Context) {
         val launcherResolveInfos = pm.queryIntentActivities(mainIntent, 0)
         val launcherPackages = launcherResolveInfos.map { it.activityInfo.packageName }.toSet()
 
-        val allPackages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        val allPackages = pm.getInstalledApplications(0)
 
         allPackages
             .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 } // Filter out system apps
             .map { appInfo ->
+                val icon = pm.getApplicationIcon(appInfo)
+                try {
+                    Log.i(tag = "VaultSelection", message = "AppDiscoveryRepository: Loaded icon for ${appInfo.packageName}, type: ${icon.javaClass.simpleName}, width: ${icon.intrinsicWidth}, height: ${icon.intrinsicHeight}")
+                } catch (e: Exception) {}
                 AppInfo(
                     name = pm.getApplicationLabel(appInfo).toString(),
                     packageName = appInfo.packageName,
-                    icon = pm.getApplicationIcon(appInfo),
+                    icon = icon,
                     hasLauncherActivity = launcherPackages.contains(appInfo.packageName)
                 )
             }
