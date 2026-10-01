@@ -38,6 +38,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.painter.Painter
+import android.graphics.drawable.Drawable
+import androidx.compose.ui.geometry.Size
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -205,12 +214,45 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.sym_def_app_icon),
-            contentDescription = "App Icon Placeholder",
-            modifier = Modifier.size(48.dp),
-            tint = Color.Unspecified
-        )
+        val defaultIcon = painterResource(id = android.R.drawable.sym_def_app_icon)
+
+        // Custom Painter for Drawable
+        val painter = remember(app.icon) {
+            try {
+                object : Painter() {
+                    override val intrinsicSize: Size
+                        get() = Size(
+                            app.icon.intrinsicWidth.toFloat().takeIf { it > 0f } ?: 144f,
+                            app.icon.intrinsicHeight.toFloat().takeIf { it > 0f } ?: 144f
+                        )
+
+                    override fun DrawScope.onDraw() {
+                        drawIntoCanvas { canvas ->
+                            app.icon.setBounds(0, 0, size.width.toInt(), size.height.toInt())
+                            app.icon.draw(canvas.nativeCanvas)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        if (painter != null) {
+            Image(
+                painter = painter,
+                contentDescription = "App Icon",
+                modifier = Modifier.size(48.dp)
+            )
+        } else {
+            Icon(
+                painter = defaultIcon,
+                contentDescription = "App Icon Placeholder",
+                modifier = Modifier.size(48.dp),
+                tint = Color.Unspecified
+            )
+        }
+
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(text = app.name, style = MaterialTheme.typography.bodyLarge)
