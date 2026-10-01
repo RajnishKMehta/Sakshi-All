@@ -5,6 +5,10 @@
 package rajnishkmehta.sakshi.portal.ui.vault
 
 import android.widget.Toast
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,12 +78,15 @@ fun VaultSelectionScreen(
     var isVerifying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        searchQuery = ""
+        viewModel.filter("")
         // try { Log.i(tag = "VaultSelection", message = "VaultSelectionScreen opened") } catch (e: Exception) {}
     }
 
     DisposableEffect(Unit) {
         onDispose {
             viewModel.cancelVerification()
+            viewModel.filter("")
         }
     }
 
@@ -90,11 +97,33 @@ fun VaultSelectionScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.cancelVerification()
+                        viewModel.filter("")
                         onBackClick()
                     }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    val downloadUrl = stringResource(R.string.vault_download_url)
+                    val downloadError = stringResource(R.string.vault_download_error)
+                    IconButton(onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                        try {
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
+                            } else {
+                                Toast.makeText(context, downloadError, Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(context, downloadError, Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_download),
+                            contentDescription = stringResource(R.string.download_sakshi_vault)
                         )
                     }
                 },
@@ -147,7 +176,7 @@ fun VaultSelectionScreen(
                                         isVerifying = false
                                         if (isSuccess) {
                                             // try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
-                                            onAppSelected(app.packageName)
+                                            viewModel.filter(""); onAppSelected(app.packageName)
                                         } else {
                                             // try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
                                             Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
@@ -168,7 +197,7 @@ fun VaultSelectionScreen(
                                         isVerifying = false
                                         if (isSuccess) {
                                             // try { Log.i(tag = "VaultSelection", message = "Ping success for: ${app.packageName}") } catch (e: Exception) {}
-                                            onAppSelected(app.packageName)
+                                            viewModel.filter(""); onAppSelected(app.packageName)
                                         } else {
                                             // try { Log.e(tag = "VaultSelection", message = "Ping failed for ${app.packageName}: $error") } catch (e: Exception) {}
                                             Toast.makeText(context, "Failed to connect: $error", Toast.LENGTH_LONG).show()
