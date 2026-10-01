@@ -25,6 +25,15 @@ import rajnishkmehta.sakshi.portal.ui.theme.PortalTheme
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.runtime.NavKey
+
+import androidx.navigation3.runtime.entryProvider
+
+import kotlinx.serialization.Serializable
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,42 +84,49 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
-            var currentScreen by remember { mutableStateOf(Screen.Gallery) }
             val coroutineScope = rememberCoroutineScope()
-
-            BackHandler(enabled = currentScreen != Screen.Gallery) {
-                currentScreen = Screen.Gallery
-            }
+            val backStack = rememberNavBackStack(GalleryScreenRoute)
 
             PortalTheme(useDynamicColor = useDynamicColor) {
-                when (currentScreen) {
-                    Screen.Gallery -> {
-                        GalleryScreen(
-                            onSettingsClick = { currentScreen = Screen.Settings }
-                        )
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { if (backStack.size > 1) backStack.removeLastOrNull() else finish() },
+                    entryProvider = entryProvider {
+                        entry<GalleryScreenRoute> {
+                            GalleryScreen(
+                                onSettingsClick = { backStack.add(SettingsScreenRoute) }
+                            )
+                        }
+                        entry<SettingsScreenRoute> {
+                            SettingsScreen(
+                                onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
+                                repository = settingsRepository,
+                                onBackClick = { backStack.removeLastOrNull() }
+                            )
+                        }
+                        entry<VaultSelectionScreenRoute> {
+                            VaultSelectionScreen(
+                                onAppSelected = { packageName ->
+                                    coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
+                                    backStack.removeLastOrNull()
+                                },
+                                onBackClick = { backStack.removeLastOrNull() }
+                            )
+                        }
                     }
-                    Screen.Settings -> {
-                        SettingsScreen(
-                            onVaultSelectionClick = { currentScreen = Screen.VaultSelection },
-                            repository = settingsRepository,
-                            onBackClick = { currentScreen = Screen.Gallery }
-                        )
-                    }
-                    Screen.VaultSelection -> {
-                        VaultSelectionScreen(
-                            onAppSelected = { packageName ->
-                                coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
-                                currentScreen = Screen.Settings
-                            },
-                            onBackClick = { currentScreen = Screen.Settings }
-                        )
-                    }
-                }
+                )
             }
         }
     }
 }
 
-enum class Screen {
-    Gallery, Settings, VaultSelection
-}
+
+
+@Serializable
+data object GalleryScreenRoute : NavKey
+
+@Serializable
+data object SettingsScreenRoute : NavKey
+
+@Serializable
+data object VaultSelectionScreenRoute : NavKey
