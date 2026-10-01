@@ -237,14 +237,16 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
     // and relying on intrinsic dimensions directly can sometimes cause issues or crash
     // if the drawable is a vector or solid color without fixed bounds on some API levels.
     // We use a safe fallback size and ensure ARGB_8888 config.
-    val bitmap = remember(app.packageName) {
-        val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
-        val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
-        val bmp = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(bmp)
-        app.icon.setBounds(0, 0, canvas.width, canvas.height)
-        app.icon.draw(canvas)
-        bmp.asImageBitmap()
+    // Safe fallback for icon loading
+    val defaultIcon = painterResource(id = android.R.drawable.sym_def_app_icon)
+    val imageBitmap = remember(app.packageName) {
+        try {
+            val width = if (app.icon.intrinsicWidth > 0) app.icon.intrinsicWidth else 144
+            val height = if (app.icon.intrinsicHeight > 0) app.icon.intrinsicHeight else 144
+            app.icon.toBitmap(width, height).asImageBitmap()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     Row(
@@ -254,11 +256,20 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            bitmap = bitmap,
-            contentDescription = "App Icon",
-            modifier = Modifier.size(48.dp)
-        )
+        if (imageBitmap != null) {
+            Image(
+                bitmap = imageBitmap,
+                contentDescription = "App Icon",
+                modifier = Modifier.size(48.dp)
+            )
+        } else {
+            Icon(
+                painter = defaultIcon,
+                contentDescription = "App Icon",
+                modifier = Modifier.size(48.dp),
+                tint = Color.Unspecified
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(text = app.name, style = MaterialTheme.typography.bodyLarge)
