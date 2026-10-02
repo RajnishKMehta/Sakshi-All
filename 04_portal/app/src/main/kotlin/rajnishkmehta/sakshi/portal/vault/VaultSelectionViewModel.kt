@@ -40,8 +40,11 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
                 allApps = repository.getInstalledApplications()
                 // try { Log.i(tag = "VaultSelectionViewModel", message = "Apps loaded: ${allApps.size}") } catch (e: Exception) {}
                 _uiState.value = UiState.Success(allApps)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 // try { Log.e(tag = "VaultSelectionViewModel", message = "Error loading apps: ${e.message}") } catch (logE: Exception) {}
+                _uiState.value = UiState.Error(e.message ?: "Failed to load applications")
             }
         }
     }
@@ -100,5 +103,6 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         object Loading : UiState()
         data class Success(val apps: List<AppInfo>) : UiState()
         data class Filtering(val apps: List<AppInfo>) : UiState()
+        data class Error(val message: String) : UiState()
     }
 }

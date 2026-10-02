@@ -209,6 +209,15 @@ fun VaultSelectionScreen(
                             }
                         )
                     }
+                    is VaultSelectionViewModel.UiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "Error: ${state.message}",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
                 }
 
                 if (isVerifying) {

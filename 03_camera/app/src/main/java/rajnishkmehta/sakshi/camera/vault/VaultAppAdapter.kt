@@ -43,11 +43,15 @@ class VaultAppAdapter(
         private val nameView: TextView = itemView.findViewById(R.id.app_name)
         private val packageView: TextView = itemView.findViewById(R.id.app_package)
 
+        private var bindingGeneration = 0
+
         fun bind(appInfo: AppInfo) {
             nameView.text = appInfo.name
             packageView.text = appInfo.packageName
 
             iconView.setImageResource(android.R.drawable.sym_def_app_icon)
+
+            val currentGeneration = ++bindingGeneration
 
             CoroutineScope(Dispatchers.Main).launch {
                 val icon = withContext(Dispatchers.IO) {
@@ -57,7 +61,7 @@ class VaultAppAdapter(
                         null
                     }
                 }
-                if (icon != null) {
+                if (icon != null && currentGeneration == bindingGeneration) {
                     iconView.setImageDrawable(icon)
                 }
             }
