@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -23,6 +26,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.CancellationException
 
 @Serializable
 data class RawMediaItem(
@@ -46,15 +50,24 @@ class GalleryViewModel(
 
     private var sakshiClient: SakshiClient? = null
 
+    private var loadJob: Job? = null
+
     init {
-        loadMedia()
+        viewModelScope.launch {
+            settingsRepository.vaultPackageFlow
+                .distinctUntilChanged()
+                .collectLatest { pkg ->
+                    loadMedia(pkg)
+                }
+        }
     }
 
-    fun loadMedia() {
-        viewModelScope.launch {
+    fun loadMedia(specificPackage: String? = null) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = GalleryUiState.Loading
             try {
-                var vaultPackage = settingsRepository.vaultPackageFlow.firstOrNull()
+                var vaultPackage = specificPackage ?: settingsRepository.vaultPackageFlow.firstOrNull()
 
                 if (vaultPackage == null) {
                     vaultPackage = "rajnishkmehta.sakshi.vault"
@@ -102,7 +115,10 @@ class GalleryViewModel(
 
                 val rawMediaMap = try {
                     Json.decodeFromString<Map<String, List<RawMediaItem>>>(jsonString)
-                } catch (e: Exception) {
+                } catch (e: CancellationException) {
+                Log.d("GalleryViewModel", "loadMedia cancelled")
+                throw e
+            } catch (e: Exception) {
                     Log.e("GalleryViewModel", "Failed to parse JSON: ${e.message}")
                     _uiState.value = GalleryUiState.Error("Invalid response format from Vault.")
                     return@launch
@@ -138,6 +154,9 @@ class GalleryViewModel(
 
                 _uiState.value = GalleryUiState.Success(parsedItems)
 
+            } catch (e: CancellationException) {
+                Log.d("GalleryViewModel", "loadMedia cancelled")
+                throw e
             } catch (e: Exception) {
                 Log.e("GalleryViewModel", "Error loading media: ${e.message}")
                 _uiState.value = GalleryUiState.Error(e.message ?: "Unknown error")
