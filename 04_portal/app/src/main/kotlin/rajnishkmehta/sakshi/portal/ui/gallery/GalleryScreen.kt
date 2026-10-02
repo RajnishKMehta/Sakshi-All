@@ -29,6 +29,13 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+
+
+
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -74,6 +81,8 @@ fun GalleryScreen(
 
     var selectedType by remember { mutableStateOf(MediaType.ALL) }
     val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val pullToRefreshState = rememberPullToRefreshState()
 
     var showMenu by remember { mutableStateOf(false) }
 
@@ -155,7 +164,7 @@ fun GalleryScreen(
             when (val state = uiState) {
                 is GalleryUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator() /* Technical reason: LoadingIndicator is internal/unresolved in this BOM version */
                     }
                 }
                                 is GalleryUiState.VaultUnavailable -> {
@@ -221,24 +230,38 @@ fun GalleryScreen(
                 is GalleryUiState.Success -> {
                     val filteredData = if (selectedType == MediaType.ALL) state.media else state.media.filter { it.type == selectedType }
 
-                    if (filteredData.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.gallery_nothing_in_vault),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = { viewModel.refreshMedia() },
+                        state = pullToRefreshState,
+                        modifier = Modifier.fillMaxSize(),
+                        indicator = {
+                            PullToRefreshDefaults.Indicator(
+                                state = pullToRefreshState,
+                                isRefreshing = isRefreshing,
+                                modifier = Modifier.align(Alignment.TopCenter)
                             )
                         }
-                    } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 120.dp),
-                            contentPadding = PaddingValues(2.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(filteredData, key = { it.id }) { item ->
-                                MediaItem(item)
+                    ) {
+                        if (filteredData.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = stringResource(R.string.gallery_nothing_in_vault),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = 120.dp),
+                                contentPadding = PaddingValues(2.dp),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(filteredData, key = { it.id }) { item ->
+                                    MediaItem(item)
+                                }
                             }
                         }
                     }

@@ -48,6 +48,9 @@ class GalleryViewModel(
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.Loading)
     val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private var sakshiClient: SakshiClient? = null
 
     private var loadJob: Job? = null
@@ -62,10 +65,17 @@ class GalleryViewModel(
         }
     }
 
-    fun loadMedia(specificPackage: String? = null) {
+    fun refreshMedia() {
+        _isRefreshing.value = true
+        loadMedia(isRefresh = true)
+    }
+
+    fun loadMedia(specificPackage: String? = null, isRefresh: Boolean = false) {
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            _uiState.value = GalleryUiState.Loading
+            if (!isRefresh) {
+                _uiState.value = GalleryUiState.Loading
+            }
             try {
                 var vaultPackage = specificPackage ?: settingsRepository.vaultPackageFlow.firstOrNull()
 
@@ -160,6 +170,8 @@ class GalleryViewModel(
             } catch (e: Exception) {
                 Log.e("GalleryViewModel", "Error loading media: ${e.message}")
                 _uiState.value = GalleryUiState.Error(e.message ?: "Unknown error")
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
