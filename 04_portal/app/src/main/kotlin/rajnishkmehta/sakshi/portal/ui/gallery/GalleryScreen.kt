@@ -198,9 +198,7 @@ fun GalleryScreen(
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     application.startActivity(intent)
                                 } catch (e: Exception) {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(application.resources.getString(R.string.vault_download_url_fallback)))
-                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                    application.startActivity(intent)
+                                    android.widget.Toast.makeText(application, application.resources.getString(R.string.vault_download_error), android.widget.Toast.LENGTH_SHORT).show()
                                 }
                             }) {
                                 Text(stringResource(R.string.download_vault_action))

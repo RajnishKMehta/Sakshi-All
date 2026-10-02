@@ -62,5 +62,4 @@
     <string name="retry_action">Retry</string>
     <string name="gallery_nothing_in_vault">Nothing in Vault</string>
     <string name="download_vault_action">Download Vault</string>
-    <string name="vault_download_url_fallback">https://play.google.com/store/apps/details?id=rajnishkmehta.sakshi.vault</string>
 </resources>
