@@ -194,11 +194,11 @@ fun GalleryScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             OutlinedButton(onClick = {
                                 try {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=rajnishkmehta.sakshi.vault"))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(application.resources.getString(R.string.vault_download_url)))
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     application.startActivity(intent)
                                 } catch (e: Exception) {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=rajnishkmehta.sakshi.vault"))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(application.resources.getString(R.string.vault_download_url_fallback)))
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     application.startActivity(intent)
                                 }
