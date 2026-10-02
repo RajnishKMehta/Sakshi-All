@@ -61,4 +61,5 @@
     <string name="select_vault_action">Select Vault</string>
     <string name="retry_action">Retry</string>
     <string name="gallery_nothing_in_vault">Nothing in Vault</string>
+    <string name="download_vault_action">Download Vault</string>
 </resources>

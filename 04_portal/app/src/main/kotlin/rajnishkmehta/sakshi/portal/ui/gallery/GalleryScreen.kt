@@ -22,6 +22,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -153,7 +158,7 @@ fun GalleryScreen(
                         CircularProgressIndicator()
                     }
                 }
-                is GalleryUiState.VaultUnavailable -> {
+                                is GalleryUiState.VaultUnavailable -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -165,16 +170,32 @@ fun GalleryScreen(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Button(
-                            onClick = onVaultSelectionClick,
+                            onClick = { viewModel.loadMedia() },
                             modifier = Modifier.padding(top = 16.dp)
                         ) {
-                            Text(stringResource(R.string.select_vault_action))
-                        }
-                        Button(
-                            onClick = { viewModel.loadMedia() },
-                            modifier = Modifier.padding(top = 8.dp)
-                        ) {
                             Text(stringResource(R.string.retry_action))
+                        }
+                        Row(
+                            modifier = Modifier.padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            OutlinedButton(onClick = onVaultSelectionClick) {
+                                Text(stringResource(R.string.select_vault_action))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            OutlinedButton(onClick = {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=rajnishkmehta.sakshi.vault"))
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    application.startActivity(intent)
+                                } catch (e: Exception) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=rajnishkmehta.sakshi.vault"))
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    application.startActivity(intent)
+                                }
+                            }) {
+                                Text(stringResource(R.string.download_vault_action))
+                            }
                         }
                     }
                 }
