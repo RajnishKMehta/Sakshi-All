@@ -5,6 +5,8 @@
 package rajnishkmehta.sakshi.portal.ui.gallery
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,80 +17,58 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.ui.res.painterResource
-import rajnishkmehta.sakshi.portal.R
-
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.collectAsState
-import androidx.compose.material3.Switch
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import rajnishkmehta.sakshi.portal.R
+import rajnishkmehta.sakshi.portal.data.SettingsRepository
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
-import kotlinx.coroutines.delay
-import rajnishkmehta.sakshi.portal.debug.DebugLogger
-
-enum class MediaType {
-    ALL, PHOTO, VIDEO, AUDIO, OTHER
-}
-
-data class DummyMediaItem(
-    val id: String,
-    val type: MediaType,
-    val aspectRatio: Float
-)
-
-sealed interface GalleryUiState {
-    data object Loading : GalleryUiState
-    data class Success(val media: List<DummyMediaItem>) : GalleryUiState
-    data class Error(val message: String) : GalleryUiState
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {}) {
+fun GalleryScreen(
+    modifier: Modifier = Modifier,
+    settingsRepository: SettingsRepository,
+    onSettingsClick: () -> Unit = {},
+    onVaultSelectionClick: () -> Unit = {}
+) {
+    val application = LocalContext.current.applicationContext as android.app.Application
+    val viewModel: GalleryViewModel = viewModel(
+        factory = GalleryViewModelFactory(application, settingsRepository)
+    )
+
     var selectedType by remember { mutableStateOf(MediaType.ALL) }
-    var uiState by remember { mutableStateOf<GalleryUiState>(GalleryUiState.Loading) }
-    var isDynamicColorEnabled by remember { mutableStateOf(true) }
-
-    LaunchedEffect(Unit) {
-        try { Log.i(tag = "GalleryScreen", message = "Loading gallery items") } catch (e: Exception) {}
-        delay(1000) // Simulate network/db load
-        val dummyData = List(30) { index ->
-            DummyMediaItem(
-                id = index.toString(),
-                type = when (index % 4) { 0 -> MediaType.VIDEO; 1 -> MediaType.AUDIO; 2 -> MediaType.OTHER; else -> MediaType.PHOTO },
-                aspectRatio = if (index % 2 == 0) 1.5f else 0.75f
-            )
-        }
-        uiState = GalleryUiState.Success(dummyData)
-    }
-
+    val uiState by viewModel.uiState.collectAsState()
 
     var showMenu by remember { mutableStateOf(false) }
 
@@ -126,8 +106,7 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
                 }
             )
         }
-    )
- { innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -174,25 +153,67 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
                         CircularProgressIndicator()
                     }
                 }
+                is GalleryUiState.VaultUnavailable -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.vault_not_found_message),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Button(
+                            onClick = onVaultSelectionClick,
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text(stringResource(R.string.select_vault_action))
+                        }
+                        Button(
+                            onClick = { viewModel.loadMedia() },
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text(stringResource(R.string.retry_action))
+                        }
+                    }
+                }
                 is GalleryUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.error_prefix, state.message), color = MaterialTheme.colorScheme.error)
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.error_prefix, state.message),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Button(
+                            onClick = { viewModel.loadMedia() },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text(stringResource(R.string.retry_action))
+                        }
                     }
                 }
                 is GalleryUiState.Success -> {
                     val filteredData = if (selectedType == MediaType.ALL) state.media else state.media.filter { it.type == selectedType }
 
-                    // Media Grid
                     if (filteredData.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(stringResource(R.string.gallery_no_media))
+                            Text(
+                                text = stringResource(R.string.gallery_nothing_in_vault),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     } else {
-                        LazyVerticalStaggeredGrid(
-                            columns = StaggeredGridCells.Fixed(3),
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 120.dp),
                             contentPadding = PaddingValues(2.dp),
                             horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            verticalItemSpacing = 2.dp,
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(filteredData, key = { it.id }) { item ->
@@ -207,14 +228,29 @@ fun GalleryScreen(modifier: Modifier = Modifier, onSettingsClick: () -> Unit = {
 }
 
 @Composable
-fun MediaItem(item: DummyMediaItem) {
-    val aspectRatio = if (item.type == MediaType.AUDIO || item.type == MediaType.OTHER) 1f else item.aspectRatio
+fun MediaItem(item: ParsedMediaItem) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(aspectRatio)
+            .aspectRatio(1f) // Ensure strictly 1:1 squares
             .background(Color.LightGray)
+            .clickable {
+                // TODO: Handle click to open media viewer
+                Log.d("MediaItem", "Clicked media item: ${item.id}")
+            }
     ) {
+        // Thumbnail Image
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(item.thumbnailUri)
+                .crossfade(true)
+                .build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop, // Crop to fill 1:1 container
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Overlay Icon
         if (item.type == MediaType.VIDEO) {
             Icon(
                 painter = painterResource(android.R.drawable.ic_media_play),
@@ -224,33 +260,6 @@ fun MediaItem(item: DummyMediaItem) {
                     .align(Alignment.Center)
                     .size(32.dp)
             )
-        } else if (item.type == MediaType.AUDIO) {
-            Icon(
-                painter = painterResource(R.drawable.ic_audio),
-                contentDescription = stringResource(R.string.media_type_audio),
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(32.dp)
-            )
-        } else if (item.type == MediaType.OTHER) {
-            Icon(
-                painter = painterResource(android.R.drawable.ic_media_play),
-                contentDescription = stringResource(R.string.media_type_other),
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(32.dp)
-            )
         }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GalleryScreenPreview() {
-    MaterialTheme {
-        GalleryScreen()
     }
 }
