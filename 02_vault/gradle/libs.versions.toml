@@ -1,16 +1,16 @@
 [versions]
-mockk = "1.13.10"
-junit-jupiter = "5.10.2"
-junit-platform = "1.10.2"
+mockk = "1.14.11"
+junit-jupiter = "6.1.3"
+junit-platform = "6.1.3"
 kotlinx-serialization = "1.12.0-RC"
 kotlinx-serialization-plugin = "2.4.20"
 agp = "9.4.1"
-room = "3.0.2"
+room = "3.0.3"
 sakshi = "1.0.0-RC.0"
 kotlin = "2.4.20"
 coroutines = "1.11.0"
-media3 = "1.11.0"
-androidx-core = "1.19.0"
+media3 = "1.11.1"
+androidx-core = "1.19.1"
 ksp = "2.3.12"
 
 [libraries]
