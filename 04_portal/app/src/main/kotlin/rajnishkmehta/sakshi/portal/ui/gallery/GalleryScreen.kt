@@ -281,18 +281,29 @@ fun MediaItem(item: ParsedMediaItem) {
                 Log.d("MediaItem", "Clicked media item: ${item.id}")
             }
     ) {
+        val placeholderRes = when (item.type) {
+            MediaType.PHOTO -> R.drawable.ic_placeholder_photo
+            MediaType.VIDEO -> R.drawable.ic_placeholder_video
+            MediaType.AUDIO -> R.drawable.ic_placeholder_audio
+            else -> R.drawable.ic_placeholder_other
+        }
+
         // Thumbnail Image
+        val painter = painterResource(id = placeholderRes)
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(item.thumbnailUri)
+                .data(if (item.type == MediaType.AUDIO || item.type == MediaType.OTHER) null else item.thumbnailUri) // Force fallback/error for audio/other since they have no thumbnail
                 .crossfade(true)
                 .build(),
             contentDescription = null,
-            contentScale = ContentScale.Crop, // Crop to fill 1:1 container
+            fallback = painter,
+            error = painter,
+            placeholder = painter,
+            contentScale = if (item.type == MediaType.AUDIO || item.type == MediaType.OTHER) ContentScale.Inside else ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
 
-        // Overlay Icon
+        // Overlay Icon (only for video)
         if (item.type == MediaType.VIDEO) {
             Icon(
                 painter = painterResource(android.R.drawable.ic_media_play),

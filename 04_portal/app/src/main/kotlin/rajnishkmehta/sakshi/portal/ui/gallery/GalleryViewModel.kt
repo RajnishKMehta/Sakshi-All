@@ -140,11 +140,11 @@ class GalleryViewModel(
                     val type = when (typeStr.lowercase()) {
                         "photo" -> MediaType.PHOTO
                         "video" -> MediaType.VIDEO
-                        // TODO: Implement Audio and Other later
-                        else -> null
+                        "audio" -> MediaType.AUDIO
+                        else -> MediaType.OTHER
                     }
 
-                    if (type != null) {
+                    if (true) {
                         items.forEach { rawItem ->
                             val uriStr = thumbnailTemplate
                                 .replace("{mediaType}", typeStr.lowercase())
