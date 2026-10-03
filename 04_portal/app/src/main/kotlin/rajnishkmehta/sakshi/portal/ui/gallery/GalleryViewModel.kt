@@ -27,6 +27,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.cancelAndJoin
 
 @Serializable
 data class RawMediaItem(
@@ -71,8 +72,9 @@ class GalleryViewModel(
     }
 
     fun loadMedia(specificPackage: String? = null, isRefresh: Boolean = false) {
-        loadJob?.cancel()
+        val previousJob = loadJob
         loadJob = viewModelScope.launch {
+            previousJob?.cancelAndJoin()
             if (!isRefresh) {
                 _uiState.value = GalleryUiState.Loading
             }
@@ -171,7 +173,9 @@ class GalleryViewModel(
                 Log.e("GalleryViewModel", "Error loading media: ${e.message}")
                 _uiState.value = GalleryUiState.Error(e.message ?: "Unknown error")
             } finally {
-                _isRefreshing.value = false
+                if (loadJob == coroutineContext[Job]) {
+                    _isRefreshing.value = false
+                }
             }
         }
     }
