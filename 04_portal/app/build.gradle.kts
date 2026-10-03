@@ -26,7 +26,7 @@ android {
         minSdk = 29
         targetSdk = 37
         versionCode = 2
-        versionName = versionCode.toString() + "-alpha"
+        versionName = "1.0.0-alpha.1"
     }
 
     buildFeatures {
