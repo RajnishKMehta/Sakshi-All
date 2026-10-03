@@ -2,6 +2,8 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package rajnishkmehta.sakshi.portal.ui.gallery
 
 import androidx.compose.foundation.background
@@ -27,7 +29,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -164,7 +167,7 @@ fun GalleryScreen(
             when (val state = uiState) {
                 is GalleryUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator() /* Technical reason: LoadingIndicator is internal/unresolved in this BOM version */
+                        LoadingIndicator()
                     }
                 }
                                 is GalleryUiState.VaultUnavailable -> {
