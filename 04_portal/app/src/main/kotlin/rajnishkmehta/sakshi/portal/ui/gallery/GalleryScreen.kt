@@ -2,7 +2,7 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 
 package rajnishkmehta.sakshi.portal.ui.gallery
 
@@ -237,21 +237,11 @@ fun GalleryScreen(
                         state = pullToRefreshState,
                         modifier = Modifier.fillMaxSize(),
                         indicator = {
-                            if (isRefreshing) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopCenter)
-                                        .padding(top = 24.dp)
-                                ) {
-                                    LoadingIndicator()
-                                }
-                            } else {
-                                PullToRefreshDefaults.Indicator(
-                                    state = pullToRefreshState,
-                                    isRefreshing = isRefreshing,
-                                    modifier = Modifier.align(Alignment.TopCenter)
-                                )
-                            }
+                            PullToRefreshDefaults.LoadingIndicator(
+                                state = pullToRefreshState,
+                                isRefreshing = isRefreshing,
+                                modifier = Modifier.align(Alignment.TopCenter)
+                            )
                         }
                     ) {
                         if (filteredData.isEmpty()) {
