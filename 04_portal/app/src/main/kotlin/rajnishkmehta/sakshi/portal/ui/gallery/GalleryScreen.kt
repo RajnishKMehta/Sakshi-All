@@ -275,7 +275,7 @@ fun MediaItem(item: ParsedMediaItem) {
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f) // Ensure strictly 1:1 squares
-            .background(Color.LightGray)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable {
                 // TODO: Handle click to open media viewer
                 Log.d("MediaItem", "Clicked media item: ${item.id}")
@@ -289,18 +289,34 @@ fun MediaItem(item: ParsedMediaItem) {
         }
 
         // Thumbnail Image
-        val painter = painterResource(id = placeholderRes)
-        AsyncImage(
+        coil3.compose.SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(if (item.type == MediaType.AUDIO || item.type == MediaType.OTHER) null else item.thumbnailUri) // Force fallback/error for audio/other since they have no thumbnail
                 .crossfade(true)
                 .build(),
             contentDescription = null,
-            fallback = painter,
-            error = painter,
-            placeholder = painter,
             contentScale = if (item.type == MediaType.AUDIO || item.type == MediaType.OTHER) ContentScale.Inside else ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            loading = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(
+                        painter = painterResource(id = placeholderRes),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            },
+            error = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(
+                        painter = painterResource(id = placeholderRes),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
         )
 
         // Overlay Icon (only for video)
