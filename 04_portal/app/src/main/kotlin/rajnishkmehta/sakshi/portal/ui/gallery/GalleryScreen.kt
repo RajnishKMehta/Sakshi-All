@@ -185,7 +185,7 @@ fun GalleryScreen(
                 ) {
                     Icon(
                         painter = painterResource(
-                            if (sortOrder == SortOrder.NEW_FIRST) R.drawable.ic_sort_desc else R.drawable.ic_sort_asc
+                            if (sortOrder == SortOrder.NEW_FIRST) R.drawable.ic_sort_asc else R.drawable.ic_sort_desc
                         ),
                         contentDescription = stringResource(
                             if (sortOrder == SortOrder.NEW_FIRST) R.string.sort_new_first else R.string.sort_old_first
