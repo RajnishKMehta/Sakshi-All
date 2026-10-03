@@ -55,7 +55,7 @@ jobs:
         id: meta
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          TAG="camera-$VERSION"
+          TAG="$VERSION"
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 

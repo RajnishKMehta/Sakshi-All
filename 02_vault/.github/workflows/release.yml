@@ -55,7 +55,7 @@ jobs:
         id: meta
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          TAG="vault-$VERSION"
+          TAG="$VERSION"
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
