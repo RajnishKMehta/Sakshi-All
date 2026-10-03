@@ -237,11 +237,21 @@ fun GalleryScreen(
                         state = pullToRefreshState,
                         modifier = Modifier.fillMaxSize(),
                         indicator = {
-                            PullToRefreshDefaults.Indicator(
-                                state = pullToRefreshState,
-                                isRefreshing = isRefreshing,
-                                modifier = Modifier.align(Alignment.TopCenter)
-                            )
+                            if (isRefreshing) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(top = 24.dp)
+                                ) {
+                                    LoadingIndicator()
+                                }
+                            } else {
+                                PullToRefreshDefaults.Indicator(
+                                    state = pullToRefreshState,
+                                    isRefreshing = isRefreshing,
+                                    modifier = Modifier.align(Alignment.TopCenter)
+                                )
+                            }
                         }
                     ) {
                         if (filteredData.isEmpty()) {
