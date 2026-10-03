@@ -16,7 +16,7 @@ java {
 
 android {
     compileSdk = 37
-    compileSdkMinor = 3
+    compileSdkMinor = 2
     ndkVersion = "30.0.16248370"
 
     namespace = "rajnishkmehta.sakshi.portal"
@@ -25,7 +25,7 @@ android {
         applicationId = "rajnishkmehta.sakshi.portal"
         minSdk = 29
         targetSdk = 37
-        versionCode = 2
+        versionCode = 3
         versionName = "1.0.0-beta.0"
     }
 
