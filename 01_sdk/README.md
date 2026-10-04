@@ -149,7 +149,12 @@ coroutineScope.launch {
 // 5. Retrieve Thumbnail & Media URI template
 coroutineScope.launch {
     val thumbnailResult = client.getThumbnail() // content://<authority>/media/{mediaType}/thumbnail/{fileId}
-    val mediaResult = client.getMedia("PHOTO", "photo_001") // content://<authority>/media/photo/photo_001
+    val mediaResult = client.getMedia("photo_001")
+    if (mediaResult is SakshiResult.Success) {
+        val details = mediaResult.data
+        // details.contentUri => content://<authority>/media/photo/photo_001
+        // details.fileExtension => jpg
+    }
 }
 
 // 6. List Media

@@ -17,6 +17,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
+import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
@@ -358,7 +359,7 @@ internal class SakshiClientImpl(
         }
     }
 
-    override suspend fun getMedia(mediaType: String, fileId: String): SakshiResult<String> {
+    override suspend fun getMedia(fileId: String): SakshiResult<MediaDetailsResponse> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {
             return SakshiResult.Failure(serviceResult.errorOrNull()!!)
@@ -367,15 +368,29 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         return try {
-            val template = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                service.getMedia(mediaType, fileId)
+            val bundle = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                service.getMedia(fileId)
             }
-            SakshiResult.Success(template)
+
+            if (!bundle.containsKey("contentUri")) {
+                 return SakshiResult.Failure(
+                    SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to get media details", cause = null)
+                )
+            }
+
+            val response = MediaDetailsResponse(
+                contentUri = bundle.getString("contentUri") ?: "",
+                fileId = bundle.getString("fileId") ?: "",
+                mediaType = bundle.getString("mediaType") ?: "",
+                fileExtension = bundle.getString("fileExtension") ?: "",
+                createdTime = bundle.getLong("createdTime", 0L)
+            )
+            SakshiResult.Success(response)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to get media template", cause = e)
+                SakshiError.IpcError(message = e.message ?: "Failed to get media details", cause = e)
             )
         }
     }
