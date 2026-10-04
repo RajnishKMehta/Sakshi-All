@@ -182,7 +182,7 @@ if (thumbnailResult.isSuccess) {
 
 == 9. Accessing Media Files
 
-To access original media files, retrieve the ContentProvider URI template using the `getMedia` API and replace the `{mediaType}` and `{fileId}` placeholders:
+To access original media files, retrieve the details including the real ContentResolver URI using the `getMedia` API:
 
 [source,kotlin]
 ----

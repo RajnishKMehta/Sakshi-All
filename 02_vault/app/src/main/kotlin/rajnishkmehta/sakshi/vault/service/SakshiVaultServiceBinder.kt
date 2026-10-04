@@ -208,9 +208,25 @@ class SakshiVaultServiceBinder(
         }
     }
 
-    override fun getMedia(mediaType: String, fileId: String): String {
-        Log.d(tag, "Received getMedia query for mediaType=$mediaType, fileId=$fileId")
-        return "content://${applicationContext.packageName}.mediaprovider/media/{mediaType}/{fileId}"
+    override fun getMedia(fileId: String): Bundle {
+        Log.d(tag, "Received getMedia query for fileId=$fileId")
+
+        val record = runBlocking {
+            database?.mediaRecordDao()?.getRecord(fileId)
+        }
+
+        return Bundle().apply {
+            if (record != null) {
+                val mediaTypeLower = record.mediaType.lowercase()
+                putString("contentUri", "content://${applicationContext.packageName}.mediaprovider/media/$mediaTypeLower/$fileId")
+                putString("fileId", record.fileId)
+                putString("mediaType", record.mediaType)
+                putString("fileExtension", record.fileExtension)
+                putLong("createdTime", record.createdTime)
+            } else {
+                putString("error", "Media file not found for id: $fileId")
+            }
+        }
     }
 
     override fun getThumbnail(): String {

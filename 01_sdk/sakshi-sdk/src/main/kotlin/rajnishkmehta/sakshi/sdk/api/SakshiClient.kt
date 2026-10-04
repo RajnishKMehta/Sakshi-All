@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
+import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncStatus
@@ -88,18 +89,12 @@ public interface SakshiClient {
     public suspend fun listMedia(): SakshiResult<String>
 
     /**
-     * Retrieves the ContentProvider URI template for accessing media thumbnails.
+     * Retrieves the details of a specific media file including its ContentResolver URI.
      *
-     * @return [SakshiResult] containing the URI template string on success or [SakshiError] on failure.
-     */
-    /**
-     * Retrieves the ContentProvider URI template for accessing a specific media file.
-     *
-     * @param mediaType The type of media (e.g., "PHOTO", "VIDEO").
      * @param fileId The unique identifier of the media.
-     * @return [SakshiResult] containing the URI template string on success or [SakshiError] on failure.
+     * @return [SakshiResult] containing [MediaDetailsResponse] on success or [SakshiError] on failure.
      */
-    public suspend fun getMedia(mediaType: String, fileId: String): SakshiResult<String>
+    public suspend fun getMedia(fileId: String): SakshiResult<MediaDetailsResponse>
 
     /**
      * Retrieves the ContentProvider URI template for accessing media thumbnails.

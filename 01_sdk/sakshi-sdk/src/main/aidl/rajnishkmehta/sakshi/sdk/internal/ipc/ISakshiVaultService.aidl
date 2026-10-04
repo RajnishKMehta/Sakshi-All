@@ -89,9 +89,8 @@ interface ISakshiVaultService {
     String getThumbnail();
 
     /**
-     * Retrieves the ContentProvider URI for accessing a specific media file.
-     * The returned URI does not contain the file extension.
+     * Retrieves media file details including the real ContentProvider URI for accessing a specific media file.
      */
-    String getMedia(in String mediaType, in String fileId);
+    Bundle getMedia(in String fileId);
 
 }
