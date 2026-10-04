@@ -8,7 +8,7 @@ constraintlayout = "2.2.2"
 coreKtx = "1.19.1"
 material = "1.14.0"
 zxing = "3.5.4"
-sakshiSdk = "1.0.0-RC.0"
+sakshi-sdk = "1.0.0-RC.1"
 lifecycleVersion = "2.6.2"
 coroutineVersion = "1.11.0"
 fragmentVersion = "1.9.1"
@@ -26,7 +26,7 @@ androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayo
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
-sakshi-sdk = { module = "io.github.rajnishkmehta.sakshi:sakshi-sdk", version.ref = "sakshiSdk" }
+sakshi-sdk = { module = "io.github.rajnishkmehta.sakshi:sakshi-sdk", version.ref = "sakshi-sdk" }
 lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleVersion" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutineVersion" }
 fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentVersion" }
