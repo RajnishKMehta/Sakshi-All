@@ -5,9 +5,8 @@
 We actively support and patch the latest released version of Sakshi Vault.
 
 | Version | Supported |
-| --- | --- |
-| Latest release | :white_check_mark: |
-| Older releases | :x: |
+| ------- | --------- |
+| 1.0.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
