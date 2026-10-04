@@ -3,5 +3,5 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">Sakshi Vault Debug</string>
+    <string name="app_name">Vault Debug</string>
 </resources>
