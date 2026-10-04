@@ -1,0 +1,573 @@
+First, follow all rules and instructions in `AGENT.md`.
+
+Also keep in mind that your training data may be outdated. For any new, modern, or version-sensitive technology, API, library, dependency, or approach you encounter, first research the latest official documentation/source online to understand how it currently works, then implement it using the current recommended approach.
+
+
+First, follow all rules and instructions in `AGENT.md`.
+
+Before making any code changes, first read:
+
+01_sdk/docs/api_usage.adoc
+
+This document contains the SDK API usage and should be the primary reference for how Portal communicates with Vault.
+
+If anything about the SDK API is unclear from the documentation, inspect the SDK implementation/source code to understand the correct usage.
+
+IMPORTANT STRICT SCOPE RULE:
+- You may modify ONLY the Portal project (`04_portal/`).
+- Do NOT modify Camera, Vault, SDK, or any other project.
+- Do NOT change their source code, documentation, dependencies, APIs, Gradle files, manifests, tests, workflows, or any other file.
+- Do not change even a single line outside `04_portal/`.
+- If something appears to require a change outside Portal, do not make that change. Adapt the Portal implementation to the existing APIs instead.
+
+Also keep in mind that your training data may be outdated. For any new, modern, or version-sensitive technology, API, library, dependency, or approach, first research the latest official documentation/source online to understand how it currently works. However, when the task explicitly specifies a dependency version below, use that specified version unless the existing project already uses a compatible newer version.
+
+## Goal
+
+Currently, clicking a Photo, Video, Audio, or Other item in the Portal gallery does nothing.
+
+Implement media opening/viewing for all four media types.
+
+When the user clicks a gallery item:
+
+1. Use the existing SDK `getMedia(mediaType, fileId)` API.
+2. Obtain the Vault-provided content URI.
+3. Use that URI according to the media type.
+4. Do not access Vault's private filesystem or database directly.
+5. Do not create another Vault API for this task.
+6. Follow the SDK API usage documented in `01_sdk/docs/api_usage.adoc`.
+
+Do NOT implement export yet.
+
+The Download/Export button should only be displayed as a TODO UI element and must not perform any export operation yet.
+
+---
+
+# Dependencies / technologies to use
+
+## Photo
+
+Use:
+
+`Coil 3 AsyncImage`
+
+Dependency:
+
+`io.coil-kt.coil3:coil-compose:3.6.3`
+
+Use the Vault content URI returned by `getMedia()` as the image source.
+
+The photo viewer should display the actual image properly and preserve its aspect ratio.
+
+---
+
+## Audio and Video
+
+Use Media3 / ExoPlayer.
+
+Use:
+
+`androidx.media3:media3-exoplayer:1.11.1`
+
+and:
+
+`androidx.media3:media3-ui-compose-material3:1.11.1`
+
+Use the modern Compose Media3 UI approach rather than introducing the old View-based `PlayerView` approach unless the existing project architecture genuinely requires it.
+
+For audio/video playback, use the URI returned by `getMedia()`.
+
+Use Media3's player state, including `Player.isPlaying`, where needed.
+
+Use the Media3 Compose Material3 UI / MiniController where appropriate.
+
+---
+
+# General viewer UI
+
+When a media item is opened, show a dedicated media viewer screen.
+
+The viewer should have:
+
+- A proper top app bar.
+- Back navigation.
+- Download/export button on the top-right.
+- Info button on the top-right.
+- Download/export button is currently TODO only.
+- Clicking Download must NOT perform any operation yet.
+- Leave a clear TODO for future export implementation.
+
+The UI must follow the existing Portal Material 3 / Material You theme.
+
+Do not introduce a completely different visual language.
+
+Use the existing Portal theme, colors, typography, spacing, loading indicators, etc.
+
+---
+
+# Photo viewer
+
+When a Photo thumbnail is clicked:
+
+1. Call `getMedia(mediaType, fileId)`.
+2. Use the returned content URI.
+3. Display the actual full image using Coil 3 `AsyncImage`.
+4. Preserve the image's aspect ratio.
+5. Do not distort or crop the image unnecessarily.
+6. Allow the image to be displayed properly within the available viewer area.
+
+The viewer must also show the Download and Info buttons described above.
+
+## Photo information / metadata
+
+The Info button should open a bottom overlay/sheet.
+
+Before implementing this UI, inspect the Camera project to understand how its bottom overlay/sheet is designed for Vault selection.
+
+Use the Camera implementation as a reference for the interaction pattern, but:
+
+- Do not copy Camera code blindly.
+- Do not modify Camera.
+- Build the equivalent UI properly for Portal using Compose and Portal's own theme/components.
+- The Portal implementation should look modern and polished, and can improve upon the Camera implementation where appropriate.
+
+The information UI should open from the bottom toward the top as an overlay/bottom-sheet style UI.
+
+When the user opens Info:
+
+- Show a loading state first.
+- Use the same loading UI/pattern already used elsewhere in Portal.
+- Load metadata only when the Info UI is opened.
+- Do not unnecessarily extract expensive metadata before the user asks for Info.
+
+Use:
+
+`androidx.exifinterface:exifinterface:1.4.2`
+
+for image EXIF metadata.
+
+Before implementing the metadata extraction, read the official AndroidX ExifInterface documentation and understand which metadata is actually available.
+
+Show all useful information that is actually available from the image/file.
+
+The information should be separated logically.
+
+At minimum, show the Vault-provided information such as:
+
+- File ID
+- File type
+- File extension
+- Timestamp / other information already provided by Portal/Vault
+
+Then show the available image/file metadata.
+
+Do not invent metadata fields that are not actually available.
+
+If a metadata value is unavailable, handle it cleanly instead of showing misleading values.
+
+The Info sheet should be capable of displaying all useful metadata exposed by ExifInterface rather than implementing only a tiny fixed subset.
+
+---
+
+# Video viewer
+
+When a Video thumbnail is clicked:
+
+1. Call `getMedia(mediaType, fileId)`.
+2. Use the returned content URI.
+3. Open the video viewer.
+4. Display the video thumbnail/first-frame style visual initially where appropriate.
+5. Show a clear Play button.
+6. Use Media3 / ExoPlayer for playback.
+7. Use the modern Compose Media3 Material3 UI where appropriate.
+8. Follow the existing Portal theme.
+
+The video viewer should behave as a proper video player rather than simply displaying the thumbnail.
+
+---
+
+# Video metadata
+
+Video metadata must be handled separately from descriptive metadata.
+
+Use:
+
+`androidx.media3:media3-inspector:1.11.1`
+
+and Media3's `MetadataRetriever` / relevant Media3 metadata APIs.
+
+Before implementation, read the current official Google/AndroidX Media3 documentation for the exact API and current recommended usage.
+
+Retrieve the actual video metadata/format information from Media3 `Format`.
+
+Useful technical fields include:
+
+- width
+- height
+- decodedWidth
+- decodedHeight
+- frameRate
+- rotationDegrees
+- pixelWidthHeightRatio
+- sampleMimeType
+- containerMimeType
+- codecs
+- bitrate
+- averageBitrate
+- peakBitrate
+- colorInfo
+
+Do not blindly assume every field is always available.
+
+Only display values that are actually present/known.
+
+Keep video metadata organized and readable.
+
+Do not mix technical media information with descriptive metadata.
+
+For example:
+
+Descriptive metadata:
+- Title
+- Description
+- Date
+- etc.
+
+Technical media information:
+- Resolution
+- Frame rate
+- Codec
+- Bitrate
+- MIME type
+- Rotation
+- Pixel aspect ratio
+- Color information
+- etc.
+
+The Info sheet should load video metadata only after the user opens Info.
+
+Use the same Portal loading indicator while metadata is being retrieved.
+
+---
+
+# Audio viewer
+
+When an Audio item is clicked:
+
+1. Call `getMedia(mediaType, fileId)`.
+2. Use the returned content URI.
+3. Create/use a Media3 ExoPlayer instance.
+4. Use Media3 playback controls.
+5. Display the audio information and playback UI according to the Portal design.
+
+## Audio descriptive metadata
+
+Use Media3's metadata facilities.
+
+Media3 exposes metadata through `MediaMetadata`.
+
+Relevant fields include:
+
+- title
+- artist
+- album title
+- album artist
+- composer
+- genre
+- track number
+- disc number
+- artwork
+
+Read the official Media3 documentation first and use the current recommended API.
+
+For playback metadata, use the Media3 player metadata APIs such as:
+
+`player.mediaMetadata`
+
+and/or:
+
+`onMediaMetadataChanged(MediaMetadata)`
+
+as appropriate.
+
+Do not assume that every audio file contains every field.
+
+Only display metadata that actually exists.
+
+## Album artwork
+
+If the audio contains album artwork:
+
+- Display the artwork prominently in the audio viewer.
+- When audio is paused, show the album artwork as the main visual.
+- If no artwork exists, use the Portal's fallback audio visual.
+
+---
+
+# Audio playback animation
+
+For the audio visualization, do NOT add a heavyweight audio visualization/equalizer library.
+
+Use:
+
+- Jetpack Compose `Canvas`
+- `rememberInfiniteTransition`
+- Media3 `Player.isPlaying`
+
+Create lightweight decorative animated bars.
+
+Important behavior:
+
+- When the player is playing:
+  - Animate the decorative bars.
+- When the player is paused:
+  - Stop the animation.
+- If album artwork exists:
+  - Show the album artwork while paused.
+  - During playback, show the decorative animated visualization appropriately.
+- If album artwork does NOT exist:
+  - Keep the decorative bars/visualization visible even while paused.
+  - When paused, the bars remain visible but stop moving.
+- The bars must not look like a completely separate visual system.
+- Use the current Portal Material 3 / Material You theme colors so the visualization naturally matches the current theme.
+- Do not hard-code an unrelated color palette.
+
+Keep the animation lightweight and efficient.
+
+Do not continuously run an animation when the player is paused.
+
+---
+
+# Audio metadata vs technical media information
+
+Keep these two concepts clearly separated.
+
+For example:
+
+Descriptive metadata:
+
+Title = "My Song"
+Artist = "Rajnish"
+Album = "Test Album"
+
+Technical media information:
+
+AAC
+48,000 Hz
+2 channels
+256 kbps
+
+Do NOT mix these into one confusing list.
+
+Use Media3's descriptive metadata APIs for descriptive information and Media3's technical `Format` / track information for technical information where available.
+
+The final Info UI should clearly distinguish these sections.
+
+---
+
+# Other file viewer
+
+For `OTHER` media:
+
+Do not attempt audio/video playback.
+
+Do not create a fake media player.
+
+Use `getMedia(mediaType, fileId)` so the Portal obtains the actual Vault content URI.
+
+The viewer should use the existing file icon currently used by the gallery.
+
+Make the existing file icon significantly larger and use it as the background/main visual.
+
+Overlay the important file information on top of / around that visual according to the Portal design.
+
+Show the information available from Vault/Portal, such as:
+
+- File ID
+- File type
+- Extension
+- Timestamp
+- File size
+- Other basic information already available
+
+Do not invent specialized metadata for arbitrary file types.
+
+The Download button is still only a TODO.
+
+The Info button can still be available if useful, but there is no need for specialized metadata extraction for `OTHER`.
+
+---
+
+# Info bottom sheet
+
+The Info UI for Photo, Video, and Audio should use a modern Compose bottom-sheet/overlay pattern.
+
+Before implementation:
+
+1. Inspect how the Camera project implements its Vault-selection bottom overlay/sheet.
+2. Understand the interaction and animation pattern.
+3. Build an improved Portal-specific version using Portal's own Compose Material 3 design.
+
+The sheet should:
+
+- Open from the bottom.
+- Animate smoothly.
+- Have a clear title/header.
+- Support long metadata lists.
+- Be scrollable.
+- Have a clear way to dismiss it.
+- Show a loading state while metadata is being loaded.
+- Avoid blocking the entire UI unnecessarily.
+- Handle metadata extraction errors gracefully.
+
+Do not preload expensive metadata before the Info button is opened.
+
+---
+
+# Loading and error handling
+
+Use the same loading indicator/pattern already used in Portal wherever possible.
+
+Handle:
+
+- `getMedia()` failure
+- invalid/unavailable content URI
+- media loading failure
+- player preparation failure
+- metadata extraction failure
+- missing metadata
+- missing album artwork
+- unsupported media format
+
+Do not crash the app because metadata is missing or a field is unavailable.
+
+Show a useful error state to the user.
+
+---
+
+# Important architectural rules
+
+Portal must continue to communicate with Vault through the SDK.
+
+Do NOT:
+
+- access Vault's private filesystem directly
+- access Vault's Room database directly
+- add direct filesystem paths
+- add another IPC mechanism
+- duplicate Vault logic inside Portal
+- modify SDK APIs
+- modify Vault APIs
+- modify Camera APIs
+
+Use the already implemented SDK APIs.
+
+The expected flow is:
+
+Gallery item
+→ Portal
+→ SDK `getMedia(mediaType, fileId)`
+→ Vault ContentProvider URI
+→ Photo: Coil
+→ Video: Media3 ExoPlayer
+→ Audio: Media3 ExoPlayer
+→ Other: file information UI
+
+---
+
+# Documentation and research requirements
+
+Before implementation:
+
+1. Read `01_sdk/docs/api_usage.adoc`.
+2. If anything is unclear, inspect the SDK implementation.
+3. Read the relevant official documentation for:
+   - Coil 3 `AsyncImage`
+   - AndroidX ExifInterface 1.4.2
+   - Media3 ExoPlayer 1.11.1
+   - Media3 Compose Material3 UI
+   - Media3 Inspector / MetadataRetriever
+   - Media3 `MediaMetadata`
+   - Android/Compose Material 3 bottom sheets
+4. Inspect the Camera project for its existing bottom overlay/sheet interaction pattern.
+5. Follow the existing Portal architecture and conventions.
+
+Do not blindly copy old API usage from examples if the current official documentation recommends a newer/correct approach.
+
+---
+
+# Scope restriction — STRICT
+
+ONLY modify files under:
+
+`04_portal/`
+
+Nothing outside `04_portal/` may be changed.
+
+This includes:
+
+- Camera
+- Vault
+- SDK
+- shared files outside Portal
+- root project files
+- other applications
+- workflows outside Portal
+- documentation outside Portal
+
+If a dependency must be added for Portal, modify only the Portal dependency configuration.
+
+Do not modify the SDK just because an API is inconvenient.
+
+Do not modify Vault just because a metadata/provider behavior could be improved.
+
+Work with the APIs that already exist.
+
+---
+
+# Code quality
+
+Keep the implementation focused on this task.
+
+Do not unnecessarily refactor unrelated Portal code.
+
+Do not introduce heavyweight libraries when the requested modern lightweight APIs are sufficient.
+
+Follow the existing Portal architecture, naming conventions, state management, navigation, theme, and UI patterns.
+
+Add/update tests where the new logic should be tested using the project's existing testing approach.
+
+Update Portal documentation only if the implementation makes existing Portal documentation inaccurate.
+
+Do not implement export yet.
+
+Do not implement delete/recover yet.
+
+Do not implement unrelated features.
+
+At the end, verify that:
+
+- Photo opens correctly through `getMedia()`.
+- Video opens and plays through `getMedia()` + Media3.
+- Audio opens and plays through `getMedia()` + Media3.
+- Other opens through `getMedia()` and displays its information.
+- Photo Info loads EXIF metadata on demand.
+- Video Info loads Media3 technical metadata on demand.
+- Audio Info shows descriptive metadata separately from technical information.
+- Album artwork is displayed when available.
+- Audio bars animate only while playing.
+- Audio bars stop animating when paused.
+- Audio bars remain visible without artwork even while paused.
+- Download buttons are visible but remain TODO/non-functional.
+- The Info UI opens as a modern bottom overlay/sheet.
+- Loading/error states work correctly.
+- No project other than Portal was modified.
+
+
+While implementing the task:
+- Keep the changes focused on the requested task.
+- If tests are needed or the changed functionality should be tested, add/update appropriate tests using the project's current and modern testing practices.
+- Update all related documentation wherever the code changes require it, including API docs, integration docs, README files, or other relevant documentation.
+- Do not leave documentation inconsistent with the new implementation.
+
+If you encounter any Maven publishing error, ignore it; it is a VM/environment issue and is not part of this task.
