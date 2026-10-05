@@ -37,6 +37,7 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
 @Composable
 fun MediaViewerScreen(
@@ -57,6 +58,7 @@ fun MediaViewerScreen(
     var showInfoSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(fileId) {
+        Log.d("MediaViewerScreen", "LaunchedEffect triggered with fileId='$fileId'. Calling viewModel.loadMedia...")
         viewModel.loadMedia(fileId)
     }
 

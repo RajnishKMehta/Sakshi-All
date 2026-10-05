@@ -323,6 +323,7 @@ fun MediaItem(item: ParsedMediaItem, onMediaClick: (String, MediaType) -> Unit =
             .aspectRatio(1f) // Ensure strictly 1:1 squares
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable {
+                rajnishkmehta.sakshi.portal.debug.DebugLogger.d("GalleryScreen", "MediaItem clicked: fileId='${item.id}', type=${item.type}")
                 onMediaClick(item.id, item.type)
             }
     ) {

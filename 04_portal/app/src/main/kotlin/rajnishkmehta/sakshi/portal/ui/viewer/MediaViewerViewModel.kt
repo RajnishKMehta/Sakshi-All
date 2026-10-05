@@ -37,6 +37,7 @@ class MediaViewerViewModel(
     private var sakshiClient: SakshiClient? = null
 
     fun loadMedia(fileId: String) {
+        Log.d("MediaViewerViewModel", "loadMedia called with fileId='$fileId'")
         viewModelScope.launch {
             _uiState.value = MediaViewerUiState.Loading
             try {
@@ -48,10 +49,13 @@ class MediaViewerViewModel(
                 )
 
                 sakshiClient?.disconnect()
+                Log.d("MediaViewerViewModel", "Creating SakshiClient...")
                 val client = SakshiClient.create(getApplication(), config)
                 sakshiClient = client
 
+                Log.d("MediaViewerViewModel", "Calling client.getMedia(fileId='$fileId')...")
                 val result = client.getMedia(fileId)
+                Log.d("MediaViewerViewModel", "client.getMedia returned isSuccess=${result.isSuccess}")
 
                 if (result.isSuccess) {
                     _uiState.value = MediaViewerUiState.Success(result.getOrNull()!!)

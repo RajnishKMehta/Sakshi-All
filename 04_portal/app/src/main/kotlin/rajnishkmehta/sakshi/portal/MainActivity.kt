@@ -46,10 +46,14 @@ class MainActivity : ComponentActivity() {
                                 settingsRepository = settingsRepository,
                                 onSettingsClick = { backStack.add(SettingsScreenRoute) },
                                 onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
-                                onMediaClick = { fileId, mediaType -> backStack.add(MediaViewerRoute(fileId, mediaType)) }
+                                onMediaClick = { fileId, mediaType ->
+                                    Log.d("MainActivity", "onMediaClick triggered: fileId='$fileId', mediaType=$mediaType")
+                                    backStack.add(MediaViewerRoute(fileId, mediaType))
+                                }
                             )
                         }
                         entry<MediaViewerRoute> { route ->
+                            Log.d("MainActivity", "Navigating to MediaViewerScreen: fileId='${route.fileId}', mediaType=${route.mediaType}")
                             MediaViewerScreen(
                                 fileId = route.fileId,
                                 mediaType = route.mediaType,
