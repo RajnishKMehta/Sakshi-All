@@ -2,7 +2,7 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, androidx.media3.common.util.UnstableApi::class, androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 
 package rajnishkmehta.sakshi.portal.ui.viewer
 
@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.guava.await
 
+@androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun InfoBottomSheet(
     mediaDetails: MediaDetailsResponse,
@@ -236,6 +239,7 @@ fun InfoBottomSheet(
     }
 }
 
+@androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 private fun InfoRow(key: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth()) {

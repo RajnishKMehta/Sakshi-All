@@ -2,6 +2,7 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
+@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 package rajnishkmehta.sakshi.portal.ui.viewer
 
 import android.net.Uri
