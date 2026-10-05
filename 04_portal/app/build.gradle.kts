@@ -101,9 +101,13 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network)
 
-
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui.compose.material3)
+    implementation(libs.media3.inspector)
+    implementation(libs.exifinterface)
 
     implementation(libs.sakshi.sdk)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.8.1")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 
