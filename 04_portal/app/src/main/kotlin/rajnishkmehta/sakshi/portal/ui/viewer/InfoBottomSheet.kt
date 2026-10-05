@@ -67,6 +67,9 @@ fun InfoBottomSheet(
                 "Created Time" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(mediaDetails.createdTime))
             )
 
+            metadataList = baseInfo
+            technicalList = emptyList()
+
             try {
                 val uri = Uri.parse(mediaDetails.contentUri)
 
@@ -84,7 +87,6 @@ fun InfoBottomSheet(
                             exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH)?.let { exifData.add("Focal Length" to it) }
                             exif.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)?.let { exifData.add("ISO" to it) }
 
-                            metadataList = baseInfo
                             technicalList = exifData
                         }
                     }
@@ -123,7 +125,6 @@ fun InfoBottomSheet(
                             if (e is kotlinx.coroutines.CancellationException) throw e
                         }
 
-                        metadataList = baseInfo
                         technicalList = videoInfo.distinct()
                     }
                     "AUDIO" -> {
@@ -140,10 +141,16 @@ fun InfoBottomSheet(
 
                                     val metadata = format.metadata
                                     if (metadata != null) {
+                                        val builder = androidx.media3.common.MediaMetadata.Builder()
                                         for (j in 0 until metadata.length()) {
-                                            val entry = metadata.get(j)
-                                            // Simplistic extraction if metadata exists directly on track
+                                            metadata.get(j).populateMediaMetadata(builder)
                                         }
+                                        val mediaMetadata = builder.build()
+                                        mediaMetadata.title?.let { descriptiveInfo.add("Title" to it.toString()) }
+                                        mediaMetadata.artist?.let { descriptiveInfo.add("Artist" to it.toString()) }
+                                        mediaMetadata.albumTitle?.let { descriptiveInfo.add("Album" to it.toString()) }
+                                        mediaMetadata.genre?.let { descriptiveInfo.add("Genre" to it.toString()) }
+                                        mediaMetadata.releaseYear?.let { descriptiveInfo.add("Year" to it.toString()) }
                                     }
 
                                     if (format.sampleMimeType != null) {

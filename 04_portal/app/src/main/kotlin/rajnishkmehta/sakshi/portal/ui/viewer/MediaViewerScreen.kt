@@ -66,15 +66,15 @@ fun MediaViewerScreen(
                 title = { Text(text = "") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(painterResource(android.R.drawable.ic_menu_revert), contentDescription = "Back")
+                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = "Back")
                     }
                 },
                 actions = {
                     IconButton(onClick = { /* TODO: Implement Download/Export */ }) {
-                        Icon(painterResource(android.R.drawable.ic_menu_save), contentDescription = "Download")
+                        Icon(painterResource(R.drawable.ic_download), contentDescription = "Download")
                     }
                     IconButton(onClick = { showInfoSheet = true }) {
-                        Icon(painterResource(android.R.drawable.ic_menu_info_details), contentDescription = "Info")
+                        Icon(painterResource(R.drawable.ic_info), contentDescription = "Info")
                     }
                 }
             )
