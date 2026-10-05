@@ -107,7 +107,7 @@ dependencies {
     implementation(libs.exifinterface)
 
     implementation(libs.sakshi.sdk)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.8.1")
+    implementation(libs.kotlinx.coroutines.guava)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 

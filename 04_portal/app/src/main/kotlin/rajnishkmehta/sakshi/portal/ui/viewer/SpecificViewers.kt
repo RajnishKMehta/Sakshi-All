@@ -70,7 +70,7 @@ fun PhotoViewer(uri: String) {
 @Composable
 fun VideoViewer(uri: String) {
     val context = LocalContext.current
-    val exoPlayer = remember {
+    val exoPlayer = remember(uri) {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
             prepare()
@@ -78,7 +78,7 @@ fun VideoViewer(uri: String) {
         }
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(exoPlayer) {
         onDispose {
             exoPlayer.release()
         }
@@ -95,7 +95,7 @@ fun VideoViewer(uri: String) {
 @Composable
 fun AudioViewer(uri: String) {
     val context = LocalContext.current
-    val exoPlayer = remember {
+    val exoPlayer = remember(uri) {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
             prepare()
