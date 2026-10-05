@@ -208,7 +208,8 @@ class SakshiVaultServiceBinder(
         }
     }
 
-    override fun getMedia(fileId: String): Bundle {
+    override fun getMedia(fileId: String?): Bundle {
+        if (fileId == null) return Bundle().apply { putString("error", "Invalid request: fileId cannot be null") }
         Log.d(tag, "Received getMedia query for fileId=$fileId")
 
         val record = runBlocking {
