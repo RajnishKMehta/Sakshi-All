@@ -52,9 +52,35 @@ import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import kotlin.random.Random
 
+
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
+
+
 @Composable
 fun PhotoViewer(uri: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoom, _ ->
+                    scale = (scale * zoom).coerceIn(1f, 5f)
+                    val maxX = (size.width * (scale - 1)) / 2
+                    val maxY = (size.height * (scale - 1)) / 2
+                    offset = Offset(
+                        x = (offset.x + pan.x * scale).coerceIn(-maxX, maxX),
+                        y = (offset.y + pan.y * scale).coerceIn(-maxY, maxY)
+                    )
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(Uri.parse(uri))
@@ -62,10 +88,19 @@ fun PhotoViewer(uri: String) {
                 .build(),
             contentDescription = "Photo",
             contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(
+                    scaleX = scale,
+                    scaleY = scale,
+                    translationX = offset.x,
+                    translationY = offset.y
+                )
         )
     }
 }
+
+
 
 @Composable
 fun VideoViewer(uri: String) {
@@ -91,6 +126,7 @@ fun VideoViewer(uri: String) {
         )
     }
 }
+
 
 @Composable
 fun AudioViewer(uri: String) {
@@ -138,27 +174,25 @@ fun AudioViewer(uri: String) {
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            if (hasArtwork && (!isPlaying || isPlaying)) { // Show artwork if available, maybe add an option to only show when paused if desired, but typically always show if available
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(artworkData)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Album Art",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize(0.8f)
-                )
-
-                // If we have artwork AND playing, overlay some small animation?
-                // Instructions say:
-                // - If album artwork exists: Show artwork while paused. During playback, show decorative animated visualization appropriately.
-                // We'll show artwork and a smaller visualization below or overlaying it.
-                if (isPlaying) {
-                    AudioVisualization(isPlaying = true, modifier = Modifier.align(Alignment.BottomCenter).height(100.dp).fillMaxWidth())
+            if (hasArtwork) {
+                if (!isPlaying) {
+                    // Show artwork while paused
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(artworkData)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Album Art",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize(0.8f)
+                    )
+                } else {
+                    // During playback, show decorative animated visualization
+                    AudioVisualization(isPlaying = true, modifier = Modifier.fillMaxSize(0.8f))
                 }
             } else {
-                // No artwork: show large visualization
-                AudioVisualization(isPlaying = isPlaying, modifier = Modifier.fillMaxSize())
+                // If album artwork does NOT exist: Keep the decorative bars/visualization visible even while paused.
+                AudioVisualization(isPlaying = isPlaying, modifier = Modifier.fillMaxSize(0.8f))
             }
         }
 
@@ -174,6 +208,7 @@ fun AudioViewer(uri: String) {
         }
     }
 }
+
 
 @Composable
 fun AudioVisualization(isPlaying: Boolean, modifier: Modifier = Modifier) {
