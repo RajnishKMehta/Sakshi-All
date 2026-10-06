@@ -124,7 +124,6 @@ fun VideoViewer(uri: String) {
         Media3Player(
             player = exoPlayer,
             modifier = Modifier.fillMaxSize(),
-            showControls = true,
             centerControls = { player, showControls ->
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
