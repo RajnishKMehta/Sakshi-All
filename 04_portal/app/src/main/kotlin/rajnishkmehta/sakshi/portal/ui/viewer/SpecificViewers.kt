@@ -4,6 +4,7 @@
  */
 @file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 package rajnishkmehta.sakshi.portal.ui.viewer
+import androidx.compose.foundation.clickable
 
 import android.net.Uri
 import androidx.compose.animation.core.LinearEasing
@@ -207,13 +208,27 @@ fun AudioViewer(uri: String) {
             }
         }
 
+        var showControls by remember { mutableStateOf(false) }
+
+        androidx.compose.runtime.LaunchedEffect(showControls, isPlaying) {
+            if (showControls && isPlaying) {
+                kotlinx.coroutines.delay(3000)
+                showControls = false
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp) // Adjust height as needed for player controls
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null
+                ) { showControls = !showControls }
         ) {
              Media3Player(
                 player = exoPlayer,
+                showControls = showControls,
                 modifier = Modifier.fillMaxSize(),
                 centerControls = { player, visible ->
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
