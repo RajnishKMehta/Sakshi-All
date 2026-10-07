@@ -208,7 +208,7 @@ fun AudioViewer(uri: String) {
             }
         }
 
-        var showControls by remember { mutableStateOf(false) }
+        var showControls by remember { mutableStateOf(true) }
 
         androidx.compose.runtime.LaunchedEffect(showControls, isPlaying) {
             if (showControls && isPlaying) {
