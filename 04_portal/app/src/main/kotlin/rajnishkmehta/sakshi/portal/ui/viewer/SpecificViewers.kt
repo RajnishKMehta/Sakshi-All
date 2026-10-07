@@ -115,8 +115,16 @@ fun VideoViewer(uri: String) {
         }
     }
 
-    DisposableEffect(exoPlayer) {
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, exoPlayer) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) {
+                exoPlayer.pause()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             exoPlayer.release()
         }
     }
@@ -151,11 +159,19 @@ fun AudioViewer(uri: String) {
         }
     }
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
     var hasArtwork by remember { mutableStateOf(false) }
     var artworkData by remember { mutableStateOf<ByteArray?>(null) }
 
-    DisposableEffect(exoPlayer) {
+    DisposableEffect(lifecycleOwner, exoPlayer) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) {
+                exoPlayer.pause()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(playing: Boolean) {
                 isPlaying = playing
@@ -171,6 +187,7 @@ fun AudioViewer(uri: String) {
         }
         exoPlayer.addListener(listener)
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             exoPlayer.removeListener(listener)
             exoPlayer.release()
         }
@@ -208,27 +225,13 @@ fun AudioViewer(uri: String) {
             }
         }
 
-        var showControls by remember { mutableStateOf(true) }
-
-        androidx.compose.runtime.LaunchedEffect(showControls, isPlaying) {
-            if (showControls && isPlaying) {
-                kotlinx.coroutines.delay(3000)
-                showControls = false
-            }
-        }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp) // Adjust height as needed for player controls
-                .clickable(
-                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                    indication = null
-                ) { showControls = !showControls }
         ) {
              Media3Player(
                 player = exoPlayer,
-                showControls = showControls,
                 modifier = Modifier.fillMaxSize(),
                 centerControls = { player, visible ->
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
