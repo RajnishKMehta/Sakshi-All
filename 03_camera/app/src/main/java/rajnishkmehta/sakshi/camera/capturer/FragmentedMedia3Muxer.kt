@@ -184,6 +184,11 @@ class FragmentedMedia3Muxer : Muxer {
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
         val currentMuxer = muxer ?: return
 
+        // Skip codec config samples because they are already provided as initialization data in addTrack()
+        if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+            return
+        }
+
         val originalPosition = byteBuffer.position()
         val originalLimit = byteBuffer.limit()
 
@@ -198,10 +203,18 @@ class FragmentedMedia3Muxer : Muxer {
             }
             lastPresentationTimesUs[trackIndex] = presentationTimeUs
 
+            var media3Flags = 0
+            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
+                media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_KEY_FRAME
+            }
+            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_END_OF_STREAM
+            }
+
             val media3BufferInfo = Media3BufferInfo(
                 presentationTimeUs,
                 bufferInfo.size,
-                bufferInfo.flags
+                media3Flags
             )
             currentMuxer.writeSampleData(trackIndex, byteBuffer, media3BufferInfo)
         } finally {
