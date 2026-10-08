@@ -102,6 +102,7 @@ fun PhotoViewer(uri: String) {
 
 
 
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun VideoViewer(uri: String) {
     val context = LocalContext.current
@@ -122,12 +123,23 @@ fun VideoViewer(uri: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Media3Player(
             player = exoPlayer,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            showControls = true,
+            centerControls = { player, showControls ->
+                androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
+                    player = player,
+                    visible = showControls,
+                    modifier = Modifier.fillMaxWidth(),
+                    backSecondary = {}, // Remove previous
+                    forwardSecondary = {} // Remove next
+                )
+            }
         )
     }
 }
 
 
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun AudioViewer(uri: String) {
     val context = LocalContext.current
@@ -203,7 +215,16 @@ fun AudioViewer(uri: String) {
         ) {
              Media3Player(
                 player = exoPlayer,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                centerControls = { player, visible ->
+                    androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
+                        player = player,
+                        visible = visible,
+                        modifier = Modifier.fillMaxWidth(),
+                        backSecondary = {},
+                        forwardSecondary = {}
+                    )
+                }
             )
         }
     }
