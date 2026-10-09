@@ -25,7 +25,8 @@ import androidx.media3.container.Mp4OrientationData
  *
  * This class translates Android's native media components to Media3 constructs
  * and manages the lifecycle of Fragmented MP4 (fMP4) muxing. It securely handles
- * file descriptors and enforces strict presentation timestamp rules required by Media3.
+ * file descriptors. It assumes the caller provides properly interleaved samples with
+ * monotonic timestamps as required by Media3.
  */
 @UnstableApi
 class FragmentedMedia3Muxer : Muxer {
@@ -44,6 +45,8 @@ class FragmentedMedia3Muxer : Muxer {
     private var location: Pair<Double, Double>? = null
     private var captureFps: Float? = null
     private var hasAddedTrack = false
+
+    private val lastPresentationTimeUs = mutableMapOf<Int, Long>()
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
@@ -125,8 +128,13 @@ class FragmentedMedia3Muxer : Muxer {
         }
     }
 
+    /**
+     * Returns false. While fMP4 writes data in fragments, allowing partial recovery,
+     * it cannot guarantee recoverability if abruptly terminated before the first
+     * fragment is written or while samples are pending in memory.
+     */
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean = true
+    override fun isInterruptionResilient(): Boolean = false
 
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
@@ -250,11 +258,14 @@ class FragmentedMedia3Muxer : Muxer {
                 addCsdIfValid("csd-0", true)
             }
 
-            for (i in 0..10) {
-                val csdKey = "csd-$i"
-                if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC && (i == 0 || i == 1)) continue
-                if ((mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) && i == 0) continue
+            var csdIndex = 0
+            while (true) {
+                val csdKey = "csd-$csdIndex"
+                if (!format.containsKey(csdKey)) break
+                if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC && (csdIndex == 0 || csdIndex == 1)) { csdIndex++; continue }
+                if ((mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) && csdIndex == 0) { csdIndex++; continue }
                 addCsdIfValid(csdKey, false)
+                csdIndex++
             }
 
             formatBuilder.setInitializationData(initializationData)
@@ -307,7 +318,11 @@ class FragmentedMedia3Muxer : Muxer {
             require(size <= capacity - offset) { "Size out of bounds: size=$size, maxAllowed=${capacity - offset}" }
 
             val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
-            if (!isEndOfStream) {
+            val lastTimeUs = lastPresentationTimeUs[trackIndex] ?: 0L
+
+            if (isEndOfStream) {
+                require(bufferInfo.presentationTimeUs >= lastTimeUs) { "EOS timestamp ${bufferInfo.presentationTimeUs} is earlier than the last sample timestamp $lastTimeUs" }
+            } else {
                 require(bufferInfo.presentationTimeUs >= 0) { "Invalid presentation time: ${bufferInfo.presentationTimeUs}" }
             }
 
@@ -337,14 +352,24 @@ class FragmentedMedia3Muxer : Muxer {
                 bufferInfo.size,
                 media3Flags
             )
-            currentMuxer.writeSampleData(trackIndex, duplicateBuffer, media3BufferInfo)
+
+            try {
+                currentMuxer.writeSampleData(trackIndex, duplicateBuffer, media3BufferInfo)
+                if (size > 0 || isEndOfStream) {
+                    lastPresentationTimeUs[trackIndex] = maxOf(lastTimeUs, bufferInfo.presentationTimeUs)
+                }
+            } catch (e: Exception) {
+                state = State.FAILED
+                Log.e("FragmentedMedia3Muxer", "Failed to write sample data", e)
+                throw e
+            }
         }
     }
 
     @SuppressLint("RestrictedApi")
     override fun stop() {
         synchronized(lock) {
-            check(state == State.STARTED) { "Muxer is not started (state: $state)" }
+            check(state == State.STARTED || state == State.FAILED) { "Muxer is not started or failed (state: $state)" }
             var exception: Exception? = null
             try {
                 muxer?.close()
@@ -373,7 +398,7 @@ class FragmentedMedia3Muxer : Muxer {
 
             var primaryException: Exception? = null
             try {
-                if (state == State.STARTED || state == State.INITIALIZED) {
+                if (state == State.STARTED || state == State.INITIALIZED || state == State.FAILED) {
                     muxer?.close()
                 }
             } catch (e: Exception) {
