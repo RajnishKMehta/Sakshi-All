@@ -1,8 +1,0 @@
-Fix FragmentedMedia3Muxer metadata, lifecycle, and resource leaks
-
-- Use ParcelFileDescriptor.AutoCloseOutputStream to prevent PFD leaks
-- Fix metadata timing: add metadata in start() to respect CameraX track/metadata ordering
-- Implement strict state machine with synchronization for thread-safety
-- Parse HDR color info from MediaFormat to Media3 ColorInfo
-- Remove artificial timestamp rewriting to expose actual encoder ordering
-- Map stop() to muxer close() for proper file finalization
