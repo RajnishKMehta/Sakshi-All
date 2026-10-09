@@ -195,7 +195,7 @@ class FragmentedMedia3Muxer : Muxer {
         formatBuilder.setInitializationData(initializationData)
 
         val trackIndex = currentMuxer.addTrack(formatBuilder.build())
-                return trackIndex
+        return trackIndex
     }
 
     /**
