@@ -56,8 +56,13 @@ import kotlin.random.Random
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
+
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+import androidx.compose.ui.input.pointer.pointerInput
+
 
 
 @Composable
@@ -114,21 +119,42 @@ fun VideoViewer(uri: String) {
         }
     }
 
+    var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
+    var showControls by remember { mutableStateOf(true) }
+
     DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
+        }
+        exoPlayer.addListener(listener)
         onDispose {
+            exoPlayer.removeListener(listener)
             exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(isPlaying, showControls) {
+        if (isPlaying && showControls) {
+            delay(3000)
+            showControls = false
         }
     }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Media3Player(
             player = exoPlayer,
-            modifier = Modifier.fillMaxSize(),
-            showControls = true,
-            centerControls = { player, showControls ->
+            modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures {
+                    showControls = !showControls
+                }
+            },
+            showControls = showControls,
+            centerControls = { player, visible ->
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
-                    visible = showControls,
+                    visible = visible,
                     modifier = Modifier.fillMaxWidth(),
                     backSecondary = {}, // Remove previous
                     forwardSecondary = {} // Remove next
