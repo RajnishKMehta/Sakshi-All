@@ -15,7 +15,7 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.Format
-
+import androidx.media3.common.ColorInfo
 import androidx.media3.container.MdtaMetadataEntry
 import androidx.media3.container.Mp4LocationData
 import androidx.media3.container.Mp4OrientationData
@@ -30,15 +30,19 @@ import androidx.media3.container.Mp4OrientationData
 @UnstableApi
 class FragmentedMedia3Muxer : Muxer {
 
+    private enum class State {
+        UNINITIALIZED, INITIALIZED, STARTED, STOPPED, RELEASED
+    }
+
+    private var state = State.UNINITIALIZED
     private var muxer: FragmentedMp4Muxer? = null
     private var fileOutputStream: FileOutputStream? = null
-    private val lastPresentationTimesUs = mutableMapOf<Int, Long>()
-    private var storedPfd: ParcelFileDescriptor? = null
+    private var autoCloseStream: ParcelFileDescriptor.AutoCloseOutputStream? = null
 
     private var orientationDegrees: Int? = null
     private var location: Pair<Double, Double>? = null
     private var captureFps: Float? = null
-    private var metadataAdded = false
+
 
     /**
      * Initializes the muxer output to the specified file path.
@@ -48,10 +52,14 @@ class FragmentedMedia3Muxer : Muxer {
      */
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
+        check(state == State.UNINITIALIZED) { "Muxer already initialized" }
+        require(format == 0) { "Only MPEG-4 format is supported. Expected 0 (MPEG_4), got $format" }
+
         val fos = FileOutputStream(path)
         fileOutputStream = fos
         @Suppress("DEPRECATION")
         muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
+        state = State.INITIALIZED
     }
 
     /**
@@ -63,11 +71,14 @@ class FragmentedMedia3Muxer : Muxer {
      */
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
-        storedPfd = parcelFileDescriptor
-        val fos = FileOutputStream(parcelFileDescriptor.fileDescriptor)
-        fileOutputStream = fos
+        check(state == State.UNINITIALIZED) { "Muxer already initialized" }
+        require(format == 0) { "Only MPEG-4 format is supported. Expected 0 (MPEG_4), got $format" }
+
+        val stream = ParcelFileDescriptor.AutoCloseOutputStream(parcelFileDescriptor)
+        autoCloseStream = stream
         @Suppress("DEPRECATION")
-        muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
+        muxer = FragmentedMp4Muxer.Builder(stream.channel).build()
+        state = State.INITIALIZED
     }
 
     /**
@@ -76,7 +87,13 @@ class FragmentedMedia3Muxer : Muxer {
      * @param degrees The orientation angle in degrees.
      */
     @SuppressLint("RestrictedApi")
-    override fun setOrientationDegrees(degrees: Int) { orientationDegrees = degrees }
+    override fun setOrientationDegrees(degrees: Int) {
+        check(state == State.INITIALIZED) { "Cannot set orientation after muxer is started" }
+        require(degrees == 0 || degrees == 90 || degrees == 180 || degrees == 270) {
+            "Invalid orientation degrees: $degrees"
+        }
+        orientationDegrees = degrees
+    }
 
     /**
      * Sets the geographic location metadata.
@@ -85,7 +102,12 @@ class FragmentedMedia3Muxer : Muxer {
      * @param longitude The longitude coordinate.
      */
     @SuppressLint("RestrictedApi")
-    override fun setLocation(latitude: Double, longitude: Double) { location = Pair(latitude, longitude) }
+    override fun setLocation(latitude: Double, longitude: Double) {
+        check(state == State.INITIALIZED) { "Cannot set location after muxer is started" }
+        require(latitude in -90.0..90.0) { "Latitude must be in range [-90, 90]" }
+        require(longitude in -180.0..180.0) { "Longitude must be in range [-180, 180]" }
+        location = Pair(latitude, longitude)
+    }
 
     /**
      * Sets the capture frames per second.
@@ -93,7 +115,11 @@ class FragmentedMedia3Muxer : Muxer {
      * @param captureFps The frame rate.
      */
     @SuppressLint("RestrictedApi")
-    override fun setCaptureFps(captureFps: Int) { this.captureFps = captureFps.toFloat() }
+    override fun setCaptureFps(captureFps: Int) {
+        check(state == State.INITIALIZED) { "Cannot set capture FPS after muxer is started" }
+        require(captureFps > 0) { "Capture FPS must be greater than 0" }
+        this.captureFps = captureFps.toFloat()
+    }
 
     /**
      * Indicates whether this muxer is resilient to interruptions,
@@ -113,6 +139,7 @@ class FragmentedMedia3Muxer : Muxer {
      */
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
+        check(state == State.INITIALIZED) { "Cannot add tracks after muxer has started or before initialization" }
         val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
         val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
@@ -132,6 +159,19 @@ class FragmentedMedia3Muxer : Muxer {
         }
         if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
             formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
+        }
+
+        if (format.containsKey(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
+            val colorStandard = format.getInteger(android.media.MediaFormat.KEY_COLOR_STANDARD)
+            val colorTransfer = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_TRANSFER)) format.getInteger(android.media.MediaFormat.KEY_COLOR_TRANSFER) else androidx.media3.common.Format.NO_VALUE
+            val colorRange = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_RANGE)) format.getInteger(android.media.MediaFormat.KEY_COLOR_RANGE) else androidx.media3.common.Format.NO_VALUE
+
+            val colorInfo = ColorInfo.Builder()
+                .setColorSpace(colorStandard)
+                .setColorTransfer(colorTransfer)
+                .setColorRange(colorRange)
+                .build()
+            formatBuilder.setColorInfo(colorInfo)
         }
 
         val initializationData = mutableListOf<ByteArray>()
@@ -154,21 +194,31 @@ class FragmentedMedia3Muxer : Muxer {
         }
         formatBuilder.setInitializationData(initializationData)
 
-        if (!metadataAdded) {
-            orientationDegrees?.let { degrees ->
-                currentMuxer.addMetadataEntry(Mp4OrientationData(degrees))
-            }
-            location?.let { loc ->
-                currentMuxer.addMetadataEntry(Mp4LocationData(loc.first.toFloat(), loc.second.toFloat()))
-            }
-            captureFps?.let { fps ->
-                val fpsBytes = ByteBuffer.allocate(4).putInt(java.lang.Float.floatToIntBits(fps)).array()
-                currentMuxer.addMetadataEntry(MdtaMetadataEntry(MdtaMetadataEntry.KEY_ANDROID_CAPTURE_FPS, fpsBytes, MdtaMetadataEntry.TYPE_INDICATOR_FLOAT32))
-            }
-            metadataAdded = true
+        val trackIndex = currentMuxer.addTrack(formatBuilder.build())
+        return trackIndex
+    }
+
+    /**
+     * Signals the muxer to start writing.
+     * Media3 muxers process data directly on `writeSampleData`, so this is a no-op.
+     */
+    @SuppressLint("RestrictedApi")
+    override fun start() {
+        check(state == State.INITIALIZED) { "Cannot start muxer from state $state" }
+        val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
+
+        orientationDegrees?.let { degrees ->
+            currentMuxer.addMetadataEntry(Mp4OrientationData(degrees))
+        }
+        location?.let { loc ->
+            currentMuxer.addMetadataEntry(Mp4LocationData(loc.first.toFloat(), loc.second.toFloat()))
+        }
+        captureFps?.let { fps ->
+            val fpsBytes = ByteBuffer.allocate(4).putInt(java.lang.Float.floatToIntBits(fps)).array()
+            currentMuxer.addMetadataEntry(MdtaMetadataEntry(MdtaMetadataEntry.KEY_ANDROID_CAPTURE_FPS, fpsBytes, MdtaMetadataEntry.TYPE_INDICATOR_FLOAT32))
         }
 
-        return currentMuxer.addTrack(formatBuilder.build())
+        state = State.STARTED
     }
 
     /**
@@ -182,7 +232,12 @@ class FragmentedMedia3Muxer : Muxer {
      */
     @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
-        val currentMuxer = muxer ?: return
+        check(state == State.STARTED) { "Muxer is not started (state: $state)" }
+        val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
+
+        require(bufferInfo.offset >= 0 && bufferInfo.size >= 0 && bufferInfo.offset + bufferInfo.size <= byteBuffer.capacity()) {
+            "Invalid buffer info: offset=${bufferInfo.offset}, size=${bufferInfo.size}, capacity=${byteBuffer.capacity()}"
+        }
 
         // Skip codec config samples because they are already provided as initialization data in addTrack()
         if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
@@ -196,13 +251,6 @@ class FragmentedMedia3Muxer : Muxer {
             byteBuffer.position(bufferInfo.offset)
             byteBuffer.limit(bufferInfo.offset + bufferInfo.size)
 
-            var presentationTimeUs = bufferInfo.presentationTimeUs
-            val lastTimeUs = lastPresentationTimesUs[trackIndex] ?: -1L
-            if (presentationTimeUs <= lastTimeUs) {
-                presentationTimeUs = lastTimeUs + 1L
-            }
-            lastPresentationTimesUs[trackIndex] = presentationTimeUs
-
             var media3Flags = 0
             if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
                 media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_KEY_FRAME
@@ -212,7 +260,7 @@ class FragmentedMedia3Muxer : Muxer {
             }
 
             val media3BufferInfo = Media3BufferInfo(
-                presentationTimeUs,
+                bufferInfo.presentationTimeUs,
                 bufferInfo.size,
                 media3Flags
             )
@@ -224,35 +272,53 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     /**
-     * Signals the muxer to start writing.
-     * Media3 muxers process data directly on `writeSampleData`, so this is a no-op.
-     */
-    @SuppressLint("RestrictedApi")
-    override fun start() { }
-
-    /**
      * Signals the muxer to stop.
      * Closing the muxer handles the finalization, so this is a no-op.
      */
     @SuppressLint("RestrictedApi")
-    override fun stop() { }
+    override fun stop() {
+        if (state == State.STARTED) {
+            try {
+                muxer?.close()
+            } catch (e: Exception) {
+                Log.e("FragmentedMedia3Muxer", "Failed to close muxer on stop", e)
+                throw e
+            } finally {
+                state = State.STOPPED
+                muxer = null
+            }
+        }
+    }
 
     /**
      * Closes the muxer and releases associated output streams and file descriptors.
      */
     @SuppressLint("RestrictedApi")
     override fun release() {
+        if (state != State.STOPPED && state != State.RELEASED && state != State.UNINITIALIZED) {
+            Log.w("FragmentedMedia3Muxer", "Releasing muxer from invalid state: $state. Should have called stop() first.")
+        }
         try {
-            muxer?.close()
+            if (state == State.STARTED || state == State.INITIALIZED) {
+                muxer?.close()
+            }
+        } catch (e: Exception) {
+            Log.e("FragmentedMedia3Muxer", "Failed to close muxer on release", e)
         } finally {
             muxer = null
             try {
                 fileOutputStream?.close()
             } catch (e: Exception) {
-                Log.e("FragmentedMedia3Muxer", "Failed to close output stream", e)
+                Log.e("FragmentedMedia3Muxer", "Failed to close FileOutputStream", e)
+            }
+            try {
+                autoCloseStream?.close()
+            } catch (e: Exception) {
+                Log.e("FragmentedMedia3Muxer", "Failed to close AutoCloseOutputStream", e)
             }
             fileOutputStream = null
-            storedPfd = null
+            autoCloseStream = null
+            state = State.RELEASED
         }
     }
 }
