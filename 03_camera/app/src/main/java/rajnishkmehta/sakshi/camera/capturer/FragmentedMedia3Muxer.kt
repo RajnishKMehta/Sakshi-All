@@ -430,10 +430,10 @@ class FragmentedMedia3Muxer : Muxer {
                 fileOutputStream = null
                 autoCloseStream = null
                 state = State.RELEASED
+            }
 
-                if (primaryException != null) {
-                    throw primaryException
-                }
+            if (primaryException != null) {
+                throw primaryException
             }
         }
     }
