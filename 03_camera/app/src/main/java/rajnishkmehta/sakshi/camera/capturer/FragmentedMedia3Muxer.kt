@@ -319,14 +319,6 @@ class FragmentedMedia3Muxer : Muxer {
             val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
             val maxTimeUs = maxPresentationTimeUs[trackIndex] ?: 0L
 
-            // Media3's FragmentedMp4Muxer strictly requires samples to be in decoding order.
-            // Out-of-order B-frames are not supported. Timestamps must be non-decreasing per track.
-            // Equal timestamps are valid.
-            require(bufferInfo.presentationTimeUs >= maxTimeUs || (isEndOfStream && size == 0)) {
-                "Sample presentation time (${bufferInfo.presentationTimeUs}) is out of order. " +
-                "Media3 FragmentedMp4Muxer does not support out-of-order B-frames. " +
-                "Previous max time was $maxTimeUs."
-            }
 
             // For EOS buffers, Android MediaCodec BufferInfo documentation states that the timestamp of a
             // zero-sized buffer should be ignored.
@@ -344,6 +336,15 @@ class FragmentedMedia3Muxer : Muxer {
 
             if (size == 0 && !isEndOfStream) {
                 return // Discard empty non-EOS buffers
+            }
+
+            // Media3's FragmentedMp4Muxer strictly requires samples to be in decoding order.
+            // Out-of-order B-frames are not supported. Timestamps must be non-decreasing per track.
+            // Equal timestamps are valid.
+            require(bufferInfo.presentationTimeUs >= maxTimeUs || (isEndOfStream && size == 0)) {
+                "Sample presentation time (${bufferInfo.presentationTimeUs}) is out of order. " +
+                "Media3 FragmentedMp4Muxer does not support out-of-order B-frames. " +
+                "Previous max time was $maxTimeUs."
             }
 
             val duplicateBuffer = byteBuffer.duplicate()
