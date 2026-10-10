@@ -25,13 +25,14 @@ import androidx.media3.container.Mp4OrientationData
  *
  * This class translates Android's native media components to Media3 constructs
  * and manages the lifecycle of Fragmented MP4 (fMP4) muxing. It securely handles
- * file descriptors and enforces strict presentation timestamp rules required by Media3.
+ * file descriptors. It assumes the caller provides properly interleaved samples with
+ * monotonic timestamps as required by Media3.
  */
 @UnstableApi
 class FragmentedMedia3Muxer : Muxer {
 
     private enum class State {
-        UNINITIALIZED, INITIALIZED, STARTED, STOPPED, RELEASED
+        UNINITIALIZED, INITIALIZED, STARTED, STOPPED, RELEASED, FAILED
     }
 
     private val lock = Any()
@@ -43,19 +44,15 @@ class FragmentedMedia3Muxer : Muxer {
     private var orientationDegrees: Int? = null
     private var location: Pair<Double, Double>? = null
     private var captureFps: Float? = null
+    private var hasAddedTrack = false
 
+    private val maxPresentationTimeUs = mutableMapOf<Int, Long>()
 
-    /**
-     * Initializes the muxer output to the specified file path.
-     *
-     * @param path The absolute path to the output file.
-     * @param format The container format requested by the caller.
-     */
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
         synchronized(lock) {
-            check(state == State.UNINITIALIZED) { "Muxer already initialized" }
-            require(format == Muxer.MUXER_FORMAT_MPEG_4) { "Only MPEG-4 format is supported. Expected ${Muxer.MUXER_FORMAT_MPEG_4} (MPEG_4), got $format" }
+            check(state == State.UNINITIALIZED) { "Muxer already initialized or in invalid state: $state" }
+            require(format == Muxer.MUXER_FORMAT_MPEG_4) { "Only MPEG-4 format is supported." }
 
             val fos = FileOutputStream(path)
             fileOutputStream = fos
@@ -64,7 +61,7 @@ class FragmentedMedia3Muxer : Muxer {
                 muxer = FragmentedMp4Muxer.Builder(fos.channel).build()
                 state = State.INITIALIZED
             } catch (e: Exception) {
-                // Do not leak stream on failure
+                state = State.FAILED
                 try {
                     fos.close()
                 } catch (ce: Exception) {
@@ -76,27 +73,20 @@ class FragmentedMedia3Muxer : Muxer {
         }
     }
 
-    /**
-     * Initializes the muxer output using a parcel file descriptor.
-     * Keeps a strong reference to the descriptor to prevent premature garbage collection.
-     *
-     * @param parcelFileDescriptor The file descriptor for the output.
-     * @param format The container format requested by the caller.
-     */
     @SuppressLint("RestrictedApi")
     override fun setOutput(parcelFileDescriptor: ParcelFileDescriptor, format: Int) {
         synchronized(lock) {
-            check(state == State.UNINITIALIZED) { "Muxer already initialized" }
-            require(format == Muxer.MUXER_FORMAT_MPEG_4) { "Only MPEG-4 format is supported. Expected ${Muxer.MUXER_FORMAT_MPEG_4} (MPEG_4), got $format" }
+            check(state == State.UNINITIALIZED) { "Muxer already initialized or in invalid state: $state" }
 
             val stream = ParcelFileDescriptor.AutoCloseOutputStream(parcelFileDescriptor)
             autoCloseStream = stream
             try {
+                require(format == Muxer.MUXER_FORMAT_MPEG_4) { "Only MPEG-4 format is supported." }
                 @Suppress("DEPRECATION")
                 muxer = FragmentedMp4Muxer.Builder(stream.channel).build()
                 state = State.INITIALIZED
             } catch (e: Exception) {
-                // Do not leak stream on failure
+                state = State.FAILED
                 try {
                     stream.close()
                 } catch (ce: Exception) {
@@ -108,15 +98,10 @@ class FragmentedMedia3Muxer : Muxer {
         }
     }
 
-    /**
-     * Sets the orientation hint for the video track.
-     *
-     * @param degrees The orientation angle in degrees.
-     */
     @SuppressLint("RestrictedApi")
     override fun setOrientationDegrees(degrees: Int) {
         synchronized(lock) {
-            check(state == State.INITIALIZED) { "Cannot set orientation after muxer is started" }
+            check(state == State.INITIALIZED) { "Cannot set orientation after muxer is started or before initialization" }
             require(degrees == 0 || degrees == 90 || degrees == 180 || degrees == 270) {
                 "Invalid orientation degrees: $degrees"
             }
@@ -124,12 +109,6 @@ class FragmentedMedia3Muxer : Muxer {
         }
     }
 
-    /**
-     * Sets the geographic location metadata.
-     *
-     * @param latitude The latitude coordinate.
-     * @param longitude The longitude coordinate.
-     */
     @SuppressLint("RestrictedApi")
     override fun setLocation(latitude: Double, longitude: Double) {
         synchronized(lock) {
@@ -140,11 +119,6 @@ class FragmentedMedia3Muxer : Muxer {
         }
     }
 
-    /**
-     * Sets the capture frames per second.
-     *
-     * @param captureFps The frame rate.
-     */
     @SuppressLint("RestrictedApi")
     override fun setCaptureFps(captureFps: Int) {
         synchronized(lock) {
@@ -155,23 +129,12 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     /**
-     * Indicates whether this muxer is resilient to interruptions.
-     * Fragmented MP4 (fMP4) writes data in fragments, making it more resilient than standard MP4.
-     * If the process terminates abruptly, fragments that have already been completely
-     * written and flushed will remain playable. Un-flushed trailing samples may be lost.
-     *
-     * @return `true` since fMP4 allows partial recovery of the file on interruption.
+     * Returns true. fMP4 writes data in fragments, allowing partial recovery
+     * even if the process is unexpectedly interrupted.
      */
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean = true
+    override fun isInterruptionResilient(): Boolean = false
 
-    /**
-     * Translates an Android [android.media.MediaFormat] to a Media3 [Format]
-     * and adds the track to the muxer.
-     *
-     * @param format The format of the track being added.
-     * @return The integer index of the newly added track.
-     */
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
         synchronized(lock) {
@@ -179,26 +142,38 @@ class FragmentedMedia3Muxer : Muxer {
             val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
             val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
+            require(!mimeType.isNullOrBlank()) { "MIME type is missing or blank" }
+            require(FragmentedMp4Muxer.SUPPORTED_VIDEO_SAMPLE_MIME_TYPES.contains(mimeType) ||
+                    FragmentedMp4Muxer.SUPPORTED_AUDIO_SAMPLE_MIME_TYPES.contains(mimeType)) {
+                "Unsupported MIME type by FragmentedMp4Muxer: $mimeType"
+            }
+
             val formatBuilder = Format.Builder().setSampleMimeType(mimeType)
 
-            if (format.containsKey(android.media.MediaFormat.KEY_WIDTH)) {
-                formatBuilder.setWidth(format.getInteger(android.media.MediaFormat.KEY_WIDTH))
+            if (FragmentedMp4Muxer.SUPPORTED_VIDEO_SAMPLE_MIME_TYPES.contains(mimeType)) {
+                require(format.containsKey(android.media.MediaFormat.KEY_WIDTH) && format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) {
+                    "Video format requires KEY_WIDTH and KEY_HEIGHT"
+                }
+                val width = format.getInteger(android.media.MediaFormat.KEY_WIDTH)
+                val height = format.getInteger(android.media.MediaFormat.KEY_HEIGHT)
+                require(width > 0 && height > 0) { "Video width and height must be positive" }
+                formatBuilder.setWidth(width).setHeight(height)
+            } else if (FragmentedMp4Muxer.SUPPORTED_AUDIO_SAMPLE_MIME_TYPES.contains(mimeType)) {
+                require(format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE) && format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+                    "Audio format requires KEY_SAMPLE_RATE and KEY_CHANNEL_COUNT"
+                }
+                val sampleRate = format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
+                val channelCount = format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+                require(sampleRate > 0 && channelCount > 0) { "Audio sample rate and channel count must be positive" }
+                formatBuilder.setSampleRate(sampleRate).setChannelCount(channelCount)
             }
-            if (format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) {
-                formatBuilder.setHeight(format.getInteger(android.media.MediaFormat.KEY_HEIGHT))
-            }
-            if (format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
-                formatBuilder.setChannelCount(format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT))
-            }
-            if (format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
-                formatBuilder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
-            }
+
             if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
                 formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
             }
 
             val media3ColorSpace = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
-                when (format.getInteger(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
+                when (val std = format.getInteger(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
                     android.media.MediaFormat.COLOR_STANDARD_BT709 -> androidx.media3.common.C.COLOR_SPACE_BT709
                     android.media.MediaFormat.COLOR_STANDARD_BT601_PAL,
                     android.media.MediaFormat.COLOR_STANDARD_BT601_NTSC -> androidx.media3.common.C.COLOR_SPACE_BT601
@@ -208,7 +183,7 @@ class FragmentedMedia3Muxer : Muxer {
             } else androidx.media3.common.Format.NO_VALUE
 
             val media3ColorTransfer = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_TRANSFER)) {
-                when (format.getInteger(android.media.MediaFormat.KEY_COLOR_TRANSFER)) {
+                when (val transfer = format.getInteger(android.media.MediaFormat.KEY_COLOR_TRANSFER)) {
                     android.media.MediaFormat.COLOR_TRANSFER_LINEAR -> androidx.media3.common.C.COLOR_TRANSFER_LINEAR
                     android.media.MediaFormat.COLOR_TRANSFER_SDR_VIDEO -> androidx.media3.common.C.COLOR_TRANSFER_SDR
                     android.media.MediaFormat.COLOR_TRANSFER_ST2084 -> androidx.media3.common.C.COLOR_TRANSFER_ST2084
@@ -218,15 +193,21 @@ class FragmentedMedia3Muxer : Muxer {
             } else androidx.media3.common.Format.NO_VALUE
 
             val media3ColorRange = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_RANGE)) {
-                when (format.getInteger(android.media.MediaFormat.KEY_COLOR_RANGE)) {
+                when (val range = format.getInteger(android.media.MediaFormat.KEY_COLOR_RANGE)) {
                     android.media.MediaFormat.COLOR_RANGE_LIMITED -> androidx.media3.common.C.COLOR_RANGE_LIMITED
                     android.media.MediaFormat.COLOR_RANGE_FULL -> androidx.media3.common.C.COLOR_RANGE_FULL
                     else -> androidx.media3.common.Format.NO_VALUE
                 }
             } else androidx.media3.common.Format.NO_VALUE
 
-            val hdrStaticInfo = if (format.containsKey("hdr-static-info")) {
-                val buffer = format.getByteBuffer("hdr-static-info")
+            val hdrStaticInfoKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                android.media.MediaFormat.KEY_HDR_STATIC_INFO
+            } else {
+                "hdr-static-info"
+            }
+
+            val hdrStaticInfo = if (format.containsKey(hdrStaticInfoKey)) {
+                val buffer = format.getByteBuffer(hdrStaticInfoKey)
                 if (buffer != null) {
                     val duplicate = buffer.duplicate()
                     val bytes = ByteArray(duplicate.remaining())
@@ -250,45 +231,55 @@ class FragmentedMedia3Muxer : Muxer {
             }
 
             val initializationData = mutableListOf<ByteArray>()
-            var csdIndex = 0
-            while (true) {
-                val csdKey = "csd-$csdIndex"
+
+            fun addCsdIfValid(csdKey: String, required: Boolean) {
                 if (format.containsKey(csdKey)) {
                     val buffer = format.getByteBuffer(csdKey)
                     if (buffer != null) {
+                        require(buffer.capacity() > 0 && buffer.remaining() > 0) { "CSD buffer $csdKey is empty" }
                         val duplicate = buffer.duplicate()
                         val bytes = ByteArray(duplicate.remaining())
                         duplicate.get(bytes)
+                        require(bytes.isNotEmpty()) { "CSD byte array $csdKey is empty" }
                         initializationData.add(bytes)
+                    } else if (required) {
+                        throw IllegalArgumentException("Required $csdKey is null")
                     }
-                    csdIndex++
-                } else {
-                    break
+                } else if (required) {
+                    throw IllegalArgumentException("Missing required $csdKey for $mimeType")
                 }
             }
-            if (mimeType != null) {
-                val needsCsd = mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC ||
-                               mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC ||
-                               mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC
-                if (needsCsd && initializationData.isEmpty()) {
-                    throw IllegalArgumentException("Missing required codec-specific data (csd-0) for mimeType: $mimeType")
-                }
+
+            if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC) {
+                addCsdIfValid("csd-0", true)
+                addCsdIfValid("csd-1", true)
+            } else if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+                addCsdIfValid("csd-0", true)
             }
+
+            var csdIndex = 0
+            while (true) {
+                val csdKey = "csd-$csdIndex"
+                if (!format.containsKey(csdKey)) break
+                if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC && (csdIndex == 0 || csdIndex == 1)) { csdIndex++; continue }
+                if ((mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) && csdIndex == 0) { csdIndex++; continue }
+                addCsdIfValid(csdKey, false)
+                csdIndex++
+            }
+
             formatBuilder.setInitializationData(initializationData)
 
-            val trackIndex = currentMuxer.addTrack(formatBuilder.build())
-            return trackIndex
+            val trackId = currentMuxer.addTrack(formatBuilder.build())
+            hasAddedTrack = true
+            return trackId
         }
     }
 
-    /**
-     * Signals the muxer to start writing.
-     * Media3 muxers process data directly on `writeSampleData`, so this is a no-op.
-     */
     @SuppressLint("RestrictedApi")
     override fun start() {
         synchronized(lock) {
             check(state == State.INITIALIZED) { "Cannot start muxer from state $state" }
+            check(hasAddedTrack) { "Cannot start muxer without adding at least one track" }
             val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
             try {
@@ -305,20 +296,13 @@ class FragmentedMedia3Muxer : Muxer {
 
                 state = State.STARTED
             } catch (e: Exception) {
+                state = State.FAILED
                 Log.e("FragmentedMedia3Muxer", "Failed to start muxer", e)
                 throw e
             }
         }
     }
 
-    /**
-     * Writes sample data to the specified track.
-     * Adjusts byte buffer boundaries and passes through presentation timestamps directly.
-     *
-     * @param trackIndex The index of the destination track.
-     * @param byteBuffer The buffer containing the encoded sample.
-     * @param bufferInfo The metadata associated with the sample.
-     */
     @SuppressLint("RestrictedApi")
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: AndroidBufferInfo) {
         synchronized(lock) {
@@ -331,11 +315,32 @@ class FragmentedMedia3Muxer : Muxer {
             require(offset >= 0 && size >= 0) { "Negative offset or size: offset=$offset, size=$size" }
             require(offset <= capacity) { "Offset out of bounds: offset=$offset, capacity=$capacity" }
             require(size <= capacity - offset) { "Size out of bounds: size=$size, maxAllowed=${capacity - offset}" }
-            require(bufferInfo.presentationTimeUs >= 0) { "Invalid presentation time: ${bufferInfo.presentationTimeUs}" }
 
-            // Skip codec config samples because they are already provided as initialization data in addTrack()
+            val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
+            val maxTimeUs = maxPresentationTimeUs[trackIndex] ?: 0L
+
+            // We do not require presentation time to be strictly monotonic here,
+            // as B-frames can have non-monotonic presentation times. Media3 handles them.
+            require(bufferInfo.presentationTimeUs >= 0 || (isEndOfStream && size == 0)) {
+                "Invalid presentation time: ${bufferInfo.presentationTimeUs}"
+            }
+
+            // For EOS buffers, if the presentation time is <= maxTimeUs (e.g. 0), we shouldn't pass that
+            // invalid time to Media3, as Media3's LAST_SAMPLE_DURATION_BEHAVIOR uses the EOS timestamp
+            // to calculate the final sample duration. If we pass 0, the duration calculation will fail.
+            // If the EOS timestamp is valid (> maxTimeUs), we pass it. If it's invalid, we shouldn't
+            // pass a broken EOS buffer because Media3 will fallback to duplicating the previous sample's
+            // duration if no EOS buffer is provided, which is safe.
+            if (isEndOfStream && size == 0 && bufferInfo.presentationTimeUs <= maxTimeUs) {
+                return
+            }
+
             if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                 return
+            }
+
+            if (size == 0 && !isEndOfStream) {
+                return // Discard empty non-EOS buffers
             }
 
             val duplicateBuffer = byteBuffer.duplicate()
@@ -347,7 +352,7 @@ class FragmentedMedia3Muxer : Muxer {
             if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
                 media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_KEY_FRAME
             }
-            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+            if (isEndOfStream) {
                 media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_END_OF_STREAM
             }
 
@@ -356,52 +361,53 @@ class FragmentedMedia3Muxer : Muxer {
                 bufferInfo.size,
                 media3Flags
             )
-            // Media3's writeSampleData copies the data so we do not need to clone the buffer here
-            currentMuxer.writeSampleData(trackIndex, duplicateBuffer, media3BufferInfo)
-        }
-    }
 
-    /**
-     * Signals the muxer to stop.
-     * Closing the muxer handles the finalization.
-     */
-    @SuppressLint("RestrictedApi")
-    override fun stop() {
-        synchronized(lock) {
-            if (state == State.STARTED) {
-                var exception: Exception? = null
-                try {
-                    muxer?.close()
-                } catch (e: Exception) {
-                    Log.e("FragmentedMedia3Muxer", "Failed to close muxer on stop", e)
-                    exception = e
-                } finally {
-                    state = State.STOPPED
-                    muxer = null
+            try {
+                currentMuxer.writeSampleData(trackIndex, duplicateBuffer, media3BufferInfo)
+                if (size > 0 || isEndOfStream) {
+                    maxPresentationTimeUs[trackIndex] = maxOf(maxTimeUs, bufferInfo.presentationTimeUs)
                 }
-
-                if (exception != null) {
-                    throw exception
-                }
+            } catch (e: Exception) {
+                state = State.FAILED
+                Log.e("FragmentedMedia3Muxer", "Failed to write sample data", e)
+                throw e
             }
         }
     }
 
-    /**
-     * Closes the muxer and releases associated output streams and file descriptors.
-     */
+    @SuppressLint("RestrictedApi")
+    override fun stop() {
+        synchronized(lock) {
+            check(state == State.STARTED || state == State.FAILED) { "Muxer is not started or failed (state: $state)" }
+            var exception: Exception? = null
+            try {
+                muxer?.close()
+            } catch (e: Exception) {
+                Log.e("FragmentedMedia3Muxer", "Failed to close muxer on stop", e)
+                exception = e
+            } finally {
+                state = if (exception != null) State.FAILED else State.STOPPED
+                muxer = null
+            }
+
+            if (exception != null) {
+                throw exception
+            }
+        }
+    }
+
     @SuppressLint("RestrictedApi")
     override fun release() {
         synchronized(lock) {
             if (state == State.RELEASED) return
 
-            if (state != State.STOPPED && state != State.UNINITIALIZED) {
+            if (state != State.STOPPED && state != State.UNINITIALIZED && state != State.FAILED) {
                 Log.w("FragmentedMedia3Muxer", "Releasing muxer from invalid state: $state. Should have called stop() first.")
             }
 
             var primaryException: Exception? = null
             try {
-                if (state == State.STARTED || state == State.INITIALIZED) {
+                if (state == State.STARTED || state == State.INITIALIZED || state == State.FAILED) {
                     muxer?.close()
                 }
             } catch (e: Exception) {
