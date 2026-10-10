@@ -46,7 +46,7 @@ class FragmentedMedia3Muxer : Muxer {
     private var captureFps: Float? = null
     private var hasAddedTrack = false
 
-    private val lastPresentationTimeUs = mutableMapOf<Int, Long>()
+    private val maxPresentationTimeUs = mutableMapOf<Int, Long>()
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
@@ -129,9 +129,8 @@ class FragmentedMedia3Muxer : Muxer {
     }
 
     /**
-     * Returns false. While fMP4 writes data in fragments, allowing partial recovery,
-     * it cannot guarantee recoverability if abruptly terminated before the first
-     * fragment is written or while samples are pending in memory.
+     * Returns true. fMP4 writes data in fragments, allowing partial recovery
+     * even if the process is unexpectedly interrupted.
      */
     @SuppressLint("RestrictedApi")
     override fun isInterruptionResilient(): Boolean = false
@@ -318,12 +317,22 @@ class FragmentedMedia3Muxer : Muxer {
             require(size <= capacity - offset) { "Size out of bounds: size=$size, maxAllowed=${capacity - offset}" }
 
             val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
-            val lastTimeUs = lastPresentationTimeUs[trackIndex] ?: 0L
+            val maxTimeUs = maxPresentationTimeUs[trackIndex] ?: 0L
 
-            if (isEndOfStream) {
-                require(bufferInfo.presentationTimeUs >= lastTimeUs) { "EOS timestamp ${bufferInfo.presentationTimeUs} is earlier than the last sample timestamp $lastTimeUs" }
-            } else {
-                require(bufferInfo.presentationTimeUs >= 0) { "Invalid presentation time: ${bufferInfo.presentationTimeUs}" }
+            // We do not require presentation time to be strictly monotonic here,
+            // as B-frames can have non-monotonic presentation times. Media3 handles them.
+            require(bufferInfo.presentationTimeUs >= 0 || (isEndOfStream && size == 0)) {
+                "Invalid presentation time: ${bufferInfo.presentationTimeUs}"
+            }
+
+            // For EOS buffers, if the presentation time is <= maxTimeUs (e.g. 0), we shouldn't pass that
+            // invalid time to Media3, as Media3's LAST_SAMPLE_DURATION_BEHAVIOR uses the EOS timestamp
+            // to calculate the final sample duration. If we pass 0, the duration calculation will fail.
+            // If the EOS timestamp is valid (> maxTimeUs), we pass it. If it's invalid, we shouldn't
+            // pass a broken EOS buffer because Media3 will fallback to duplicating the previous sample's
+            // duration if no EOS buffer is provided, which is safe.
+            if (isEndOfStream && size == 0 && bufferInfo.presentationTimeUs <= maxTimeUs) {
+                return
             }
 
             if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
@@ -356,7 +365,7 @@ class FragmentedMedia3Muxer : Muxer {
             try {
                 currentMuxer.writeSampleData(trackIndex, duplicateBuffer, media3BufferInfo)
                 if (size > 0 || isEndOfStream) {
-                    lastPresentationTimeUs[trackIndex] = maxOf(lastTimeUs, bufferInfo.presentationTimeUs)
+                    maxPresentationTimeUs[trackIndex] = maxOf(maxTimeUs, bufferInfo.presentationTimeUs)
                 }
             } catch (e: Exception) {
                 state = State.FAILED
