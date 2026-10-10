@@ -133,7 +133,7 @@ class FragmentedMedia3Muxer : Muxer {
      * even if the process is unexpectedly interrupted.
      */
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean = false
+    override fun isInterruptionResilient(): Boolean = true
 
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
