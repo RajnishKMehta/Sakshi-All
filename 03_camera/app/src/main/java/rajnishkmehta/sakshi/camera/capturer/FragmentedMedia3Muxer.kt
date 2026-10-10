@@ -133,7 +133,7 @@ class FragmentedMedia3Muxer : Muxer {
      * even if the process is unexpectedly interrupted.
      */
     @SuppressLint("RestrictedApi")
-    override fun isInterruptionResilient(): Boolean = true
+    override fun isInterruptionResilient(): Boolean = false
 
     @SuppressLint("RestrictedApi")
     override fun addTrack(format: android.media.MediaFormat): Int {
@@ -319,12 +319,20 @@ class FragmentedMedia3Muxer : Muxer {
             val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
             val maxTimeUs = maxPresentationTimeUs[trackIndex] ?: 0L
 
+            // We do not require presentation time to be strictly monotonic here,
+            // as B-frames can have non-monotonic presentation times. Media3 handles them.
             require(bufferInfo.presentationTimeUs >= 0 || (isEndOfStream && size == 0)) {
                 "Invalid presentation time: ${bufferInfo.presentationTimeUs}"
             }
 
+            // For EOS buffers, if the presentation time is <= maxTimeUs (e.g. 0), we shouldn't pass that
+            // invalid time to Media3, as Media3's LAST_SAMPLE_DURATION_BEHAVIOR uses the EOS timestamp
+            // to calculate the final sample duration. If we pass 0, the duration calculation will fail.
+            // If the EOS timestamp is valid (> maxTimeUs), we pass it. If it's invalid, we shouldn't
+            // pass a broken EOS buffer because Media3 will fallback to duplicating the previous sample's
+            // duration if no EOS buffer is provided, which is safe.
             if (isEndOfStream && size == 0 && bufferInfo.presentationTimeUs <= maxTimeUs) {
-                return // Media3 LAST_SAMPLE_DURATION_BEHAVIOR will correctly handle this
+                return
             }
 
             if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
