@@ -319,19 +319,22 @@ class FragmentedMedia3Muxer : Muxer {
             val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
             val maxTimeUs = maxPresentationTimeUs[trackIndex] ?: 0L
 
-            // We do not require presentation time to be strictly monotonic here,
-            // as B-frames can have non-monotonic presentation times. Media3 handles them.
-            require(bufferInfo.presentationTimeUs >= 0 || (isEndOfStream && size == 0)) {
-                "Invalid presentation time: ${bufferInfo.presentationTimeUs}"
+            // Media3's FragmentedMp4Muxer strictly requires samples to be in decoding order.
+            // Out-of-order B-frames are not supported. Timestamps must be non-decreasing per track.
+            // Equal timestamps are valid.
+            require(bufferInfo.presentationTimeUs >= maxTimeUs || (isEndOfStream && size == 0)) {
+                "Sample presentation time (${bufferInfo.presentationTimeUs}) is out of order. " +
+                "Media3 FragmentedMp4Muxer does not support out-of-order B-frames. " +
+                "Previous max time was $maxTimeUs."
             }
 
-            // For EOS buffers, if the presentation time is <= maxTimeUs (e.g. 0), we shouldn't pass that
-            // invalid time to Media3, as Media3's LAST_SAMPLE_DURATION_BEHAVIOR uses the EOS timestamp
-            // to calculate the final sample duration. If we pass 0, the duration calculation will fail.
-            // If the EOS timestamp is valid (> maxTimeUs), we pass it. If it's invalid, we shouldn't
-            // pass a broken EOS buffer because Media3 will fallback to duplicating the previous sample's
-            // duration if no EOS buffer is provided, which is safe.
-            if (isEndOfStream && size == 0 && bufferInfo.presentationTimeUs <= maxTimeUs) {
+            // For EOS buffers, Android MediaCodec BufferInfo documentation states that the timestamp of a
+            // zero-sized buffer should be ignored.
+            // Media3 FragmentedMp4Muxer internally uses LAST_FRAME_DURATION_BEHAVIOR_DUPLICATE_PREV_DURATION,
+            // which duplicates the previous sample's duration to determine the final sample duration.
+            // It completely skips 0-sized buffers in its Track.java and does not use the EOS timestamp
+            // for duration calculation.
+            if (isEndOfStream && size == 0) {
                 return
             }
 
