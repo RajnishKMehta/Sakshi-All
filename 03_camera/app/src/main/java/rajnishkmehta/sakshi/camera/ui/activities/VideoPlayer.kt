@@ -7,10 +7,15 @@ import android.net.Uri
 import android.os.Bundle
 import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.widget.FrameLayout
-import android.widget.MediaController
+
 import android.widget.RelativeLayout
 import android.widget.Toast
-import android.widget.VideoView
+import androidx.media3.ui.PlayerView
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -36,6 +41,7 @@ class VideoPlayer : AppCompatActivity() {
     private lateinit var binding: VideoPlayerBinding
 
     private val autoFinisher = AutoFinishOnSleep(this)
+    private var player: ExoPlayer? = null
 
     private var isSecureMode = false
 
@@ -69,23 +75,31 @@ class VideoPlayer : AppCompatActivity() {
 
         val uri = getParcelableExtra<Uri>(intent, VIDEO_URI)!!
 
-        val videoView = binding.videoPlayer
+        val playerView = binding.videoPlayer
+        supportActionBar?.setBackgroundDrawable(null)
+        playerView.setShowNextButton(false)
+        playerView.setShowPreviousButton(false)
 
-        val mediaController = object : MediaController(this) {
-            override fun show() {
-                super.show()
+                val audioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+            .build()
+        val exoPlayer = ExoPlayer.Builder(this).build()
+        exoPlayer.setAudioAttributes(audioAttributes, true)
+        playerView.player = exoPlayer
+        player = exoPlayer
+
+        playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { visibility ->
+            if (visibility == android.view.View.VISIBLE) {
                 showActionBar()
                 windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-            }
-
-            override fun hide() {
-                super.hide()
+            } else {
                 hideActionBar()
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
-        }
+        })
 
-        supportActionBar?.setBackgroundDrawable(null)
+
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.shade) { view, insets ->
             val systemBars = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars())
@@ -99,51 +113,32 @@ class VideoPlayer : AppCompatActivity() {
             insets
         }
 
-        thread {
-            var hasAudio = true
-            try {
-                MediaMetadataRetriever().use {
-                    it.setDataSource(this, uri)
-                    hasAudio = it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null
-                }
-            } catch (e: Exception) {
-                Log.d(TAG, "", e)
-            }
-
-            mainExecutor.execute {
-                if (lifecycle.currentState == Lifecycle.State.DESTROYED) {
-                    return@execute
-                }
-
-                val audioFocus = if (hasAudio) AudioManager.AUDIOFOCUS_GAIN else AudioManager.AUDIOFOCUS_NONE
-                videoView.setAudioFocusRequest(audioFocus)
-
-                videoView.setOnPreparedListener { _ ->
-                    videoView.setMediaController(mediaController)
-
-                    if (lifecycle.currentState == Lifecycle.State.RESUMED) {
-                        videoView.start()
-                    }
-
-                    showActionBar()
-                    mediaController.show(0)
-                }
-
-                playVideo(videoView, uri)
-            }
+        val mediaItem = MediaItem.fromUri(uri)
+        player?.setMediaItem(mediaItem)
+        player?.prepare()
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            player?.playWhenReady = true
         }
+
+        player?.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    showActionBar()
+                }
+            }
+        })
     }
 
-    // When the media service dies during setup, VideoView lets prepareAsync()'s
-    // IllegalStateException escape instead of routing it to its error dialog
-    internal fun playVideo(videoView: VideoView, uri: Uri) {
-        try {
-            videoView.setVideoURI(uri)
-        } catch (e: IllegalStateException) {
-            Log.e(TAG, "Unable to play video", e)
-            Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
-            finish()
-        }
+
+
+        override fun onStart() {
+        super.onStart()
+        player?.playWhenReady = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        player?.playWhenReady = false
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -193,5 +188,7 @@ class VideoPlayer : AppCompatActivity() {
         if (isSecureMode) {
             this.autoFinisher.stop()
         }
+        player?.release()
+        player = null
     }
 }

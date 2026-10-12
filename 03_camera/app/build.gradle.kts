@@ -93,6 +93,8 @@ dependencies {
     implementation(libs.sakshi.sdk)
     implementation(libs.androidx.media3.muxer)
     implementation(libs.androidx.media3.container)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.coroutines.android)
