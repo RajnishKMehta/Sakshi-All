@@ -47,6 +47,7 @@ class FragmentedMedia3Muxer : Muxer {
     private var hasAddedTrack = false
 
     private val maxPresentationTimeUs = mutableMapOf<Int, Long>()
+    private val mimeTypeMap = mutableMapOf<Int, String>()
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
@@ -267,9 +268,15 @@ class FragmentedMedia3Muxer : Muxer {
                 csdIndex++
             }
 
+
+            if (mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+                formatBuilder.setCodecs("mp4a.40.2")
+            }
+
             formatBuilder.setInitializationData(initializationData)
 
             val trackId = currentMuxer.addTrack(formatBuilder.build())
+            mimeTypeMap[trackId] = mimeType
             hasAddedTrack = true
             return trackId
         }
@@ -353,7 +360,8 @@ class FragmentedMedia3Muxer : Muxer {
             duplicateBuffer.limit(bufferInfo.offset + bufferInfo.size)
 
             var media3Flags = 0
-            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
+            val isAudio = FragmentedMp4Muxer.SUPPORTED_AUDIO_SAMPLE_MIME_TYPES.contains(mimeTypeMap[trackIndex])
+            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0 || isAudio) {
                 media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_KEY_FRAME
             }
             if (isEndOfStream) {
