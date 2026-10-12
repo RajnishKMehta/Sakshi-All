@@ -11,6 +11,8 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.media3.ui.PlayerView
+import androidx.media3.common.util.UnstableApi
+import androidx.annotation.OptIn
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -30,6 +32,7 @@ import rajnishkmehta.sakshi.camera.util.getParcelableExtra
 import kotlin.concurrent.thread
 
 
+@OptIn(UnstableApi::class)
 class VideoPlayer : AppCompatActivity() {
 
     companion object {
@@ -131,7 +134,7 @@ class VideoPlayer : AppCompatActivity() {
 
 
 
-        override fun onStart() {
+    override fun onStart() {
         super.onStart()
         player?.playWhenReady = true
     }
