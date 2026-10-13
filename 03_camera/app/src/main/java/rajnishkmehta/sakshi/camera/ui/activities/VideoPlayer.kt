@@ -41,6 +41,8 @@ class VideoPlayer : AppCompatActivity() {
         const val TAG = "VideoPlayer"
         const val IN_SECURE_MODE = "isInSecureMode"
         const val VIDEO_URI = "videoUri"
+        private const val KEY_PLAY_WHEN_READY = "playWhenReady"
+        private const val KEY_PLAYBACK_POSITION = "playbackPosition"
     }
 
     private lateinit var binding: VideoPlayerBinding
@@ -54,6 +56,11 @@ class VideoPlayer : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (savedInstanceState != null) {
+            playWhenReady = savedInstanceState.getBoolean(KEY_PLAY_WHEN_READY, true)
+            playbackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSITION, 0L)
+        }
         enableEdgeToEdge()
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -126,7 +133,6 @@ class VideoPlayer : AppCompatActivity() {
                 .build()
 
                                     val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
-                .setMp4ExtractorFlags(androidx.media3.extractor.mp4.Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS) // Example flag just in case
                 .setFragmentedMp4ExtractorFlags(androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK) // Just an example
 
             val mediaSourceFactory = DefaultMediaSourceFactory(this, extractorsFactory)
@@ -176,6 +182,17 @@ class VideoPlayer : AppCompatActivity() {
             it.release()
         }
         player = null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        player?.let {
+            outState.putBoolean(KEY_PLAY_WHEN_READY, it.playWhenReady)
+            outState.putLong(KEY_PLAYBACK_POSITION, it.currentPosition)
+        } ?: run {
+            outState.putBoolean(KEY_PLAY_WHEN_READY, playWhenReady)
+            outState.putLong(KEY_PLAYBACK_POSITION, playbackPosition)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
