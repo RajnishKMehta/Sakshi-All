@@ -15,6 +15,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.annotation.OptIn
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.common.Player
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -45,6 +47,8 @@ class VideoPlayer : AppCompatActivity() {
 
     private val autoFinisher = AutoFinishOnSleep(this)
     private var player: ExoPlayer? = null
+    private var playWhenReady = true
+    private var playbackPosition = 0L
 
     private var isSecureMode = false
 
@@ -83,14 +87,7 @@ class VideoPlayer : AppCompatActivity() {
         playerView.setShowNextButton(false)
         playerView.setShowPreviousButton(false)
 
-                val audioAttributes = AudioAttributes.Builder()
-            .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-            .build()
-        val exoPlayer = ExoPlayer.Builder(this).build()
-        exoPlayer.setAudioAttributes(audioAttributes, true)
-        playerView.player = exoPlayer
-        player = exoPlayer
+
 
         playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { visibility ->
             if (visibility == android.view.View.VISIBLE) {
@@ -116,32 +113,69 @@ class VideoPlayer : AppCompatActivity() {
             insets
         }
 
-        val mediaItem = MediaItem.fromUri(uri)
-        player?.setMediaItem(mediaItem)
-        player?.prepare()
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            player?.playWhenReady = true
-        }
-
-        player?.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    showActionBar()
-                }
-            }
-        })
     }
 
 
+
+
+    private fun initializePlayer() {
+        if (player == null) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                .build()
+
+                                    val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
+                .setMp4ExtractorFlags(androidx.media3.extractor.mp4.Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS) // Example flag just in case
+                .setFragmentedMp4ExtractorFlags(androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK) // Just an example
+
+            val mediaSourceFactory = DefaultMediaSourceFactory(this, extractorsFactory)
+
+            val exoPlayer = ExoPlayer.Builder(this)
+                .setMediaSourceFactory(mediaSourceFactory)
+                .build()
+            exoPlayer.setAudioAttributes(audioAttributes, true)
+            binding.videoPlayer.player = exoPlayer
+            player = exoPlayer
+
+            val uri = getParcelableExtra<Uri>(intent, VIDEO_URI)!!
+            val mediaItem = MediaItem.fromUri(uri)
+
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.seekTo(playbackPosition)
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = playWhenReady
+
+            exoPlayer.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_READY) {
+                        showActionBar()
+                    }
+                }
+
+                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    Log.e(TAG, "Unable to play video", error)
+                    Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            })
+        }
+    }
 
     override fun onStart() {
         super.onStart()
-        player?.playWhenReady = true
+        initializePlayer()
     }
+
 
     override fun onStop() {
         super.onStop()
-        player?.playWhenReady = false
+        player?.let {
+            playWhenReady = it.playWhenReady
+            playbackPosition = it.currentPosition
+            it.release()
+        }
+        player = null
     }
 
     override fun onSupportNavigateUp(): Boolean {

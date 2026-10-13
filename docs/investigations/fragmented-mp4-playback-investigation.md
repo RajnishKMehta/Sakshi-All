@@ -56,7 +56,7 @@ The investigation reveals that the root cause lies in the playback implementatio
 * **Defect:** Player Configuration / Compatibility Limitation.
 * **Evidence:** VLC plays the file perfectly. `VideoView` fails predictably on fMP4.
 * **Confidence Level:** Confirmed.
-* **Fix Strategy:** Replace `VideoView` with `androidx.media3.ui.PlayerView` and `ExoPlayer` in `VideoPlayer.kt`. ExoPlayer provides robust, native support for fragmented MP4s, resolving both audio playback and seeking issues without altering the valid recording pipeline.
+* **Fix Strategy:** Replace `VideoView` with `androidx.media3.ui.PlayerView` and `ExoPlayer` in `VideoPlayer.kt`. ExoPlayer addresses the legacy playback limitation but seeking requires a supported index. The fixing strategy is to either ensure the fragmented MP4 contains a seek index like `sidx` or `mfra` during/after muxing or to use an indexing source in ExoPlayer.
 
 ## Validation Requirements
 | Test | Expected result | Actual Result |
