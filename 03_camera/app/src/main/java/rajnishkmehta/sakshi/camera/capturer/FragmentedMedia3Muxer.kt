@@ -47,6 +47,7 @@ class FragmentedMedia3Muxer : Muxer {
     private var hasAddedTrack = false
 
     private val maxPresentationTimeUs = mutableMapOf<Int, Long>()
+    private val trackMimeTypes = mutableMapOf<Int, String>()
 
     @SuppressLint("RestrictedApi")
     override fun setOutput(path: String, format: Int) {
@@ -166,6 +167,18 @@ class FragmentedMedia3Muxer : Muxer {
                 val channelCount = format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
                 require(sampleRate > 0 && channelCount > 0) { "Audio sample rate and channel count must be positive" }
                 formatBuilder.setSampleRate(sampleRate).setChannelCount(channelCount)
+
+                // AAC-LC requires "mp4a.40.2" codec string in Media3 to play correctly in some fragmented mp4 containers
+                val profile = if (format.containsKey(android.media.MediaFormat.KEY_AAC_PROFILE)) {
+                    format.getInteger(android.media.MediaFormat.KEY_AAC_PROFILE)
+                } else {
+                    android.media.MediaCodecInfo.CodecProfileLevel.AACObjectLC
+                }
+
+                if (profile == android.media.MediaCodecInfo.CodecProfileLevel.AACObjectLC) {
+                    formatBuilder.setCodecs("mp4a.40.2")
+                }
+
             }
 
             if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
@@ -269,7 +282,8 @@ class FragmentedMedia3Muxer : Muxer {
 
             formatBuilder.setInitializationData(initializationData)
 
-            val trackId = currentMuxer.addTrack(formatBuilder.build())
+                        val trackId = currentMuxer.addTrack(formatBuilder.build())
+            trackMimeTypes[trackId] = mimeType
             hasAddedTrack = true
             return trackId
         }
@@ -352,8 +366,10 @@ class FragmentedMedia3Muxer : Muxer {
             duplicateBuffer.position(bufferInfo.offset)
             duplicateBuffer.limit(bufferInfo.offset + bufferInfo.size)
 
-            var media3Flags = 0
-            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
+                        var media3Flags = 0
+            val isAudio = trackMimeTypes[trackIndex]?.startsWith("audio/") == true
+
+            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0 || isAudio) {
                 media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_KEY_FRAME
             }
             if (isEndOfStream) {

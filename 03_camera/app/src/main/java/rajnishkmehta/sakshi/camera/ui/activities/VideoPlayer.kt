@@ -7,10 +7,19 @@ import android.net.Uri
 import android.os.Bundle
 import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.widget.FrameLayout
-import android.widget.MediaController
+
 import android.widget.RelativeLayout
 import android.widget.Toast
-import android.widget.VideoView
+import androidx.media3.ui.PlayerView
+import androidx.media3.common.util.UnstableApi
+import androidx.annotation.OptIn
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor
+import androidx.media3.common.Player
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -25,22 +34,33 @@ import rajnishkmehta.sakshi.camera.util.getParcelableExtra
 import kotlin.concurrent.thread
 
 
+@OptIn(UnstableApi::class)
 class VideoPlayer : AppCompatActivity() {
 
     companion object {
         const val TAG = "VideoPlayer"
         const val IN_SECURE_MODE = "isInSecureMode"
         const val VIDEO_URI = "videoUri"
+        private const val KEY_PLAY_WHEN_READY = "playWhenReady"
+        private const val KEY_PLAYBACK_POSITION = "playbackPosition"
     }
 
     private lateinit var binding: VideoPlayerBinding
 
     private val autoFinisher = AutoFinishOnSleep(this)
+    private var player: ExoPlayer? = null
+    private var playWhenReady = true
+    private var playbackPosition = 0L
 
     private var isSecureMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (savedInstanceState != null) {
+            playWhenReady = savedInstanceState.getBoolean(KEY_PLAY_WHEN_READY, true)
+            playbackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSITION, 0L)
+        }
         enableEdgeToEdge()
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -69,23 +89,24 @@ class VideoPlayer : AppCompatActivity() {
 
         val uri = getParcelableExtra<Uri>(intent, VIDEO_URI)!!
 
-        val videoView = binding.videoPlayer
+        val playerView = binding.videoPlayer
+        supportActionBar?.setBackgroundDrawable(null)
+        playerView.setShowNextButton(false)
+        playerView.setShowPreviousButton(false)
 
-        val mediaController = object : MediaController(this) {
-            override fun show() {
-                super.show()
+
+
+        playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { visibility ->
+            if (visibility == android.view.View.VISIBLE) {
                 showActionBar()
                 windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-            }
-
-            override fun hide() {
-                super.hide()
+            } else {
                 hideActionBar()
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
-        }
+        })
 
-        supportActionBar?.setBackgroundDrawable(null)
+
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.shade) { view, insets ->
             val systemBars = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars())
@@ -99,50 +120,78 @@ class VideoPlayer : AppCompatActivity() {
             insets
         }
 
-        thread {
-            var hasAudio = true
-            try {
-                MediaMetadataRetriever().use {
-                    it.setDataSource(this, uri)
-                    hasAudio = it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null
-                }
-            } catch (e: Exception) {
-                Log.d(TAG, "", e)
-            }
+    }
 
-            mainExecutor.execute {
-                if (lifecycle.currentState == Lifecycle.State.DESTROYED) {
-                    return@execute
-                }
 
-                val audioFocus = if (hasAudio) AudioManager.AUDIOFOCUS_GAIN else AudioManager.AUDIOFOCUS_NONE
-                videoView.setAudioFocusRequest(audioFocus)
 
-                videoView.setOnPreparedListener { _ ->
-                    videoView.setMediaController(mediaController)
 
-                    if (lifecycle.currentState == Lifecycle.State.RESUMED) {
-                        videoView.start()
+    private fun initializePlayer() {
+        if (player == null) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                .build()
+
+                                    val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
+                .setFragmentedMp4ExtractorFlags(androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK) // Just an example
+
+            val mediaSourceFactory = DefaultMediaSourceFactory(this, extractorsFactory)
+
+            val exoPlayer = ExoPlayer.Builder(this)
+                .setMediaSourceFactory(mediaSourceFactory)
+                .build()
+            exoPlayer.setAudioAttributes(audioAttributes, true)
+            binding.videoPlayer.player = exoPlayer
+            player = exoPlayer
+
+            val uri = getParcelableExtra<Uri>(intent, VIDEO_URI)!!
+            val mediaItem = MediaItem.fromUri(uri)
+
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.seekTo(playbackPosition)
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = playWhenReady
+
+            exoPlayer.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_READY) {
+                        showActionBar()
                     }
-
-                    showActionBar()
-                    mediaController.show(0)
                 }
 
-                playVideo(videoView, uri)
-            }
+                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    Log.e(TAG, "Unable to play video", error)
+                    Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            })
         }
     }
 
-    // When the media service dies during setup, VideoView lets prepareAsync()'s
-    // IllegalStateException escape instead of routing it to its error dialog
-    internal fun playVideo(videoView: VideoView, uri: Uri) {
-        try {
-            videoView.setVideoURI(uri)
-        } catch (e: IllegalStateException) {
-            Log.e(TAG, "Unable to play video", e)
-            Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
-            finish()
+    override fun onStart() {
+        super.onStart()
+        initializePlayer()
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        player?.let {
+            playWhenReady = it.playWhenReady
+            playbackPosition = it.currentPosition
+            it.release()
+        }
+        player = null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        player?.let {
+            outState.putBoolean(KEY_PLAY_WHEN_READY, it.playWhenReady)
+            outState.putLong(KEY_PLAYBACK_POSITION, it.currentPosition)
+        } ?: run {
+            outState.putBoolean(KEY_PLAY_WHEN_READY, playWhenReady)
+            outState.putLong(KEY_PLAYBACK_POSITION, playbackPosition)
         }
     }
 
@@ -193,5 +242,7 @@ class VideoPlayer : AppCompatActivity() {
         if (isSecureMode) {
             this.autoFinisher.stop()
         }
+        player?.release()
+        player = null
     }
 }
