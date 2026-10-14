@@ -36,6 +36,10 @@ import androidx.compose.foundation.layout.Box
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 import kotlinx.coroutines.flow.first
 
+import androidx.media3.common.util.UnstableApi
+import androidx.annotation.OptIn
+
+@OptIn(UnstableApi::class)
 @Composable
 fun MediaViewerScreen(
     uri: String, // Actually fileId
