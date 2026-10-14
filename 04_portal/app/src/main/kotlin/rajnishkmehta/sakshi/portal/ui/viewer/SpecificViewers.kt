@@ -112,11 +112,14 @@ fun PhotoViewer(uri: String) {
 fun VideoViewer(uri: String) {
     val context = LocalContext.current
     val exoPlayer = remember(uri) {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
-            prepare()
-            playWhenReady = true
-        }
+        ExoPlayer.Builder(context)
+            .setSeekBackIncrementMs(5000)
+            .setSeekForwardIncrementMs(5000)
+            .build().apply {
+                setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
+                prepare()
+                playWhenReady = true
+            }
     }
 
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
@@ -155,9 +158,7 @@ fun VideoViewer(uri: String) {
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
                     visible = visible,
-                    modifier = Modifier.fillMaxWidth(),
-                    backSecondary = {}, // Remove previous
-                    forwardSecondary = {} // Remove next
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         )
@@ -170,11 +171,14 @@ fun VideoViewer(uri: String) {
 fun AudioViewer(uri: String) {
     val context = LocalContext.current
     val exoPlayer = remember(uri) {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
-            prepare()
-            playWhenReady = true
-        }
+        ExoPlayer.Builder(context)
+            .setSeekBackIncrementMs(5000)
+            .setSeekForwardIncrementMs(5000)
+            .build().apply {
+                setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
+                prepare()
+                playWhenReady = true
+            }
     }
 
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
@@ -246,10 +250,8 @@ fun AudioViewer(uri: String) {
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                         player = player,
                         visible = visible,
-                        modifier = Modifier.fillMaxWidth(),
-                        backSecondary = {},
-                        forwardSecondary = {}
-                    )
+                        modifier = Modifier.fillMaxWidth()
+                )
                 }
             )
         }
