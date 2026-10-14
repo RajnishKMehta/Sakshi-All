@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import rajnishkmehta.sakshi.portal.ui.gallery.ParsedMediaItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,6 +81,7 @@ enum class SortOrder {
 fun GalleryScreen(
     modifier: Modifier = Modifier,
     settingsRepository: SettingsRepository,
+    onMediaClick: (String) -> Unit,
     onSettingsClick: () -> Unit = {},
     onVaultSelectionClick: () -> Unit = {}
 ) {
@@ -303,7 +306,7 @@ fun GalleryScreen(
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items(filteredData, key = { it.id }) { item ->
-                                    MediaItem(item)
+                                    MediaItem(item = item, onClick = { onMediaClick(item.id) })
                                 }
                             }
                         }
@@ -315,16 +318,13 @@ fun GalleryScreen(
 }
 
 @Composable
-fun MediaItem(item: ParsedMediaItem) {
+fun MediaItem(item: ParsedMediaItem, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f) // Ensure strictly 1:1 squares
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable {
-                // TODO: Handle click to open media viewer
-                Log.d("MediaItem", "Clicked media item: ${item.id}")
-            }
+            .clickable { onClick() }
     ) {
         val placeholderRes = when (item.type) {
             MediaType.PHOTO -> R.drawable.ic_placeholder_photo

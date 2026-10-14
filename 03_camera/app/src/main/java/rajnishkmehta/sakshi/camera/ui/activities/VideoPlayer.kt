@@ -132,8 +132,11 @@ class VideoPlayer : AppCompatActivity() {
                 .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
                 .build()
 
-                                    val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
-                .setFragmentedMp4ExtractorFlags(androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK) // Just an example
+            val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
+                .setFragmentedMp4ExtractorFlags(
+                    androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK or
+                    androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP
+                )
 
             val mediaSourceFactory = DefaultMediaSourceFactory(this, extractorsFactory)
 

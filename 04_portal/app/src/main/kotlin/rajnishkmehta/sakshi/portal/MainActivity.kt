@@ -22,6 +22,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import kotlinx.serialization.Serializable
+import rajnishkmehta.sakshi.portal.ui.gallery.MediaViewerScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +44,8 @@ class MainActivity : ComponentActivity() {
                             GalleryScreen(
                                 settingsRepository = settingsRepository,
                                 onSettingsClick = { backStack.add(SettingsScreenRoute) },
-                                onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) }
+                                onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
+                                onMediaClick = { uri -> backStack.add(MediaViewerScreenRoute(uri)) }
                             )
                         }
                         entry<SettingsScreenRoute> {
@@ -62,6 +64,12 @@ class MainActivity : ComponentActivity() {
                                 onBackClick = { backStack.removeLastOrNull() }
                             )
                         }
+                        entry<MediaViewerScreenRoute> { route ->
+                            MediaViewerScreen(
+                                uri = route.uri,
+                                onBack = { backStack.removeLastOrNull() }
+                            )
+                        }
                     }
                 )
             }
@@ -77,3 +85,6 @@ data object SettingsScreenRoute : NavKey
 
 @Serializable
 data object VaultSelectionScreenRoute : NavKey
+
+@Serializable
+data class MediaViewerScreenRoute(val uri: String) : NavKey

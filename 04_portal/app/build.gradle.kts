@@ -104,6 +104,9 @@ dependencies {
 
 
     implementation(libs.sakshi.sdk)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui.compose)
+    implementation(libs.androidx.media3.ui)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 
