@@ -132,8 +132,19 @@ class VideoPlayer : AppCompatActivity() {
                 .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
                 .build()
 
-                                    val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
-                .setFragmentedMp4ExtractorFlags(androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK)
+
+            val uri = getParcelableExtra<Uri>(intent, VIDEO_URI)!!
+            var flags = androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+
+            // Apply workaround only to camera-generated recordings.
+            // Using a heuristic based on file path containing "Sakshi".
+            val isCameraGenerated = uri.path?.contains("Sakshi") == true
+            if (isCameraGenerated) {
+                flags = flags or androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX
+            }
+
+            val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
+                .setFragmentedMp4ExtractorFlags(flags)
 
             val mediaSourceFactory = DefaultMediaSourceFactory(this, extractorsFactory)
 
@@ -144,7 +155,6 @@ class VideoPlayer : AppCompatActivity() {
             binding.videoPlayer.player = exoPlayer
             player = exoPlayer
 
-            val uri = getParcelableExtra<Uri>(intent, VIDEO_URI)!!
             val mediaItem = MediaItem.fromUri(uri)
 
             exoPlayer.setMediaItem(mediaItem)
