@@ -3,7 +3,7 @@ sakshi-sdk = "1.0.0-RC.1"
 
 agp = "9.4.1"
 mockk = "1.14.11"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 coroutines = "1.11.0"
 androidx-core = "1.19.1"
 androidx-annotation = "1.10.0"
