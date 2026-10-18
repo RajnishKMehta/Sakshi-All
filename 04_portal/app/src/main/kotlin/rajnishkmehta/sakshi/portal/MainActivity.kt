@@ -21,6 +21,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import kotlinx.serialization.Serializable
 import rajnishkmehta.sakshi.portal.ui.viewer.MediaViewerScreen
 import rajnishkmehta.sakshi.portal.ui.gallery.MediaType
@@ -40,6 +42,7 @@ class MainActivity : ComponentActivity() {
                 NavDisplay(
                     backStack = backStack,
                     onBack = { if (backStack.size > 1) backStack.removeLastOrNull() else finish() },
+                    entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
                     entryProvider = entryProvider {
                         entry<GalleryScreenRoute> {
                             GalleryScreen(
@@ -90,5 +93,11 @@ data object SettingsScreenRoute : NavKey
 data object VaultSelectionScreenRoute : NavKey
 
 
+/**
+ * Navigation key for the Media Viewer screen.
+ *
+ * @property fileId The unique identifier of the media file to view.
+ * @property mediaType The type of media (e.g., photo, video) for rendering logic.
+ */
 @Serializable
 data class MediaViewerRoute(val fileId: String, val mediaType: MediaType) : NavKey

@@ -70,9 +70,6 @@ fun MediaViewerScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Implement Download/Export */ }) {
-                        Icon(painterResource(R.drawable.ic_download), contentDescription = "Download")
-                    }
                     IconButton(onClick = { showInfoSheet = true }) {
                         Icon(painterResource(R.drawable.ic_info), contentDescription = "Info")
                     }
