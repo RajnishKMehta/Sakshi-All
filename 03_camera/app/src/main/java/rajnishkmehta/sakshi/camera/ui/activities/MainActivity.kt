@@ -114,6 +114,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
+import android.widget.Toast
+import rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog
+import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 
 /**
  * The primary activity of the Camera application. Handles UI rendering, user interactions,
@@ -1907,11 +1910,11 @@ open class MainActivity : AppCompatActivity(),
         if (this::sakshiClient.isInitialized) {
             sakshiClient.disconnect()
         }
-        val config = rajnishkmehta.sakshi.sdk.api.SakshiClientConfig(
+        val config = SakshiClientConfig(
             vaultPackageName = camConfig.vaultPackage,
             connectionTimeoutMs = 5000L
         )
-        sakshiClient = rajnishkmehta.sakshi.sdk.api.SakshiClient.create(this@MainActivity, config)
+        sakshiClient = SakshiClient.create(this@MainActivity, config)
 
 
         lifecycleScope.launch {
@@ -1919,7 +1922,7 @@ open class MainActivity : AppCompatActivity(),
             if (!pingResult.isSuccess) {
                 val msg = pingResult.errorOrNull()?.message ?: "Unknown error"
                 // Let user know the Vault connection failed
-                android.widget.Toast.makeText(this@MainActivity, "Vault connection failed: $msg", android.widget.Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, "Vault connection failed: $msg", Toast.LENGTH_LONG).show()
                 // Force selection dialog whenever vault ping fails
                 if (!isFinishing && !isDestroyed) showVaultUnavailableDialog()
             }
@@ -1929,9 +1932,9 @@ open class MainActivity : AppCompatActivity(),
     }
 
     private fun showVaultUnavailableDialog() {
-        val dialog = rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog()
+        val dialog = VaultSelectionDialog()
         dialog.isMandatory = true
-        dialog.show(supportFragmentManager, rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog.TAG)
+        dialog.show(supportFragmentManager, VaultSelectionDialog.TAG)
 
         supportFragmentManager.setFragmentResultListener("vault_selection", this) { _, bundle ->
             val newPackage = bundle.getString("package_name")
@@ -1944,11 +1947,11 @@ open class MainActivity : AppCompatActivity(),
         }
     }
 
-    fun grantVaultUriPermission(fileId: String, uri: android.net.Uri) {
+    fun grantVaultUriPermission(fileId: String, uri: Uri) {
         grantUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    fun revokeVaultUriPermission(fileId: String, uri: android.net.Uri) {
+    fun revokeVaultUriPermission(fileId: String, uri: Uri) {
         revokeUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 

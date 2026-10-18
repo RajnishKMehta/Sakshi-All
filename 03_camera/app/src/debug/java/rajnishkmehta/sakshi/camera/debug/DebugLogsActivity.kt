@@ -19,6 +19,8 @@ import android.widget.TextView
 import android.widget.ImageButton
 import android.view.Gravity
 import java.io.File
+import android.util.TypedValue
+import androidx.core.content.ContextCompat
 
 /**
  * An activity specifically for debug builds that allows developers to view, export, and clear
@@ -74,12 +76,12 @@ class DebugLogsActivity : AppCompatActivity() {
         val rotatedPattern = Regex(".*_\\d+\\.txt$")
 
         // Resolve primary text color using Material3 theme attribute
-        val typedValue = android.util.TypedValue()
+        val typedValue = TypedValue()
         theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
-        val primaryTextColor = if (typedValue.type >= android.util.TypedValue.TYPE_FIRST_COLOR_INT && typedValue.type <= android.util.TypedValue.TYPE_LAST_COLOR_INT) {
+        val primaryTextColor = if (typedValue.type >= TypedValue.TYPE_FIRST_COLOR_INT && typedValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
             typedValue.data
         } else {
-            androidx.core.content.ContextCompat.getColor(this, typedValue.resourceId)
+            ContextCompat.getColor(this, typedValue.resourceId)
         }
 
         for (file in files) {

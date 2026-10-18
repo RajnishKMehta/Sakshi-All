@@ -19,6 +19,7 @@ import androidx.media3.common.Format
 import androidx.media3.container.MdtaMetadataEntry
 import androidx.media3.container.Mp4LocationData
 import androidx.media3.container.Mp4OrientationData
+import android.media.MediaFormat
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
@@ -112,26 +113,26 @@ class FragmentedMedia3Muxer : Muxer {
      * @return The integer index of the newly added track.
      */
     @SuppressLint("RestrictedApi")
-    override fun addTrack(format: android.media.MediaFormat): Int {
+    override fun addTrack(format: MediaFormat): Int {
         val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
-        val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
+        val mimeType = format.getString(MediaFormat.KEY_MIME)
         val formatBuilder = Format.Builder().setSampleMimeType(mimeType)
 
-        if (format.containsKey(android.media.MediaFormat.KEY_WIDTH)) {
-            formatBuilder.setWidth(format.getInteger(android.media.MediaFormat.KEY_WIDTH))
+        if (format.containsKey(MediaFormat.KEY_WIDTH)) {
+            formatBuilder.setWidth(format.getInteger(MediaFormat.KEY_WIDTH))
         }
-        if (format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) {
-            formatBuilder.setHeight(format.getInteger(android.media.MediaFormat.KEY_HEIGHT))
+        if (format.containsKey(MediaFormat.KEY_HEIGHT)) {
+            formatBuilder.setHeight(format.getInteger(MediaFormat.KEY_HEIGHT))
         }
-        if (format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
-            formatBuilder.setChannelCount(format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT))
+        if (format.containsKey(MediaFormat.KEY_CHANNEL_COUNT)) {
+            formatBuilder.setChannelCount(format.getInteger(MediaFormat.KEY_CHANNEL_COUNT))
         }
-        if (format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
-            formatBuilder.setSampleRate(format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE))
+        if (format.containsKey(MediaFormat.KEY_SAMPLE_RATE)) {
+            formatBuilder.setSampleRate(format.getInteger(MediaFormat.KEY_SAMPLE_RATE))
         }
-        if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
-            formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
+        if (format.containsKey(MediaFormat.KEY_BIT_RATE)) {
+            formatBuilder.setAverageBitrate(format.getInteger(MediaFormat.KEY_BIT_RATE))
         }
 
         val initializationData = mutableListOf<ByteArray>()
