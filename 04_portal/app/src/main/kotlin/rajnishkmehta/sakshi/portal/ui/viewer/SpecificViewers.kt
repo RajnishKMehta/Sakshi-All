@@ -115,7 +115,6 @@ fun VideoViewer(uri: String) {
         val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory().apply {
             setFragmentedMp4ExtractorFlags(
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_MERGE_FRAGMENTED_SIDX or
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
             )
@@ -169,7 +168,9 @@ fun VideoViewer(uri: String) {
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
                     visible = visible,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    backSecondary = {},
+                    forwardSecondary = {}
                 )
             }
         )
@@ -185,7 +186,6 @@ fun AudioViewer(uri: String) {
         val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory().apply {
             setFragmentedMp4ExtractorFlags(
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_MERGE_FRAGMENTED_SIDX or
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
             )
@@ -272,7 +272,9 @@ fun AudioViewer(uri: String) {
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                         player = player,
                         visible = visible,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        backSecondary = {},
+                        forwardSecondary = {}
                     )
                 }
             )
