@@ -188,7 +188,7 @@ class ImageCapturer(val mActivity: MainActivity) {
         val fileCopyRequest = rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest(
             fileId = fileId,
             uri = item.uri,
-            mediaType = "PHOTO",
+            mediaType = "OTHER",
             fileExtension = imageFileFormat.removePrefix(".")
         )
         mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
