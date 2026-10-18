@@ -112,7 +112,21 @@ fun PhotoViewer(uri: String) {
 fun VideoViewer(uri: String) {
     val context = LocalContext.current
     val exoPlayer = remember(uri) {
-        ExoPlayer.Builder(context).build().apply {
+        val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory().apply {
+            setFragmentedMp4ExtractorFlags(
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_MERGE_FRAGMENTED_SIDX or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+            )
+        }
+        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(context, extractorsFactory)
+
+        ExoPlayer.Builder(context)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .setSeekBackIncrementMs(5000)
+            .setSeekForwardIncrementMs(10000)
+            .build().apply {
             setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
             prepare()
             playWhenReady = true
@@ -155,9 +169,7 @@ fun VideoViewer(uri: String) {
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
                     visible = visible,
-                    modifier = Modifier.fillMaxWidth(),
-                    backSecondary = {}, // Remove previous
-                    forwardSecondary = {} // Remove next
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         )
@@ -170,7 +182,21 @@ fun VideoViewer(uri: String) {
 fun AudioViewer(uri: String) {
     val context = LocalContext.current
     val exoPlayer = remember(uri) {
-        ExoPlayer.Builder(context).build().apply {
+        val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory().apply {
+            setFragmentedMp4ExtractorFlags(
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_MERGE_FRAGMENTED_SIDX or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+            )
+        }
+        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(context, extractorsFactory)
+
+        ExoPlayer.Builder(context)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .setSeekBackIncrementMs(5000)
+            .setSeekForwardIncrementMs(10000)
+            .build().apply {
             setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
             prepare()
             playWhenReady = true
@@ -246,9 +272,7 @@ fun AudioViewer(uri: String) {
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                         player = player,
                         visible = visible,
-                        modifier = Modifier.fillMaxWidth(),
-                        backSecondary = {},
-                        forwardSecondary = {}
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             )
