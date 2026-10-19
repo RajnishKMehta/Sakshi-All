@@ -32,10 +32,7 @@ import java.util.UUID
 import java.util.Locale
 
 import android.content.Intent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import rajnishkmehta.sakshi.sdk.api.SakshiResult
-import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
+import .FileCopyRequest
 
 private const val imageFileFormat = ".jpg"
 
