@@ -24,15 +24,15 @@ import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.showIgnoringShortEdgeMode
 import rajnishkmehta.sakshi.camera.util.printStackTraceToString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-
 import java.util.UUID
 import java.util.Locale
-
 import android.content.Intent
-import .FileCopyRequest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 
 private const val imageFileFormat = ".jpg"
 
