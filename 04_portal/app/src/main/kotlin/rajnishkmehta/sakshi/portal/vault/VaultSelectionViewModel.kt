@@ -18,7 +18,6 @@ import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import rajnishkmehta.sakshi.portal.R
-
 import kotlinx.coroutines.CancellationException
 
 class VaultSelectionViewModel(application: Application) : AndroidViewModel(application) {
