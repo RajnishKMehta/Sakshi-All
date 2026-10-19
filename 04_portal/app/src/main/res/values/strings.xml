@@ -52,6 +52,11 @@
     <string name="media_type_audio">Audio</string>
     <string name="media_type_other">Other File</string>
 
+    <!-- Media Viewer / Export -->
+    <string name="export_action_desc">Save to Device</string>
+    <string name="export_success">Saved to %1$s</string>
+    <string name="export_error">Failed to save: %1$s</string>
+
     <!-- Debug Logs Activity -->
     <string name="debug_logs_share_title">Share Log File</string>
     <string name="debug_logs_empty_error">Log file is empty or does not exist</string>
