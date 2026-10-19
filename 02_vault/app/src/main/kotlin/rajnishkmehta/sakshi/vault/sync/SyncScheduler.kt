@@ -20,6 +20,7 @@ import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
 import rajnishkmehta.sakshi.sdk.api.SakshiError
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 
 /**
  * Adaptive scheduler that manages non-overlapping synchronization loops for recording files.
@@ -37,9 +38,9 @@ class SyncScheduler(
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
     private val activeJobs = ConcurrentHashMap<String, Job>()
     private val activeCallbacks = ConcurrentHashMap<String, ISakshiVaultCallback>()
-    private val fileMutexes = ConcurrentHashMap<String, kotlinx.coroutines.sync.Mutex>()
+    private val fileMutexes = ConcurrentHashMap<String, Mutex>()
 
-    private fun getMutex(fileId: String) = fileMutexes.getOrPut(fileId) { kotlinx.coroutines.sync.Mutex() }
+    private fun getMutex(fileId: String) = fileMutexes.getOrPut(fileId) { Mutex() }
 
     private val syncIntervalMs = 2000L
     private val consecutiveNoBytesLimit = 5
@@ -62,7 +63,7 @@ class SyncScheduler(
             try {
                 runSyncLoop(fileId, sourceUri, mediaType, fileExtension)
             } catch (e: Exception) {
-                if (e !is kotlinx.coroutines.CancellationException) {
+                if (e !is CancellationException) {
                     Log.e(tag, "Error in sync loop for $fileId", e)
                     val sakshiError = SakshiError.Unknown(
                         "Sync loop failed: ${e.message}",
@@ -142,7 +143,7 @@ class SyncScheduler(
                     }
                 }
             } catch (e: Exception) {
-                if (e !is kotlinx.coroutines.CancellationException) {
+                if (e !is CancellationException) {
                     Log.e(tag, "Failed to perform final sync pass for $fileId", e)
                     if (storedCallback != null) {
                         VaultResponder.sendError(

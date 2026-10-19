@@ -24,12 +24,15 @@ import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.showIgnoringShortEdgeMode
 import rajnishkmehta.sakshi.camera.util.printStackTraceToString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-
 import java.util.UUID
 import java.util.Locale
+import android.content.Intent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 
 private const val imageFileFormat = ".jpg"
 
@@ -182,19 +185,19 @@ class ImageCapturer(val mActivity: MainActivity) {
 
         val mimeType = item.mimeType()
         // Generate a better ID than just filename
-        val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
+        val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
         val fileId = "img_${uniqueHash}"
 
-        val fileCopyRequest = rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest(
+        val fileCopyRequest = FileCopyRequest(
             fileId = fileId,
             uri = item.uri,
             mediaType = "PHOTO",
             fileExtension = imageFileFormat.removePrefix(".")
         )
-        mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+        mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        CoroutineScope(Dispatchers.IO).launch {
             val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
-            if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
+            if (result is SakshiResult.Failure) {
                 Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
             }
         }

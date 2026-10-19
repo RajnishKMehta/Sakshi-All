@@ -19,6 +19,11 @@ import androidx.media3.common.ColorInfo
 import androidx.media3.container.MdtaMetadataEntry
 import androidx.media3.container.Mp4LocationData
 import androidx.media3.container.Mp4OrientationData
+import android.media.MediaCodec
+import android.media.MediaCodecInfo
+import android.media.MediaFormat
+import android.os.Build
+import androidx.media3.common.C
 
 /**
  * A custom [Muxer] implementation utilizing Media3's [FragmentedMp4Muxer].
@@ -137,12 +142,12 @@ class FragmentedMedia3Muxer : Muxer {
     override fun isInterruptionResilient(): Boolean = true
 
     @SuppressLint("RestrictedApi")
-    override fun addTrack(format: android.media.MediaFormat): Int {
+    override fun addTrack(format: MediaFormat): Int {
         synchronized(lock) {
             check(state == State.INITIALIZED) { "Cannot add tracks after muxer has started or before initialization" }
             val currentMuxer = muxer ?: throw IllegalStateException("FragmentedMp4Muxer is not initialized")
 
-            val mimeType = format.getString(android.media.MediaFormat.KEY_MIME)
+            val mimeType = format.getString(MediaFormat.KEY_MIME)
             require(!mimeType.isNullOrBlank()) { "MIME type is missing or blank" }
             require(FragmentedMp4Muxer.SUPPORTED_VIDEO_SAMPLE_MIME_TYPES.contains(mimeType) ||
                     FragmentedMp4Muxer.SUPPORTED_AUDIO_SAMPLE_MIME_TYPES.contains(mimeType)) {
@@ -152,69 +157,69 @@ class FragmentedMedia3Muxer : Muxer {
             val formatBuilder = Format.Builder().setSampleMimeType(mimeType)
 
             if (FragmentedMp4Muxer.SUPPORTED_VIDEO_SAMPLE_MIME_TYPES.contains(mimeType)) {
-                require(format.containsKey(android.media.MediaFormat.KEY_WIDTH) && format.containsKey(android.media.MediaFormat.KEY_HEIGHT)) {
+                require(format.containsKey(MediaFormat.KEY_WIDTH) && format.containsKey(MediaFormat.KEY_HEIGHT)) {
                     "Video format requires KEY_WIDTH and KEY_HEIGHT"
                 }
-                val width = format.getInteger(android.media.MediaFormat.KEY_WIDTH)
-                val height = format.getInteger(android.media.MediaFormat.KEY_HEIGHT)
+                val width = format.getInteger(MediaFormat.KEY_WIDTH)
+                val height = format.getInteger(MediaFormat.KEY_HEIGHT)
                 require(width > 0 && height > 0) { "Video width and height must be positive" }
                 formatBuilder.setWidth(width).setHeight(height)
             } else if (FragmentedMp4Muxer.SUPPORTED_AUDIO_SAMPLE_MIME_TYPES.contains(mimeType)) {
-                require(format.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE) && format.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+                require(format.containsKey(MediaFormat.KEY_SAMPLE_RATE) && format.containsKey(MediaFormat.KEY_CHANNEL_COUNT)) {
                     "Audio format requires KEY_SAMPLE_RATE and KEY_CHANNEL_COUNT"
                 }
-                val sampleRate = format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
-                val channelCount = format.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+                val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+                val channelCount = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
                 require(sampleRate > 0 && channelCount > 0) { "Audio sample rate and channel count must be positive" }
                 formatBuilder.setSampleRate(sampleRate).setChannelCount(channelCount)
 
                 // AAC-LC requires "mp4a.40.2" codec string in Media3 to play correctly in some fragmented mp4 containers
-                val profile = if (format.containsKey(android.media.MediaFormat.KEY_AAC_PROFILE)) {
-                    format.getInteger(android.media.MediaFormat.KEY_AAC_PROFILE)
+                val profile = if (format.containsKey(MediaFormat.KEY_AAC_PROFILE)) {
+                    format.getInteger(MediaFormat.KEY_AAC_PROFILE)
                 } else {
-                    android.media.MediaCodecInfo.CodecProfileLevel.AACObjectLC
+                    MediaCodecInfo.CodecProfileLevel.AACObjectLC
                 }
 
-                if (profile == android.media.MediaCodecInfo.CodecProfileLevel.AACObjectLC) {
+                if (profile == MediaCodecInfo.CodecProfileLevel.AACObjectLC) {
                     formatBuilder.setCodecs("mp4a.40.2")
                 }
 
             }
 
-            if (format.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
-                formatBuilder.setAverageBitrate(format.getInteger(android.media.MediaFormat.KEY_BIT_RATE))
+            if (format.containsKey(MediaFormat.KEY_BIT_RATE)) {
+                formatBuilder.setAverageBitrate(format.getInteger(MediaFormat.KEY_BIT_RATE))
             }
 
-            val media3ColorSpace = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
-                when (val std = format.getInteger(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
-                    android.media.MediaFormat.COLOR_STANDARD_BT709 -> androidx.media3.common.C.COLOR_SPACE_BT709
-                    android.media.MediaFormat.COLOR_STANDARD_BT601_PAL,
-                    android.media.MediaFormat.COLOR_STANDARD_BT601_NTSC -> androidx.media3.common.C.COLOR_SPACE_BT601
-                    android.media.MediaFormat.COLOR_STANDARD_BT2020 -> androidx.media3.common.C.COLOR_SPACE_BT2020
-                    else -> androidx.media3.common.Format.NO_VALUE
+            val media3ColorSpace = if (format.containsKey(MediaFormat.KEY_COLOR_STANDARD)) {
+                when (val std = format.getInteger(MediaFormat.KEY_COLOR_STANDARD)) {
+                    MediaFormat.COLOR_STANDARD_BT709 -> C.COLOR_SPACE_BT709
+                    MediaFormat.COLOR_STANDARD_BT601_PAL,
+                    MediaFormat.COLOR_STANDARD_BT601_NTSC -> C.COLOR_SPACE_BT601
+                    MediaFormat.COLOR_STANDARD_BT2020 -> C.COLOR_SPACE_BT2020
+                    else -> Format.NO_VALUE
                 }
-            } else androidx.media3.common.Format.NO_VALUE
+            } else Format.NO_VALUE
 
-            val media3ColorTransfer = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_TRANSFER)) {
-                when (val transfer = format.getInteger(android.media.MediaFormat.KEY_COLOR_TRANSFER)) {
-                    android.media.MediaFormat.COLOR_TRANSFER_LINEAR -> androidx.media3.common.C.COLOR_TRANSFER_LINEAR
-                    android.media.MediaFormat.COLOR_TRANSFER_SDR_VIDEO -> androidx.media3.common.C.COLOR_TRANSFER_SDR
-                    android.media.MediaFormat.COLOR_TRANSFER_ST2084 -> androidx.media3.common.C.COLOR_TRANSFER_ST2084
-                    android.media.MediaFormat.COLOR_TRANSFER_HLG -> androidx.media3.common.C.COLOR_TRANSFER_HLG
-                    else -> androidx.media3.common.Format.NO_VALUE
+            val media3ColorTransfer = if (format.containsKey(MediaFormat.KEY_COLOR_TRANSFER)) {
+                when (val transfer = format.getInteger(MediaFormat.KEY_COLOR_TRANSFER)) {
+                    MediaFormat.COLOR_TRANSFER_LINEAR -> C.COLOR_TRANSFER_LINEAR
+                    MediaFormat.COLOR_TRANSFER_SDR_VIDEO -> C.COLOR_TRANSFER_SDR
+                    MediaFormat.COLOR_TRANSFER_ST2084 -> C.COLOR_TRANSFER_ST2084
+                    MediaFormat.COLOR_TRANSFER_HLG -> C.COLOR_TRANSFER_HLG
+                    else -> Format.NO_VALUE
                 }
-            } else androidx.media3.common.Format.NO_VALUE
+            } else Format.NO_VALUE
 
-            val media3ColorRange = if (format.containsKey(android.media.MediaFormat.KEY_COLOR_RANGE)) {
-                when (val range = format.getInteger(android.media.MediaFormat.KEY_COLOR_RANGE)) {
-                    android.media.MediaFormat.COLOR_RANGE_LIMITED -> androidx.media3.common.C.COLOR_RANGE_LIMITED
-                    android.media.MediaFormat.COLOR_RANGE_FULL -> androidx.media3.common.C.COLOR_RANGE_FULL
-                    else -> androidx.media3.common.Format.NO_VALUE
+            val media3ColorRange = if (format.containsKey(MediaFormat.KEY_COLOR_RANGE)) {
+                when (val range = format.getInteger(MediaFormat.KEY_COLOR_RANGE)) {
+                    MediaFormat.COLOR_RANGE_LIMITED -> C.COLOR_RANGE_LIMITED
+                    MediaFormat.COLOR_RANGE_FULL -> C.COLOR_RANGE_FULL
+                    else -> Format.NO_VALUE
                 }
-            } else androidx.media3.common.Format.NO_VALUE
+            } else Format.NO_VALUE
 
-            val hdrStaticInfoKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                android.media.MediaFormat.KEY_HDR_STATIC_INFO
+            val hdrStaticInfoKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                MediaFormat.KEY_HDR_STATIC_INFO
             } else {
                 "hdr-static-info"
             }
@@ -229,9 +234,9 @@ class FragmentedMedia3Muxer : Muxer {
                 } else null
             } else null
 
-            if (media3ColorSpace != androidx.media3.common.Format.NO_VALUE ||
-                media3ColorTransfer != androidx.media3.common.Format.NO_VALUE ||
-                media3ColorRange != androidx.media3.common.Format.NO_VALUE ||
+            if (media3ColorSpace != Format.NO_VALUE ||
+                media3ColorTransfer != Format.NO_VALUE ||
+                media3ColorRange != Format.NO_VALUE ||
                 hdrStaticInfo != null) {
 
                 val colorInfo = ColorInfo.Builder()
@@ -263,10 +268,10 @@ class FragmentedMedia3Muxer : Muxer {
                 }
             }
 
-            if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC) {
+            if (mimeType == MediaFormat.MIMETYPE_VIDEO_AVC) {
                 addCsdIfValid("csd-0", true)
                 addCsdIfValid("csd-1", true)
-            } else if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) {
+            } else if (mimeType == MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == MediaFormat.MIMETYPE_AUDIO_AAC) {
                 addCsdIfValid("csd-0", true)
             }
 
@@ -274,8 +279,8 @@ class FragmentedMedia3Muxer : Muxer {
             while (true) {
                 val csdKey = "csd-$csdIndex"
                 if (!format.containsKey(csdKey)) break
-                if (mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_AVC && (csdIndex == 0 || csdIndex == 1)) { csdIndex++; continue }
-                if ((mimeType == android.media.MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == android.media.MediaFormat.MIMETYPE_AUDIO_AAC) && csdIndex == 0) { csdIndex++; continue }
+                if (mimeType == MediaFormat.MIMETYPE_VIDEO_AVC && (csdIndex == 0 || csdIndex == 1)) { csdIndex++; continue }
+                if ((mimeType == MediaFormat.MIMETYPE_VIDEO_HEVC || mimeType == MediaFormat.MIMETYPE_AUDIO_AAC) && csdIndex == 0) { csdIndex++; continue }
                 addCsdIfValid(csdKey, false)
                 csdIndex++
             }
@@ -330,7 +335,7 @@ class FragmentedMedia3Muxer : Muxer {
             require(offset <= capacity) { "Offset out of bounds: offset=$offset, capacity=$capacity" }
             require(size <= capacity - offset) { "Size out of bounds: size=$size, maxAllowed=${capacity - offset}" }
 
-            val isEndOfStream = (bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
+            val isEndOfStream = (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0
             val maxTimeUs = maxPresentationTimeUs[trackIndex] ?: 0L
 
 
@@ -344,7 +349,7 @@ class FragmentedMedia3Muxer : Muxer {
                 return
             }
 
-            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+            if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                 return
             }
 
@@ -369,11 +374,11 @@ class FragmentedMedia3Muxer : Muxer {
                         var media3Flags = 0
             val isAudio = trackMimeTypes[trackIndex]?.startsWith("audio/") == true
 
-            if ((bufferInfo.flags and android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0 || isAudio) {
-                media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_KEY_FRAME
+            if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0 || isAudio) {
+                media3Flags = media3Flags or C.BUFFER_FLAG_KEY_FRAME
             }
             if (isEndOfStream) {
-                media3Flags = media3Flags or androidx.media3.common.C.BUFFER_FLAG_END_OF_STREAM
+                media3Flags = media3Flags or C.BUFFER_FLAG_END_OF_STREAM
             }
 
             val media3BufferInfo = Media3BufferInfo(

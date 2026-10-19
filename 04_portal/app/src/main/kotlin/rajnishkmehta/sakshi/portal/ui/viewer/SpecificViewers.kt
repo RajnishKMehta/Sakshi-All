@@ -2,7 +2,8 @@
  * Copyright 2026 Rajnish Kumar
  * SPDX-License-Identifier: Apache-2.0
  */
-@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@file:OptIn(UnstableApi::class)
+
 package rajnishkmehta.sakshi.portal.ui.viewer
 
 import android.net.Uri
@@ -51,17 +52,21 @@ import coil3.request.crossfade
 import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import kotlin.random.Random
-
-
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.ui.graphics.graphicsLayer
-
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.annotation.OptIn
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor
+import androidx.media3.ui.compose.material3.PlayerDefaults
 
 
 
@@ -107,19 +112,19 @@ fun PhotoViewer(uri: String) {
 
 
 
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@OptIn(UnstableApi::class)
 @Composable
 fun VideoViewer(uri: String) {
     val context = LocalContext.current
     val exoPlayer = remember(uri) {
-        val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory().apply {
+        val extractorsFactory = DefaultExtractorsFactory().apply {
             setFragmentedMp4ExtractorFlags(
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+                FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
+                FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
+                FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
             )
         }
-        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(context, extractorsFactory)
+        val mediaSourceFactory = DefaultMediaSourceFactory(context, extractorsFactory)
 
         ExoPlayer.Builder(context)
             .setMediaSourceFactory(mediaSourceFactory)
@@ -165,7 +170,7 @@ fun VideoViewer(uri: String) {
             },
             showControls = showControls,
             centerControls = { player, visible ->
-                androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
+                PlayerDefaults.CenterControls(
                     player = player,
                     visible = visible,
                     modifier = Modifier.fillMaxWidth(),
@@ -178,19 +183,19 @@ fun VideoViewer(uri: String) {
 }
 
 
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@OptIn(UnstableApi::class)
 @Composable
 fun AudioViewer(uri: String) {
     val context = LocalContext.current
     val exoPlayer = remember(uri) {
-        val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory().apply {
+        val extractorsFactory = DefaultExtractorsFactory().apply {
             setFragmentedMp4ExtractorFlags(
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+                FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
+                FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
+                FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
             )
         }
-        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(context, extractorsFactory)
+        val mediaSourceFactory = DefaultMediaSourceFactory(context, extractorsFactory)
 
         ExoPlayer.Builder(context)
             .setMediaSourceFactory(mediaSourceFactory)
@@ -212,7 +217,7 @@ fun AudioViewer(uri: String) {
             override fun onIsPlayingChanged(playing: Boolean) {
                 isPlaying = playing
             }
-            override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                 if (mediaMetadata.artworkData != null) {
                     hasArtwork = true
                     artworkData = mediaMetadata.artworkData
@@ -269,7 +274,7 @@ fun AudioViewer(uri: String) {
                 player = exoPlayer,
                 modifier = Modifier.fillMaxSize(),
                 centerControls = { player, visible ->
-                    androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
+                    PlayerDefaults.CenterControls(
                         player = player,
                         visible = visible,
                         modifier = Modifier.fillMaxWidth(),
@@ -291,8 +296,8 @@ fun AudioVisualization(isPlaying: Boolean, modifier: Modifier = Modifier) {
     // Create animated progress values for several bars
     val barCount = 10
     val barProgresses = (0 until barCount).map { i ->
-        val duration = remember { kotlin.random.Random.nextInt(500, 1200) }
-        val target = remember { kotlin.random.Random.nextFloat() * 0.8f + 0.2f }
+        val duration = remember { Random.nextInt(500, 1200) }
+        val target = remember { Random.nextFloat() * 0.8f + 0.2f }
 
         // Always call animateFloat to keep the slot table structure intact,
         // but change the target based on isPlaying so it either animates or stays fixed.

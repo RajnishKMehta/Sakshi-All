@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.widget.FrameLayout
-
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.media3.ui.PlayerView
@@ -32,6 +31,9 @@ import rajnishkmehta.sakshi.camera.R
 import rajnishkmehta.sakshi.camera.databinding.VideoPlayerBinding
 import rajnishkmehta.sakshi.camera.util.getParcelableExtra
 import kotlin.concurrent.thread
+import android.view.View
+import androidx.media3.common.PlaybackException
+import androidx.media3.extractor.DefaultExtractorsFactory
 
 
 @OptIn(UnstableApi::class)
@@ -97,7 +99,7 @@ class VideoPlayer : AppCompatActivity() {
 
 
         playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { visibility ->
-            if (visibility == android.view.View.VISIBLE) {
+            if (visibility == View.VISIBLE) {
                 showActionBar()
                 windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
             } else {
@@ -132,8 +134,8 @@ class VideoPlayer : AppCompatActivity() {
                 .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
                 .build()
 
-                                    val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
-                .setFragmentedMp4ExtractorFlags(androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK) // Just an example
+                                    val extractorsFactory = DefaultExtractorsFactory()
+                .setFragmentedMp4ExtractorFlags(FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK) // Just an example
 
             val mediaSourceFactory = DefaultMediaSourceFactory(this, extractorsFactory)
 
@@ -159,7 +161,7 @@ class VideoPlayer : AppCompatActivity() {
                     }
                 }
 
-                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                override fun onPlayerError(error: PlaybackException) {
                     Log.e(TAG, "Unable to play video", error)
                     Toast.makeText(applicationContext, R.string.unable_to_play_video, Toast.LENGTH_SHORT).show()
                     finish()
