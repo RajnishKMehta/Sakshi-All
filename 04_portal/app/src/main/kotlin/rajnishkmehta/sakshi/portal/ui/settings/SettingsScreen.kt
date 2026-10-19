@@ -40,7 +40,6 @@ import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import rajnishkmehta.sakshi.portal.BuildConfig
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
-
 import rajnishkmehta.sakshi.portal.debug.DebugLogsActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
