@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 @file:OptIn(UnstableApi::class)
+
 package rajnishkmehta.sakshi.portal.ui.viewer
 
 import android.net.Uri
@@ -51,18 +52,14 @@ import coil3.request.crossfade
 import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import kotlin.random.Random
-
-
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.ui.graphics.graphicsLayer
-
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import androidx.compose.ui.input.pointer.pointerInput
-
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
