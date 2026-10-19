@@ -44,9 +44,7 @@ import java.text.SimpleDateFormat
 import androidx.lifecycle.lifecycleScope
 import java.util.Date
 import java.util.Locale
-
 import kotlinx.coroutines.launch
-
 import android.content.Intent
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
