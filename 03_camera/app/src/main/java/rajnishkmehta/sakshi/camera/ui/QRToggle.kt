@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import rajnishkmehta.sakshi.camera.R
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import com.google.android.material.imageview.ShapeableImageView
-
 import com.google.zxing.BarcodeFormat
 
 class QRToggle @JvmOverloads constructor(
