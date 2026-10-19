@@ -22,7 +22,6 @@ import rajnishkmehta.sakshi.vault.sync.CopyEngine
 import rajnishkmehta.sakshi.vault.sync.SyncScheduler
 import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
 import java.io.File
-
 import kotlinx.serialization.json.Json
 import rajnishkmehta.sakshi.sdk.api.validation.PathValidator
 
