@@ -47,7 +47,6 @@ import androidx.camera.video.internal.muxer.MuxerFactory
 import rajnishkmehta.sakshi.camera.capturer.FragmentedMedia3MuxerFactory
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
-
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -67,7 +66,6 @@ import com.google.zxing.BarcodeFormat
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
-
 import androidx.annotation.OptIn
 
 // note that enum constant name is used as a name of a SharedPreferences instance
