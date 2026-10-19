@@ -114,7 +114,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
-
 import android.widget.Toast
 import rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
