@@ -116,7 +116,8 @@ fun VideoViewer(uri: String) {
             setFragmentedMp4ExtractorFlags(
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_MERGE_FRAGMENTED_SIDX
             )
         }
         val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(context, extractorsFactory)
@@ -168,9 +169,7 @@ fun VideoViewer(uri: String) {
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
                     visible = visible,
-                    modifier = Modifier.fillMaxWidth(),
-                    backSecondary = {},
-                    forwardSecondary = {}
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         )
@@ -187,7 +186,8 @@ fun AudioViewer(uri: String) {
             setFragmentedMp4ExtractorFlags(
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_READ_MFRA_FOR_SEEK_MAP or
                 androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_TFDT_BOX or
-                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK or
+                androidx.media3.extractor.mp4.FragmentedMp4Extractor.FLAG_MERGE_FRAGMENTED_SIDX
             )
         }
         val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(context, extractorsFactory)
@@ -272,9 +272,7 @@ fun AudioViewer(uri: String) {
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                         player = player,
                         visible = visible,
-                        modifier = Modifier.fillMaxWidth(),
-                        backSecondary = {},
-                        forwardSecondary = {}
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             )
