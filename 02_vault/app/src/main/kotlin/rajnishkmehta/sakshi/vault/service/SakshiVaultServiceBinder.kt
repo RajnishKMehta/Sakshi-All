@@ -23,6 +23,9 @@ import rajnishkmehta.sakshi.vault.sync.SyncScheduler
 import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
 import java.io.File
 
+import kotlinx.serialization.json.Json
+import rajnishkmehta.sakshi.sdk.api.validation.PathValidator
+
 /**
  * Implementation of the [ISakshiVaultService] AIDL interface.
  * Handles IPC requests and delegates them to internal Vault components.
@@ -115,7 +118,7 @@ class SakshiVaultServiceBinder(
 
         serviceScope?.launch {
             try {
-                rajnishkmehta.sakshi.sdk.api.validation.PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
+                PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
                 scheduler?.startSync(fileId, sourceUriStr, mediaType, fileExtension, callback)
             } catch (e: IllegalArgumentException) {
                 Log.e(tag, "Invalid path components for startAVSync: ${e.message}", e)
@@ -187,7 +190,7 @@ class SakshiVaultServiceBinder(
             }
         }
 
-        val jsonString = kotlinx.serialization.json.Json.encodeToString(result)
+        val jsonString = Json.encodeToString(result)
 
         return Bundle().apply {
             putString("media_list_json", jsonString)

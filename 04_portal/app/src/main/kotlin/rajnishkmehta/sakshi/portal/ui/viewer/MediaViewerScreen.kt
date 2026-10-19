@@ -38,6 +38,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun MediaViewerScreen(
     fileId: String,
@@ -47,7 +50,7 @@ fun MediaViewerScreen(
 ) {
     val viewModel: MediaViewerViewModel = viewModel(
         factory = MediaViewerViewModelFactory(
-            application = androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application,
+            application = LocalContext.current.applicationContext as Application,
             settingsRepository = settingsRepository
         )
     )

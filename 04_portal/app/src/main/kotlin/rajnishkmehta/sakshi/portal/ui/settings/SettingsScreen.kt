@@ -41,6 +41,8 @@ import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import rajnishkmehta.sakshi.portal.BuildConfig
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 
+import rajnishkmehta.sakshi.portal.debug.DebugLogsActivity
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -93,7 +95,7 @@ fun SettingsScreen(
                     Button(
                         onClick = {
                             try {
-                                val intent = Intent(context, Class.forName("rajnishkmehta.sakshi.portal.debug.DebugLogsActivity"))
+                                val intent = Intent(context, Class.forName("DebugLogsActivity"))
                                 context.startActivity(intent)
                             } catch (e: Exception) {
                                 e.printStackTrace()

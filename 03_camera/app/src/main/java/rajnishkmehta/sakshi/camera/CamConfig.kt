@@ -68,6 +68,8 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
+import androidx.annotation.OptIn
+
 // note that enum constant name is used as a name of a SharedPreferences instance
 /**
  * Represents the various camera extensions or modes available (e.g., Night, Bokeh, Face Retouch).
@@ -1288,7 +1290,7 @@ class CamConfig(private val mActivity: MainActivity) {
     // reporting >= 35 there), so it is checked in addition to the API level. This deliberately
     // mirrors CameraX's own SDK_INT >= 35 gate — which upstream may still move, see b/417839748
     // — plus the HAL capability that gate cannot see; re-check both on CameraX updates.
-    @androidx.annotation.OptIn(ExperimentalCamera2Interop::class)
+    @OptIn(ExperimentalCamera2Interop::class)
     private fun canVerifyFeatureCombinations(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return false
 

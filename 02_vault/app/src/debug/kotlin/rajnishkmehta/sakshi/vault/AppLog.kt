@@ -14,10 +14,12 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 object AppLog {
     private const val MAX_BUFFER_SIZE = 2000
     private val liveBuffer = ConcurrentLinkedQueue<String>()
-    private val listeners = java.util.concurrent.CopyOnWriteArrayList<(String) -> Unit>()
+    private val listeners = CopyOnWriteArrayList<(String) -> Unit>()
 
     @Volatile
     private var currentFileWriter: PrintWriter? = null

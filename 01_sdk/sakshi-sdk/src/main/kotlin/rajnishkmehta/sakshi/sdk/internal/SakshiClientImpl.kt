@@ -26,6 +26,9 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.VaultServiceConnection
 import kotlin.coroutines.resume
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+
 /**
  * Concrete implementation of [SakshiClient].
  *
@@ -338,7 +341,7 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         return try {
-            val resBundle = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val resBundle = kotlinx.coroutines.withContext(Dispatchers.IO) {
                 service.listMedia()
             }
             val json = resBundle.getString("media_list_json")
@@ -347,7 +350,7 @@ internal class SakshiClientImpl(
             } else {
                 SakshiResult.Failure(SakshiError.Unknown("No JSON returned from vault", null))
             }
-        } catch (e: kotlinx.coroutines.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
@@ -368,7 +371,7 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         return try {
-            val bundle = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val bundle = kotlinx.coroutines.withContext(Dispatchers.IO) {
                 service.getMedia(fileId)
             }
 
@@ -386,7 +389,7 @@ internal class SakshiClientImpl(
                 createdTime = bundle.getLong("createdTime", 0L)
             )
             SakshiResult.Success(response)
-        } catch (e: kotlinx.coroutines.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
@@ -404,11 +407,11 @@ internal class SakshiClientImpl(
         val service = serviceResult.getOrNull()!!
 
         return try {
-            val template = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val template = kotlinx.coroutines.withContext(Dispatchers.IO) {
                 service.thumbnail
             }
             SakshiResult.Success(template)
-        } catch (e: kotlinx.coroutines.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(

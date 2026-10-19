@@ -47,7 +47,7 @@ const val SAF_URI_HOST_EXTERNAL_STORAGE = "com.android.externalstorage.documents
 const val DEFAULT_MEDIA_STORE_CAPTURE_PATH = "DCIM/Camera"
 
 /*
-Based on androidx.camera.core.ImageSaver
+Based on ImageSaver
 
 Main differences:
 - image saving stages are pipelined: extractJpegBytes(), saveImage() and generateThumbnail() can

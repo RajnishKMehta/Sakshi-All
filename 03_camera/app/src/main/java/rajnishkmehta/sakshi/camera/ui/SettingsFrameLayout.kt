@@ -6,6 +6,9 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import android.view.MotionEvent
 
+import android.view.View
+import android.view.ViewGroup
+
 class SettingsFrameLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
@@ -21,7 +24,7 @@ class SettingsFrameLayout @JvmOverloads constructor(
         /**
          * If disallowIntercept is true the touch event can't be stolen and the return value
          * is ignored.
-         * @see android.view.ViewGroup.onInterceptTouchEvent
+         * @see ViewGroup.onInterceptTouchEvent
          */
         fun onInterceptTouchEvent(
             view: SettingsFrameLayout?,
@@ -30,7 +33,7 @@ class SettingsFrameLayout @JvmOverloads constructor(
         ): Boolean
 
         /**
-         * @see android.view.View.onTouchEvent
+         * @see View.onTouchEvent
          */
         fun onTouchEvent(view: SettingsFrameLayout?, event: MotionEvent?): Boolean
     }

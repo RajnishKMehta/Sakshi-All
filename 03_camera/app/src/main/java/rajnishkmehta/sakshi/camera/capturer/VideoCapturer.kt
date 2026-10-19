@@ -47,6 +47,13 @@ import java.util.Locale
 
 import kotlinx.coroutines.launch
 
+import android.content.Intent
+import java.util.UUID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
+
 /**
  * Handles the logic for capturing videos, including setting up the [Recorder],
  * managing the recording state (start, stop, pause, mute), and saving the resulting file.
@@ -63,7 +70,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
 
     private var currentFileId: String? = null
 
-    private var lastMissingOutputUri: android.net.Uri? = null
+    private var lastMissingOutputUri: Uri? = null
 
     private val videoFileFormat = ".mp4"
 
@@ -260,33 +267,33 @@ class VideoCapturer(private val mActivity: MainActivity) {
                 if (event is VideoRecordEvent.Start) {
                     Log.d("VideoCapturer", "Event: Start")
                     onRecordingStart()
-                } else if (event is androidx.camera.video.VideoRecordEvent.Status) {
+                } else if (event is VideoRecordEvent.Status) {
                     Log.d("VideoCapturer", "Event: Status, bytes: ${event.recordingStats.numBytesRecorded}, time: ${event.recordingStats.recordedDurationNanos}")
                     updateTimerTime(event.recordingStats.recordedDurationNanos)
                     if (!videoSyncStarted && event.recordingStats.numBytesRecorded > 1024) {
                         videoSyncStarted = true
-                        val uniqueHash = java.util.UUID.randomUUID().toString().substring(0, 8)
+                        val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
                         fileId = "vid_${uniqueHash}"
                         currentFileId = fileId
-                        val avSyncRequest = rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest(
+                        val avSyncRequest = AVSyncRequest(
                             fileId = fileId!!,
                             uri = recordingCtx.uri,
                             mediaType = "VIDEO",
                             fileExtension = videoFileFormat.removePrefix(".")
                         )
-                        ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
-                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        if (ctx is MainActivity) {
+                            CoroutineScope(Dispatchers.IO).launch {
                                 Log.d("VideoCapturer", "Calling SakshiClient.startAVSync with fileId: $fileId")
                                 ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
-                                    if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
+                                    if (result is SakshiResult.Failure) {
                                         Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
                                     }
                                 }
                             }
                         }
                     }
-                } else if (event is androidx.camera.video.VideoRecordEvent.Finalize) {
+                } else if (event is VideoRecordEvent.Finalize) {
                     Log.d("VideoCapturer", "Event: Finalize, error: ${event.error}, cause: ${event.cause}")
 
                     /**
@@ -294,7 +301,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                      */
                     var outputExists = false
                     try {
-                        val cursor = mActivity.contentResolver.query(recordingCtx.uri, arrayOf(android.provider.MediaStore.MediaColumns._ID), null, null, null)
+                        val cursor = mActivity.contentResolver.query(recordingCtx.uri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)
                         cursor?.use {
                             outputExists = it.moveToFirst()
                         }
@@ -335,13 +342,13 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         }
 
                         /** Evaluates specific finalization states to determine the recording outcome. */
-                        val isExpectedTermination = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NONE ||
-                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED ||
-                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED ||
-                                event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_SOURCE_INACTIVE
+                        val isExpectedTermination = event.error == VideoRecordEvent.Finalize.ERROR_NONE ||
+                                event.error == VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED ||
+                                event.error == VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED ||
+                                event.error == VideoRecordEvent.Finalize.ERROR_SOURCE_INACTIVE
 
-                        val isInsufficientStorage = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_INSUFFICIENT_STORAGE
-                        val isNoValidData = event.error == androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA
+                        val isInsufficientStorage = event.error == VideoRecordEvent.Finalize.ERROR_INSUFFICIENT_STORAGE
+                        val isNoValidData = event.error == VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA
 
                         if (!isExpectedTermination) {
                             val message = mActivity.getString(R.string.unable_to_save_video_verbose, event.error)
@@ -354,7 +361,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                          * Partially failed recordings are intentionally preserved.
                          */
                         if (!isNoValidData && videoSyncStarted && fileId != null) {
-                            if (ctx is rajnishkmehta.sakshi.camera.ui.activities.MainActivity) {
+                            if (ctx is MainActivity) {
                                 ctx.handleCopyDone(fileId!!)
                             }
                         }
