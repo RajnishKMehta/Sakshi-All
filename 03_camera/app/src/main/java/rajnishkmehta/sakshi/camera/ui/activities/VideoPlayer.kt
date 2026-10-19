@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import rajnishkmehta.sakshi.camera.debug.DebugLogger as Log
 import android.widget.FrameLayout
-
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.media3.ui.PlayerView
@@ -32,7 +31,6 @@ import rajnishkmehta.sakshi.camera.R
 import rajnishkmehta.sakshi.camera.databinding.VideoPlayerBinding
 import rajnishkmehta.sakshi.camera.util.getParcelableExtra
 import kotlin.concurrent.thread
-
 import android.view.View
 import androidx.media3.common.PlaybackException
 import androidx.media3.extractor.DefaultExtractorsFactory
