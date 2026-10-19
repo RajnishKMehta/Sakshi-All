@@ -70,12 +70,12 @@ fun MediaViewerScreen(
     LaunchedEffect(exportState) {
         when (val state = exportState) {
             is ExportUiState.Success -> {
-                val message = context.getString(R.string.export_success, state.destination)
+                val message = context.resources.getString(R.string.export_success, state.destination)
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 viewModel.resetExportState()
             }
             is ExportUiState.Error -> {
-                val message = context.getString(R.string.export_error, state.message)
+                val message = context.resources.getString(R.string.export_error, state.message)
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 viewModel.resetExportState()
             }
