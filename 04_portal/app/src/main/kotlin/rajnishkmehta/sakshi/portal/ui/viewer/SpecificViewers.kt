@@ -169,7 +169,9 @@ fun VideoViewer(uri: String) {
                 androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                     player = player,
                     visible = visible,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                        backSecondary = {},
+                        forwardSecondary = {}
                 )
             }
         )
@@ -272,7 +274,9 @@ fun AudioViewer(uri: String) {
                     androidx.media3.ui.compose.material3.PlayerDefaults.CenterControls(
                         player = player,
                         visible = visible,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        backSecondary = {},
+                        forwardSecondary = {}
                     )
                 }
             )
