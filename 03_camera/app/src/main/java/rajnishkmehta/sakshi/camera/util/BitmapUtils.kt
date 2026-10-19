@@ -6,7 +6,6 @@ import android.graphics.Shader
 import android.os.Build
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
-
 import rajnishkmehta.sakshi.camera.BlurBitmap
 
 fun setBlurBitmapCompat(view: ImageView, bitmap: Bitmap, radius: Float = 4f) {
