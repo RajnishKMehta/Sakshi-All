@@ -41,7 +41,6 @@ import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import rajnishkmehta.sakshi.portal.BuildConfig
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
