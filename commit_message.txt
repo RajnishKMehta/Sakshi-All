@@ -1,0 +1,7 @@
+feat: implement scheduled deletion system in Portal and Vault
+
+- Renamed completionState to state and added scheduledDeletionTime
+- Implemented MediaCleanupWorker in Vault using WorkManager
+- Implemented deletion APIs in Vault Service Binder
+- Updated listMedia logic to exclude scheduled deletions
+- Implemented confirmation UI in Portal MediaViewer Screen
