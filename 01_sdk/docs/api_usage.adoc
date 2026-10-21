@@ -217,7 +217,41 @@ lifecycleScope.launch {
 }
 ----
 
-== 11. Disconnecting
+== 11. Deleting Media
+
+Client applications can request to delete single or multiple media files from the Vault database and storage.
+
+=== Single File Deletion
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+val deleteResult = client.deleteMedia("photo_2026_1001")
+if (deleteResult.isSuccess) {
+    println("Media deleted successfully!")
+} else {
+    println("Failed to delete media: ${deleteResult.errorOrNull()?.message}")
+}
+----
+
+=== Batch File Deletion
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+val batchDeleteResult = client.deleteMedia(listOf("photo_1", "photo_2", "photo_invalid"))
+if (batchDeleteResult.isSuccess) {
+    val response = batchDeleteResult.getOrNull()!!
+    println("Successfully deleted: ${response.successfulIds}")
+    println("Failed to delete: ${response.failedIds}")
+} else {
+    println("Batch deletion failed completely: ${batchDeleteResult.errorOrNull()?.message}")
+}
+----
+
+== 12. Disconnecting
 
 When the client component is destroyed, disconnect the client to avoid memory leaks and unbind the service:
 
