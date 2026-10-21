@@ -8,5 +8,7 @@ object AppLog {
 
     fun d(tag: String, msg: String) = Unit
 
+    fun w(tag: String, msg: String, tr: Throwable? = null) = Unit
+
     fun e(tag: String, msg: String, tr: Throwable? = null) = Unit
 }

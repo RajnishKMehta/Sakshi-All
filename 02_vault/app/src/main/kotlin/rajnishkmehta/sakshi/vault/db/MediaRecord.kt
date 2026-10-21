@@ -22,5 +22,6 @@ data class MediaRecord(
     val completionState: String, // "INITIALIZING", "SYNCING", "COMPLETED", "STOPPED", "FAILED"
     val lastCopiedOffset: Long,
     val createdTime: Long,
-    val updatedTime: Long
+    val updatedTime: Long,
+    val scheduledDeletionTime: Long? = null
 )

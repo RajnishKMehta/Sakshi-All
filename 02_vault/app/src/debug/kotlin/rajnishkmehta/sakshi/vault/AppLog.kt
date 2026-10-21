@@ -95,6 +95,10 @@ object AppLog {
         logLine("D", tag, msg)
     }
 
+    fun w(tag: String, msg: String, tr: Throwable? = null) {
+        android.util.Log.w(tag, msg, tr)
+    }
+
     fun e(tag: String, msg: String, tr: Throwable? = null) {
         Log.e(tag, msg, tr)
         val fullMsg = if (tr != null) "$msg\n${Log.getStackTraceString(tr)}" else msg

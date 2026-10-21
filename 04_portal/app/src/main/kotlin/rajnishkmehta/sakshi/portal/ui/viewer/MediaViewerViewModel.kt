@@ -103,6 +103,32 @@ class MediaViewerViewModel(
         }
     }
 
+
+
+    fun scheduleDeletion(fileId: String, onDeleted: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val vaultPackage = settingsRepository.vaultPackageFlow.firstOrNull() ?: "rajnishkmehta.sakshi.vault"
+                val config = SakshiClientConfig(vaultPackageName = vaultPackage, connectionTimeoutMs = 5000L)
+                val client = SakshiClient.create(getApplication(), config)
+
+                val result = client.deleteMedia(fileId)
+                if (result.isSuccess) {
+                    onDeleted()
+                } else {
+                    val msg = result.errorOrNull()?.message ?: "Unknown error scheduling deletion"
+                    Log.e("MediaViewerViewModel", msg)
+                    onError(msg)
+                }
+                client.disconnect()
+            } catch (e: Exception) {
+                val msg = e.message ?: "Unknown error"
+                Log.e("MediaViewerViewModel", "Error scheduling deletion: $msg")
+                onError(msg)
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         sakshiClient?.disconnect()

@@ -17,6 +17,7 @@ import androidx.media3.effect.Presentation
 import androidx.media3.inspector.frame.FrameExtractor
 import java.io.File
 import java.io.FileOutputStream
+import rajnishkmehta.sakshi.sdk.api.validation.PathValidator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.guava.await
@@ -158,6 +159,28 @@ object ThumbnailManager {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to generate thumbnail for $fileId", e)
             return@withContext null
+        }
+    }
+
+    /**
+     * Deletes the thumbnail for the specified file.
+     *
+     * @param context the application context.
+     * @param mediaType the media type (e.g., "PHOTO", "VIDEO").
+     * @param fileId the unique file ID.
+     * @return true if deleted successfully or did not exist, false if deletion failed.
+     */
+    fun deleteThumbnail(context: Context, mediaType: String, fileId: String): Boolean {
+        try {
+            PathValidator.validatePathComponents(fileId, mediaType, "webp")
+            val thumbnailDir = File(context.filesDir, "thumbnails/${mediaType.lowercase()}")
+            val thumbnailFile = File(thumbnailDir, "$fileId.webp")
+            if (thumbnailFile.exists()) {
+                return thumbnailFile.delete()
+            }
+            return true // It doesn't exist, consider it "deleted"
+        } catch (e: Exception) {
+            return false
         }
     }
 }

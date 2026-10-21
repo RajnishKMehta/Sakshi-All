@@ -18,6 +18,13 @@ import rajnishkmehta.sakshi.vault.storage.StorageManager
 import rajnishkmehta.sakshi.vault.sync.CopyEngine
 import rajnishkmehta.sakshi.vault.sync.SyncScheduler
 
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
+import rajnishkmehta.sakshi.vault.worker.PermanentDeletionWorker
+
 /**
  * Remote IPC background service that implements the ISakshiVaultService AIDL interface.
  * It coordinates incoming photo and video synchronization requests from client applications
@@ -57,6 +64,23 @@ class SakshiVaultRemoteService : Service() {
 
             // Automatically resume any interrupted, pending synchronizations from database
             scheduler?.resumePendingSyncs()
+
+            // Schedule periodic deletion worker (runs approximately once a day)
+            val constraints = Constraints.Builder()
+                .setRequiresStorageNotLow(true)
+                .build()
+
+            val cleanupWorkRequest = PeriodicWorkRequestBuilder<PermanentDeletionWorker>(
+                1, TimeUnit.DAYS
+            )
+                .setConstraints(constraints)
+                .build()
+
+            WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+                PermanentDeletionWorker.WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                cleanupWorkRequest
+            )
             Log.d(tag, "SakshiVaultRemoteService onCreate completed successfully")
         } catch (e: Exception) {
             Log.e(tag, "Error initializing SakshiVaultRemoteService in onCreate: ${e.message}", e)

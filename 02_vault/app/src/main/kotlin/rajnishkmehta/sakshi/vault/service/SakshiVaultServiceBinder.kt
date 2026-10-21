@@ -21,6 +21,7 @@ import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.sync.CopyEngine
 import rajnishkmehta.sakshi.vault.sync.SyncScheduler
 import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
+import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 import java.io.File
 import kotlinx.serialization.json.Json
 import rajnishkmehta.sakshi.sdk.api.validation.PathValidator
@@ -44,6 +45,36 @@ class SakshiVaultServiceBinder(
      */
     override fun ping(requestBundle: Bundle): Bundle {
         Log.d(tag, "Received ping request")
+
+        // Trigger permanent deletion of eligible files as a fallback
+        serviceScope?.launch {
+            try {
+                val db = database ?: return@launch
+                val storage = AppPrivateStorageManager(applicationContext)
+                val allRecords = db.mediaRecordDao().getAllRecords()
+                val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+                val now = System.currentTimeMillis()
+
+                for (record in allRecords) {
+                    val deletionTime = record.scheduledDeletionTime
+                    if (deletionTime != null && now - deletionTime >= thirtyDaysInMillis) {
+                        Log.d(tag, "Ping fallback: Permanently deleting eligible file ${record.fileId}")
+                        val deleted = storage.deleteMedia(record.fileId, record.mediaType, record.fileExtension)
+                        // Also attempt to delete thumbnail
+                        val thumbnailDeleted = ThumbnailManager.deleteThumbnail(applicationContext, record.mediaType, record.fileId)
+
+                        if (deleted) {
+                            db.mediaRecordDao().deleteRecord(record.fileId)
+                        } else {
+                            Log.w(tag, "Ping fallback: Failed to delete physical file for ${record.fileId}")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Error during ping fallback deletion", e)
+            }
+        }
+
         return Bundle().apply {
             putBoolean("is_available", true)
             putString("vault_version", BuildConfig.VERSION_NAME)
@@ -51,10 +82,6 @@ class SakshiVaultServiceBinder(
         }
     }
 
-    /**
-     * Receives a completed file, copies it to private vault storage,
-     * persists metadata in the database, and acknowledges success.
-     */
     override fun copyFile(fileBundle: Bundle, callback: ISakshiVaultCallback) {
         val fileId = fileBundle.getString("file_id") ?: ""
         val uriStr = fileBundle.getString("uri") ?: ""
@@ -180,7 +207,7 @@ class SakshiVaultServiceBinder(
             db.mediaRecordDao().getAllRecords()
         }
 
-        val validRecords = records.filter { it.completionState == "COMPLETED" || it.completionState == "FAILED" }
+        val validRecords = records.filter { (it.completionState == "COMPLETED" || it.completionState == "FAILED") && it.scheduledDeletionTime == null }
 
         val groups = validRecords.groupBy { it.mediaType.lowercase() }
         val result = groups.mapValues { (_, list) ->
@@ -228,6 +255,77 @@ class SakshiVaultServiceBinder(
             } else {
                 putString("error", "Media file not found for id: $fileId")
             }
+        }
+    }
+
+
+
+    override fun deleteMedia(fileId: String): Bundle {
+        Log.d(tag, "Received deleteMedia request for fileId=$fileId")
+        var success = false
+        var errorMsg: String? = null
+
+        runBlocking {
+            try {
+                val db = database ?: throw IllegalStateException("VaultDatabase is not initialized")
+                val record = db.mediaRecordDao().getRecord(fileId)
+                if (record != null) {
+                    if (record.completionState == "SYNCING" || record.completionState == "INITIALIZING") {
+                        errorMsg = "Cannot delete file currently syncing"
+                    } else {
+                        val updatedRecord = record.copy(scheduledDeletionTime = System.currentTimeMillis())
+                        db.mediaRecordDao().updateRecord(updatedRecord)
+                        success = true
+                    }
+                } else {
+                    errorMsg = "Media file not found for id: $fileId"
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Error scheduling deletion for fileId=$fileId", e)
+                errorMsg = e.message
+            }
+        }
+
+        return Bundle().apply {
+            putBoolean("success", success)
+            if (errorMsg != null) {
+                putString("error", errorMsg)
+            }
+        }
+    }
+
+
+    override fun deleteMediaBatch(fileIds: List<String>): Bundle {
+        Log.d(tag, "Received deleteMediaBatch request for ${fileIds.size} files")
+        val successfulIds = ArrayList<String>()
+        val failedIds = Bundle()
+
+        runBlocking {
+            val db = database ?: return@runBlocking
+            for (fileId in fileIds) {
+                try {
+                    val record = db.mediaRecordDao().getRecord(fileId)
+                    if (record != null) {
+                        if (record.completionState == "SYNCING" || record.completionState == "INITIALIZING") {
+                             failedIds.putString(fileId, "Cannot delete file currently syncing")
+                        } else {
+                             val updatedRecord = record.copy(scheduledDeletionTime = System.currentTimeMillis())
+                             db.mediaRecordDao().updateRecord(updatedRecord)
+                             successfulIds.add(fileId)
+                        }
+                    } else {
+                         failedIds.putString(fileId, "Media file not found for id: $fileId")
+                    }
+                } catch (e: Exception) {
+                    Log.e(tag, "Error scheduling deletion for fileId=$fileId", e)
+                    failedIds.putString(fileId, e.message ?: "Unknown error")
+                }
+            }
+        }
+
+        return Bundle().apply {
+            putStringArrayList("successfulIds", successfulIds)
+            putBundle("failedIds", failedIds)
         }
     }
 

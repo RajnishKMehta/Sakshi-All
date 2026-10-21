@@ -34,6 +34,10 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button
+
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,7 +66,10 @@ fun MediaViewerScreen(
     val context = LocalContext.current
     val resources = LocalResources.current
 
+
     var showInfoSheet by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(fileId) {
         viewModel.loadMedia(fileId)
@@ -104,7 +111,12 @@ fun MediaViewerScreen(
                             )
                         }
                     }
+
+                    IconButton(onClick = { showDeleteConfirm = true }) {
+                        Icon(painterResource(R.drawable.trash_clock), contentDescription = "Schedule Deletion")
+                    }
                     IconButton(onClick = { showInfoSheet = true }) {
+
                         Icon(painterResource(R.drawable.ic_info), contentDescription = "Info")
                     }
                 }
@@ -116,8 +128,39 @@ fun MediaViewerScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+
+
+            if (showDeleteConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteConfirm = false },
+                    title = { Text("Schedule Deletion") },
+                    text = { Text("This file will be scheduled for permanent deletion after 30 days. It will be hidden immediately from your gallery.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDeleteConfirm = false
+                                viewModel.scheduleDeletion(
+                                    fileId,
+                                    onDeleted = { onBackClick() },
+                                    onError = { msg -> Toast.makeText(context, "Deletion failed: $msg", Toast.LENGTH_LONG).show() }
+                                )
+                            }
+                        ) {
+                            Text("Schedule Deletion", color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteConfirm = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
             when (val state = uiState) {
                 is MediaViewerUiState.Loading -> {
+
+
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         LoadingIndicator()
                     }
