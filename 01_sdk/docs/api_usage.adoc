@@ -1,6 +1,6 @@
 = Sakshi SDK Client API Usage Guide
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-RC.0, 2026-09-28
+v1.0.0-RC.2, 2026-10-21
 :description: Guide for developers building client applications using the Sakshi SDK.
 :keywords: sakshi, sdk, client, api, android, camera, audio, integration
 :toc: left
