@@ -42,6 +42,11 @@ Sakshi Camera uses modern Jetpack CameraX and Media3 APIs for video recording:
 1. **Standard MP4 Recording**: Utilizes the default official CameraX `Recorder` implementation (via platform muxer) without redundant abstractions.
 2. **Fragmented MP4 (fMP4) Recording**: Implements a custom, crash-safe recording pipeline using Media3's `FragmentedMp4Muxer` injected via CameraX's `MuxerFactory` interface, preserving data integrity upon unexpected terminations.
 
+fMP4 is the default. The container format (More Settings → Video Container Format) also decides how a video reaches Sakshi Vault:
+
+- **fMP4**: copied to Vault while recording, using the SDK's incremental audio/video synchronization API.
+- **Normal MP4**: not crash-safe, so it is not copied while recording. After recording finishes, the file is submitted once with the SDK's `copyFile` (`FileCopyRequest`) API. Switching to normal MP4 asks the user to confirm this first.
+
 ## Ecosystem Architecture
 
 Sakshi Camera is one part of the Sakshi ecosystem:
