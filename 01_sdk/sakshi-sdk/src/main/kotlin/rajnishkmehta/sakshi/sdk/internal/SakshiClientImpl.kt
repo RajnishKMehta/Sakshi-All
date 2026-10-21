@@ -479,7 +479,7 @@ internal class SakshiClientImpl(
                 }
             }
 
-            if (bundle.containsKey("error") && successfulIds.isEmpty() && failedIds.isEmpty()) {
+            if (successfulIds.isEmpty() && failedIds.isEmpty()) {
                  SakshiResult.Failure(SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to batch delete media", cause = null))
             } else {
                 SakshiResult.Success(BatchMediaDeleteResponse(successfulIds, failedIds))
