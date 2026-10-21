@@ -37,8 +37,8 @@ interface StorageManager {
 
     /**
      * Appends newly written media bytes to the private destination file starting at the specified [offset].
-     * This method seeks (or skips) in the [inputStream] to the [offset], copies any new bytes to the end of the destination,
-     * and synchronizes the file header to capture metadata updates (e.g., MP4 moov/mdat size updates).
+     * This method seeks (or skips) in the [inputStream] to the [offset] and copies any new bytes to the end of the destination.
+     * Bytes before [offset] that were already copied are not rewritten.
      *
      * @param fileId Unique identifier of the media.
      * @param inputStream Source stream containing the media bytes.
