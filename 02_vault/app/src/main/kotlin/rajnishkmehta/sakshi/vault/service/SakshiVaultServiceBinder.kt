@@ -235,4 +235,13 @@ class SakshiVaultServiceBinder(
         Log.d(tag, "Received getThumbnail query")
         return "content://${applicationContext.packageName}.thumbnailprovider/media/{mediaType}/thumbnail/{fileId}.webp"
     }
+
+
+    override fun deleteMedia(fileId: String): Bundle {
+        return Bundle()
+    }
+
+    override fun deleteMediaBatch(fileIds: List<String>): Bundle {
+        return Bundle()
+    }
 }
