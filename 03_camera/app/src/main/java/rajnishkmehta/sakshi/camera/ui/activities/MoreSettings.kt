@@ -30,7 +30,6 @@ import rajnishkmehta.sakshi.camera.util.storageLocationToUiString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import android.content.pm.PackageManager
-import rajnishkmehta.sakshi.camera.debug.DebugLogsActivity
 import rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog
 
 /**
@@ -259,7 +258,7 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
         if (debugLogsSetting != null) {
             debugLogsSetting.setOnClickListener {
                 try {
-                    val intent = Intent(this, Class.forName("DebugLogsActivity"))
+                    val intent = Intent(this, Class.forName("rajnishkmehta.sakshi.camera.debug.DebugLogsActivity"))
                     startActivity(intent)
                 } catch (e: Exception) {
                     e.printStackTrace()
