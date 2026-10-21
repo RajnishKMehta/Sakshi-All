@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
+import rajnishkmehta.sakshi.sdk.api.models.BatchMediaDeleteResponse
 import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
@@ -103,6 +104,22 @@ public interface SakshiClient {
      */
 
     public suspend fun getThumbnail(): SakshiResult<String>
+
+    /**
+     * Deletes a specific media file from Vault.
+     *
+     * @param fileId The unique identifier of the media.
+     * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     */
+    public suspend fun deleteMedia(fileId: String): SakshiResult<Unit>
+
+    /**
+     * Deletes multiple media files from Vault in a single batch.
+     *
+     * @param fileIds The list of unique identifiers of the media files to delete.
+     * @return [SakshiResult] containing [BatchMediaDeleteResponse] on success or [SakshiError] on failure.
+     */
+    public suspend fun deleteMedia(fileIds: List<String>): SakshiResult<BatchMediaDeleteResponse>
 
     /**
      * Explicitly disconnects from Vault IPC service and releases internal resources.

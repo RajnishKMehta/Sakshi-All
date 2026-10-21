@@ -13,6 +13,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
+import rajnishkmehta.sakshi.sdk.api.models.BatchMediaDeleteResponse
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
@@ -415,6 +416,79 @@ internal class SakshiClientImpl(
         } catch (e: Throwable) {
             SakshiResult.Failure(
                 SakshiError.IpcError(message = e.message ?: "Failed to get thumbnail template", cause = e)
+            )
+        }
+    }
+
+    override suspend fun deleteMedia(fileId: String): SakshiResult<Unit> {
+        val serviceResult = serviceConnection.getService()
+        if (serviceResult.isFailure) {
+            return SakshiResult.Failure(serviceResult.errorOrNull()!!)
+        }
+
+        val service = serviceResult.getOrNull()!!
+
+        return try {
+            val bundle = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                service.deleteMedia(fileId)
+            }
+
+            if (bundle.getBoolean("success", false)) {
+                SakshiResult.Success(Unit)
+            } else {
+                SakshiResult.Failure(
+                    SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to delete media", cause = null)
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            SakshiResult.Failure(
+                SakshiError.IpcError(message = e.message ?: "Failed to delete media", cause = e)
+            )
+        }
+    }
+
+    override suspend fun deleteMedia(fileIds: List<String>): SakshiResult<BatchMediaDeleteResponse> {
+        if (fileIds.isEmpty()) {
+            return SakshiResult.Success(BatchMediaDeleteResponse(emptyList(), emptyMap()))
+        }
+
+        val serviceResult = serviceConnection.getService()
+        if (serviceResult.isFailure) {
+            return SakshiResult.Failure(serviceResult.errorOrNull()!!)
+        }
+
+        val service = serviceResult.getOrNull()!!
+
+        return try {
+            val bundle = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                service.deleteMediaBatch(fileIds)
+            }
+
+            val successfulIds = bundle.getStringArrayList("successfulIds")?.toList() ?: emptyList()
+            val failedIdsBundle = bundle.getBundle("failedIds")
+            val failedIds = mutableMapOf<String, String>()
+
+            if (failedIdsBundle != null) {
+                for (key in failedIdsBundle.keySet()) {
+                    val error = failedIdsBundle.getString(key)
+                    if (error != null) {
+                        failedIds[key] = error
+                    }
+                }
+            }
+
+            if (successfulIds.isEmpty() && failedIds.isEmpty()) {
+                 SakshiResult.Failure(SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to batch delete media", cause = null))
+            } else {
+                SakshiResult.Success(BatchMediaDeleteResponse(successfulIds, failedIds))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            SakshiResult.Failure(
+                SakshiError.IpcError(message = e.message ?: "Failed to batch delete media", cause = e)
             )
         }
     }

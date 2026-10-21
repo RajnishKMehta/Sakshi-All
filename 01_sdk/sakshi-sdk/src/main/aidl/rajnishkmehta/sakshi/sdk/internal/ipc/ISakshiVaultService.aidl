@@ -93,4 +93,19 @@ interface ISakshiVaultService {
      */
     Bundle getMedia(in String fileId);
 
+    /**
+     * Deletes a specific media file from the Vault.
+     *
+     * @param fileId Unique identifier of the media file to delete.
+     * @return Bundle containing success status or error details.
+     */
+    Bundle deleteMedia(in String fileId);
+
+    /**
+     * Deletes multiple media files from the Vault in a single batch.
+     *
+     * @param fileIds List of unique identifiers of the media files to delete.
+     * @return Bundle containing the lists of successful and failed deletions.
+     */
+    Bundle deleteMediaBatch(in List<String> fileIds);
 }
