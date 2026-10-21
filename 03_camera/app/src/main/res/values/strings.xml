@@ -116,6 +116,7 @@
     <string name="video_container_format_desc">Format for saving video recordings</string>
     <string name="fmp4_crash_safe">fMP4 (Crash-Safe, Recommended)</string>
     <string name="mp4_standard">MP4 (Standard Compatibility)</string>
+    <string name="mp4_warning">MP4 format is not crash-safe. During recording, the video will not be synchronized to the Vault. It will only be copied after the recording is successfully finished. Continue?</string>
     <string name="degree_format">%d°</string>
     <string name="percent_symbol">%</string>
 

@@ -219,8 +219,16 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
                 camConfig.videoFormat = CamConfig.SettingValues.Default.FORMAT_FMP4
                 vFValue.text = getString(R.string.fragmented_mp4)
             } else {
-                camConfig.videoFormat = CamConfig.SettingValues.Default.FORMAT_MPEG4
-                vFValue.text = getString(R.string.mp4)
+                MaterialAlertDialogBuilder(this)
+                    .setMessage(R.string.mp4_warning)
+                    .setNegativeButton(R.string.confirm) { _, _ ->
+                        camConfig.videoFormat = CamConfig.SettingValues.Default.FORMAT_MPEG4
+                        vFValue.text = getString(R.string.mp4)
+                    }
+                    .setPositiveButton(R.string.cancel) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             }
         }
 

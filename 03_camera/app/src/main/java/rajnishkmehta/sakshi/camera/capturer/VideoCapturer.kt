@@ -51,6 +51,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
+import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 
 /**
  * Handles the logic for capturing videos, including setting up the [Recorder],
@@ -273,19 +274,22 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
                         fileId = "vid_${uniqueHash}"
                         currentFileId = fileId
-                        val avSyncRequest = AVSyncRequest(
-                            fileId = fileId!!,
-                            uri = recordingCtx.uri,
-                            mediaType = "VIDEO",
-                            fileExtension = videoFileFormat.removePrefix(".")
-                        )
-                        ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        if (ctx is MainActivity) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                Log.d("VideoCapturer", "Calling SakshiClient.startAVSync with fileId: $fileId")
-                                ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
-                                    if (result is SakshiResult.Failure) {
-                                        Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+
+                        if (camConfig.videoFormat == CamConfig.SettingValues.Default.FORMAT_FMP4) {
+                            val avSyncRequest = AVSyncRequest(
+                                fileId = fileId!!,
+                                uri = recordingCtx.uri,
+                                mediaType = "VIDEO",
+                                fileExtension = videoFileFormat.removePrefix(".")
+                            )
+                            ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            if (ctx is MainActivity) {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    Log.d("VideoCapturer", "Calling SakshiClient.startAVSync with fileId: $fileId")
+                                    ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
+                                        if (result is SakshiResult.Failure) {
+                                            Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                        }
                                     }
                                 }
                             }
@@ -360,7 +364,25 @@ class VideoCapturer(private val mActivity: MainActivity) {
                          */
                         if (!isNoValidData && videoSyncStarted && fileId != null) {
                             if (ctx is MainActivity) {
-                                ctx.handleCopyDone(fileId!!)
+                                if (camConfig.videoFormat == CamConfig.SettingValues.Default.FORMAT_FMP4) {
+                                    ctx.handleCopyDone(fileId!!)
+                                } else {
+                                    val fileCopyRequest = FileCopyRequest(
+                                        fileId = fileId!!,
+                                        uri = recordingCtx.uri,
+                                        mediaType = "VIDEO",
+                                        fileExtension = videoFileFormat.removePrefix(".")
+                                    )
+                                    ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val result = ctx.sakshiClient.copyFile(fileCopyRequest)
+                                        if (result is SakshiResult.Success) {
+                                            ctx.revokeVaultUriPermission(fileId!!, recordingCtx.uri)
+                                        } else if (result is SakshiResult.Failure) {
+                                            Log.e("SakshiSDK", "Video copy failed: " + result.error.message)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

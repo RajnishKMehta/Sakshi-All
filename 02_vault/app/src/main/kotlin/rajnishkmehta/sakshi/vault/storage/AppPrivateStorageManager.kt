@@ -47,12 +47,9 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
     }
 
     /**
-     * Synchronizes the leading media metadata and appends bytes after [offset].
+     * Appends bytes after [offset].
      *
-     * For an existing file, up to 128 KiB is rewritten from the start of [inputStream] so
-     * mutable headers, such as MP4 metadata, stay current during incremental copies.
-     *
-     * @return the number of bytes appended after [offset], excluding synchronized header bytes.
+     * @return the number of bytes appended after [offset].
      */
     override fun appendMediaBytes(fileId: String, inputStream: InputStream, offset: Long, mediaType: String, fileExtension: String): Long {
         PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
@@ -71,29 +68,10 @@ class AppPrivateStorageManager(private val context: Context) : StorageManager {
             }
         }
 
-        // The first few KB (typically up to 128KB) contain critical video headers (like moov or mdat size updates for mp4).
-        // If the file exists and we are appending, we need to read this header from the input stream and overwrite the existing file's header.
-        var skipOffset = offset
-        if (offset > 0 && destinationFile.exists()) {
-            val headerSize = minOf(offset, 128 * 1024L) // Synchronize up to 128KB of header
-            val headerBuffer = ByteArray(headerSize.toInt())
-            var headerBytesRead = 0
-            while (headerBytesRead < headerSize) {
-                val read = inputStream.read(headerBuffer, headerBytesRead, (headerSize - headerBytesRead).toInt())
-                if (read == -1) break
-                headerBytesRead += read
-            }
-            if (headerBytesRead > 0) {
-                RandomAccessFile(destinationFile, "rw").use { raf ->
-                    raf.seek(0)
-                    raf.write(headerBuffer, 0, headerBytesRead)
-                }
-            }
-            skipOffset = offset - headerBytesRead
-        }
+
 
         // Seek (skip) to the requested offset in the source input stream
-        inputStream.skipFully(skipOffset)
+        inputStream.skipFully(offset)
 
         var bytesCopied = 0L
         FileOutputStream(destinationFile, true).use { output ->
