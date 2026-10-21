@@ -12,10 +12,9 @@
     android:paddingBottom="8dp">
 
     <TextView
-        android:id="@+id/mp4_warning_message"
+        android:id="@+id/dialog_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/mp4_warning_message"
         android:textAppearance="?attr/textAppearanceBodyMedium" />
 
     <LinearLayout
@@ -25,20 +24,18 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/mp4_warning_confirm"
+            android:id="@+id/dialog_button_left"
             style="@style/Widget.Material3.Button.TextButton.Dialog"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/confirm" />
+            android:layout_weight="1" />
 
         <Button
-            android:id="@+id/mp4_warning_cancel"
+            android:id="@+id/dialog_button_right"
             style="@style/Widget.Material3.Button.TextButton.Dialog"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cancel" />
+            android:layout_weight="1" />
 
     </LinearLayout>
 

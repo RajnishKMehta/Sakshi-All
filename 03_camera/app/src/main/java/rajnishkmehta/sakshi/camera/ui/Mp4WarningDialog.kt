@@ -8,6 +8,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -21,14 +22,29 @@ import rajnishkmehta.sakshi.camera.R
  * the dialog so the current setting stays unchanged.
  */
 class Mp4WarningDialog : DialogFragment() {
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_mp4_warning, null)
 
-        view.findViewById<Button>(R.id.mp4_warning_confirm).setOnClickListener {
+    /**
+     * Creates and returns the dialog for this fragment, utilizing a generic alert layout.
+     *
+     * @param savedInstanceState The last saved instance state of the Fragment,
+     * or null if this is a freshly created Fragment.
+     * @return A new Dialog instance to be displayed by the Fragment.
+     */
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_custom_alert, null)
+
+        view.findViewById<TextView>(R.id.dialog_message).setText(R.string.mp4_warning_message)
+
+        val btnLeft = view.findViewById<Button>(R.id.dialog_button_left)
+        btnLeft.setText(R.string.confirm)
+        btnLeft.setOnClickListener {
             setFragmentResult(REQUEST_KEY, Bundle.EMPTY)
             dismiss()
         }
-        view.findViewById<Button>(R.id.mp4_warning_cancel).setOnClickListener {
+
+        val btnRight = view.findViewById<Button>(R.id.dialog_button_right)
+        btnRight.setText(R.string.cancel)
+        btnRight.setOnClickListener {
             dismiss()
         }
 
@@ -38,7 +54,11 @@ class Mp4WarningDialog : DialogFragment() {
             .create()
     }
 
+    /**
+     * Companion object holding constant values related to [Mp4WarningDialog].
+     */
     companion object {
+        /** The tag used to identify this DialogFragment in the FragmentManager. */
         const val TAG = "Mp4WarningDialog"
 
         /** Fragment Result request key posted when the user confirms switching to normal MP4. */

@@ -52,8 +52,8 @@ class VideoFormatSelectionTest {
             assertEquals(FORMAT_FMP4, camConfig.videoFormat)
 
             instrumentation.runOnMainSync {
-                val confirm = dialog!!.requireDialog().findViewById<View>(R.id.mp4_warning_confirm)
-                val cancel = dialog.requireDialog().findViewById<View>(R.id.mp4_warning_cancel)
+                val confirm = dialog!!.requireDialog().findViewById<View>(R.id.dialog_button_left)
+                val cancel = dialog.requireDialog().findViewById<View>(R.id.dialog_button_right)
                 assertTrue("Confirm must be left of Cancel", screenX(confirm) < screenX(cancel))
                 cancel.performClick()
             }
@@ -70,7 +70,7 @@ class VideoFormatSelectionTest {
             assertNotNull("The MP4 warning was not shown", dialog)
 
             instrumentation.runOnMainSync {
-                dialog!!.requireDialog().findViewById<View>(R.id.mp4_warning_confirm).performClick()
+                dialog!!.requireDialog().findViewById<View>(R.id.dialog_button_left).performClick()
             }
             instrumentation.waitForIdleSync()
 
