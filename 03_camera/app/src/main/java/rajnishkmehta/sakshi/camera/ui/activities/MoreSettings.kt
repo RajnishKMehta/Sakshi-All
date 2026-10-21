@@ -30,7 +30,6 @@ import rajnishkmehta.sakshi.camera.util.storageLocationToUiString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import android.content.pm.PackageManager
-
 import rajnishkmehta.sakshi.camera.vault.VaultSelectionDialog
 
 /**
