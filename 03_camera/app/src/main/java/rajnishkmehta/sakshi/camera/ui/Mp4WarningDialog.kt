@@ -22,6 +22,14 @@ import rajnishkmehta.sakshi.camera.R
  * the dialog so the current setting stays unchanged.
  */
 class Mp4WarningDialog : DialogFragment() {
+
+    /**
+     * Creates and returns the dialog for this fragment, utilizing a generic alert layout.
+     *
+     * @param savedInstanceState The last saved instance state of the Fragment,
+     * or null if this is a freshly created Fragment.
+     * @return A new Dialog instance to be displayed by the Fragment.
+     */
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_custom_alert, null)
 
@@ -46,7 +54,11 @@ class Mp4WarningDialog : DialogFragment() {
             .create()
     }
 
+    /**
+     * Companion object holding constant values related to [Mp4WarningDialog].
+     */
     companion object {
+        /** The tag used to identify this DialogFragment in the FragmentManager. */
         const val TAG = "Mp4WarningDialog"
 
         /** Fragment Result request key posted when the user confirms switching to normal MP4. */
