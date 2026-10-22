@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.2")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.3")
 }
 ```
 
@@ -78,7 +78,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.2")
+    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.3")
 }
 ```
 
