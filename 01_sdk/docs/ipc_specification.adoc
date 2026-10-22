@@ -1,6 +1,6 @@
 = Sakshi SDK AIDL IPC Specification
 Rajnish Kumar <RajnishKMehta@proton.me>
-v1.0.0-RC.2, 2026-10-21
+v1.0.0-RC.3, 2026-10-23
 :description: AIDL interface contracts and IPC specification for the Sakshi SDK.
 :keywords: sakshi, sdk, aidl, ipc, binder, bundle, serialization
 :toc: left
