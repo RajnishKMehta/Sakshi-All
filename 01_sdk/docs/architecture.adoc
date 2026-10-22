@@ -57,7 +57,7 @@ Client applications initiate requests to transfer media or start incremental syn
 * Initiates ping health checks.
 * Submits photo requests (`FileCopyRequest`).
 * Signals start of audio/video recordings (`SakshiClient.startAVSync` accepts `AVSyncRequest`), pause (`SakshiClient.pauseAVSync`), resume (`SakshiClient.resumeAVSync`), and stop (`SakshiClient.stopAVSync` accepts `fileId`).
-* Queries media existence via `SakshiClient.isAVSynced` or `SakshiClient.listMedia`.
+* Queries media existence via `SakshiClient.isAVSynced`, `SakshiClient.listMedia`, or `SakshiClient.listDeletedMedia`.
 * Disconnects to release resources (`SakshiClient.disconnect`).
 * Observes status updates and copy completion acknowledgements (`CopyDoneAck`).
 

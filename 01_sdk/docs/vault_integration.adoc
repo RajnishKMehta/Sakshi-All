@@ -152,6 +152,13 @@ class SakshiVaultServiceBinder(
         }
     }
 
+    override fun listDeletedMedia(): Bundle {
+        val mediaJson = getDeletedMediaListAsJson()
+        return Bundle().apply {
+            putString("media_list_json", mediaJson)
+        }
+    }
+
 }
 
 class SakshiVaultRemoteService : Service() {

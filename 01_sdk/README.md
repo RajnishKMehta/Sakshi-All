@@ -160,6 +160,7 @@ coroutineScope.launch {
 // 6. List Media
 coroutineScope.launch {
     val result = client.listMedia()
+    // To get only files scheduled for deletion, use client.listDeletedMedia()
     if (result is SakshiResult.Success) {
         println("Media JSON: ${result.data}")
     }
