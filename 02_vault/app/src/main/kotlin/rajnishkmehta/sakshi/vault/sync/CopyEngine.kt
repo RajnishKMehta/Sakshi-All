@@ -8,6 +8,7 @@ import android.content.Context
 import android.net.Uri
 import kotlinx.coroutines.delay
 import rajnishkmehta.sakshi.vault.db.MediaRecord
+import rajnishkmehta.sakshi.vault.db.MediaState
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.storage.StorageManager
 import java.io.IOException
@@ -36,6 +37,9 @@ class CopyEngine(
      * @return The local vault destination path.
      */
     suspend fun copyFile(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
+        check(mediaRecordDao.getRecord(fileId)?.state != MediaState.DELETE) {
+            "File $fileId is scheduled for deletion and cannot be overwritten"
+        }
         val uri = Uri.parse(sourceUriStr)
         val inputStream = context.contentResolver.openInputStream(uri) ?: throw IOException("ContentResolver returned null InputStream for $uri")
 
@@ -52,7 +56,7 @@ class CopyEngine(
             vaultPath = vaultPath,
             mediaType = mediaType,
             fileExtension = fileExtension,
-            completionState = "COMPLETED",
+            state = MediaState.COMPLETED,
             lastCopiedOffset = File(vaultPath).length(),
             createdTime = existing?.createdTime ?: now,
             updatedTime = now
@@ -76,6 +80,9 @@ class CopyEngine(
         val now = System.currentTimeMillis()
 
         val existing = mediaRecordDao.getRecord(fileId)
+        if (existing?.state == MediaState.DELETE) {
+            return 0L
+        }
         val lastOffset = existing?.lastCopiedOffset ?: 0L
         val created = existing?.createdTime ?: now
 
@@ -95,7 +102,7 @@ class CopyEngine(
             vaultPath = vaultPath,
             mediaType = mediaType,
             fileExtension = fileExtension,
-            completionState = existing?.completionState ?: "SYNCING",
+            state = existing?.state ?: MediaState.SYNCING,
             lastCopiedOffset = newOffset,
             createdTime = created,
             updatedTime = now

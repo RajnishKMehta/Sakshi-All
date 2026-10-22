@@ -17,7 +17,11 @@ import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import rajnishkmehta.sakshi.vault.BuildConfig
+import rajnishkmehta.sakshi.vault.db.MediaState
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
+import rajnishkmehta.sakshi.vault.deletion.DeletionScheduleResult
+import rajnishkmehta.sakshi.vault.deletion.MediaDeletionScheduler
+import rajnishkmehta.sakshi.vault.deletion.PingCleanupTrigger
 import rajnishkmehta.sakshi.vault.sync.CopyEngine
 import rajnishkmehta.sakshi.vault.sync.SyncScheduler
 import rajnishkmehta.sakshi.vault.thumbnail.ThumbnailManager
@@ -34,16 +38,24 @@ class SakshiVaultServiceBinder(
     private val database: VaultDatabase?,
     private val copyEngine: CopyEngine?,
     private val scheduler: SyncScheduler?,
-    private val serviceScope: CoroutineScope?
+    private val serviceScope: CoroutineScope?,
+    private val deletionScheduler: MediaDeletionScheduler? = null,
+    private val pingCleanupTrigger: PingCleanupTrigger? = null
 ) : ISakshiVaultService.Stub() {
 
     private val tag = "SakshiVaultServiceBinder"
 
     /**
      * Fast-response health check for the vault service.
+     * Also starts a non-blocking fallback cleanup of media whose deletion retention period elapsed.
      */
     override fun ping(requestBundle: Bundle): Bundle {
         Log.d(tag, "Received ping request")
+        try {
+            pingCleanupTrigger?.onPing()
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to start ping-triggered cleanup", e)
+        }
         return Bundle().apply {
             putBoolean("is_available", true)
             putString("vault_version", BuildConfig.VERSION_NAME)
@@ -180,7 +192,7 @@ class SakshiVaultServiceBinder(
             db.mediaRecordDao().getAllRecords()
         }
 
-        val validRecords = records.filter { it.completionState == "COMPLETED" || it.completionState == "FAILED" }
+        val validRecords = filterListableRecords(records)
 
         val groups = validRecords.groupBy { it.mediaType.lowercase() }
         val result = groups.mapValues { (_, list) ->
@@ -204,9 +216,9 @@ class SakshiVaultServiceBinder(
 
         return Bundle().apply {
             putBoolean("exists", record != null)
-            putString("sync_state", record?.completionState ?: "IDLE_WAITING")
+            putString("sync_state", record?.state ?: "IDLE_WAITING")
             putLong("offset_bytes", record?.lastCopiedOffset ?: 0L)
-            putBoolean("is_completed", record?.completionState == "COMPLETED")
+            putBoolean("is_completed", record?.state == MediaState.COMPLETED)
         }
     }
 
@@ -218,7 +230,7 @@ class SakshiVaultServiceBinder(
         }
 
         return Bundle().apply {
-            if (record != null) {
+            if (record != null && record.state != MediaState.DELETE) {
                 val mediaTypeLower = record.mediaType.lowercase()
                 putString("contentUri", "content://${applicationContext.packageName}.mediaprovider/media/$mediaTypeLower/$fileId")
                 putString("fileId", record.fileId)
@@ -229,6 +241,55 @@ class SakshiVaultServiceBinder(
                 putString("error", "Media file not found for id: $fileId")
             }
         }
+    }
+
+    /**
+     * Schedules a single media file for permanent deletion after the retention period.
+     * The file is not deleted immediately; it is hidden from listings once scheduling succeeds.
+     */
+    override fun deleteMedia(fileId: String?): Bundle {
+        Log.d(tag, "Received deleteMedia request: fileId=$fileId")
+        return try {
+            val deletion = deletionScheduler ?: throw IllegalStateException("Deletion scheduler is not initialized")
+            when (val result = runBlocking { deletion.schedule(fileId.orEmpty()) }) {
+                is DeletionScheduleResult.Scheduled -> Bundle().apply {
+                    putBoolean("success", true)
+                    putLong("deletionScheduledAt", result.scheduledAt)
+                }
+                is DeletionScheduleResult.Rejected -> errorBundle(result.reason)
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to schedule deletion for $fileId", e)
+            errorBundle("Failed to schedule deletion: ${e.message}")
+        }
+    }
+
+    /**
+     * Schedules multiple media files for permanent deletion after the retention period and reports
+     * per-file results in `successfulIds` and `failedIds`.
+     */
+    override fun deleteMediaBatch(fileIds: MutableList<String>?): Bundle {
+        Log.d(tag, "Received deleteMediaBatch request for ${fileIds?.size ?: 0} files")
+        return try {
+            val deletion = deletionScheduler ?: throw IllegalStateException("Deletion scheduler is not initialized")
+            val ids = fileIds?.toList().orEmpty()
+            if (ids.isEmpty()) return errorBundle("fileIds must not be empty")
+            val result = runBlocking { deletion.scheduleBatch(ids) }
+            Bundle().apply {
+                putStringArrayList("successfulIds", ArrayList(result.successfulIds))
+                putBundle("failedIds", Bundle().apply {
+                    result.failedIds.forEach { (id, reason) -> putString(id, reason) }
+                })
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to schedule batch deletion", e)
+            errorBundle("Failed to schedule batch deletion: ${e.message}")
+        }
+    }
+
+    private fun errorBundle(message: String): Bundle = Bundle().apply {
+        putBoolean("success", false)
+        putString("error", message)
     }
 
     override fun getThumbnail(): String {

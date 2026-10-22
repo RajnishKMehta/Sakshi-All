@@ -102,6 +102,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.guava)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime)
+
     // Media3
     implementation(libs.androidx.media3.inspector.frame)
 

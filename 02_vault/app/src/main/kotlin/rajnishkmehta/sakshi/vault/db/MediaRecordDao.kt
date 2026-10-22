@@ -28,6 +28,47 @@ interface MediaRecordDao {
     @Query("SELECT * FROM media_records ORDER BY createdTime DESC")
     suspend fun getAllRecords(): List<MediaRecord>
 
+    /** Returns all records currently in [state]. */
+    @Query("SELECT * FROM media_records WHERE state = :state")
+    suspend fun getRecordsInState(state: String): List<MediaRecord>
+
     @Query("DELETE FROM media_records WHERE fileId = :fileId")
     suspend fun deleteRecord(fileId: String)
+
+    /**
+     * Atomically moves a record to [MediaState.DELETE] if its current state is one of [allowedStates].
+     *
+     * The state check and the update run in a single SQL statement, so a concurrent state change
+     * (for example a synchronization restarting) cannot be overwritten.
+     *
+     * @return the number of updated rows: 1 if the record was scheduled, 0 otherwise.
+     */
+    @Query(
+        "UPDATE media_records SET state = '" + MediaState.DELETE + "', " +
+            "deletionScheduledAt = :scheduledAt, " +
+            "deletionScheduledElapsedRealtime = :scheduledElapsedRealtime, " +
+            "deletionScheduledBootCount = :scheduledBootCount, " +
+            "updatedTime = :scheduledAt " +
+            "WHERE fileId = :fileId AND state IN (:allowedStates)"
+    )
+    suspend fun markScheduledForDeletion(
+        fileId: String,
+        scheduledAt: Long,
+        scheduledElapsedRealtime: Long,
+        scheduledBootCount: Int?,
+        allowedStates: List<String>
+    ): Int
+
+    /**
+     * Deletes a record only if it is still scheduled for deletion with the given [scheduledAt] timestamp.
+     *
+     * This guards against removing a record that was re-created or changed after the cleanup started.
+     *
+     * @return the number of deleted rows.
+     */
+    @Query(
+        "DELETE FROM media_records WHERE fileId = :fileId AND state = '" + MediaState.DELETE + "' " +
+            "AND deletionScheduledAt = :scheduledAt"
+    )
+    suspend fun deleteScheduledRecord(fileId: String, scheduledAt: Long): Int
 }

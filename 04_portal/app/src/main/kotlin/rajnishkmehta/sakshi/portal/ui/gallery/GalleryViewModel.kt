@@ -22,6 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
+import rajnishkmehta.sakshi.portal.data.deletion.RemovedMediaStore
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
@@ -42,13 +46,21 @@ data class ParsedMediaItem(
     val timestamp: Long
 )
 
+/**
+ * ViewModel for the gallery: lists media from Vault and hides media that Vault confirmed as
+ * scheduled for deletion.
+ *
+ * @param removedMediaStore Source of media IDs to hide immediately.
+ */
 class GalleryViewModel(
     application: Application,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    removedMediaStore: RemovedMediaStore
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.Loading)
-    val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<GalleryUiState> = combine(_uiState, removedMediaStore.removedIds, ::excludeRemovedMedia)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, GalleryUiState.Loading)
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -190,12 +202,13 @@ class GalleryViewModel(
 
 class GalleryViewModelFactory(
     private val application: Application,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val removedMediaStore: RemovedMediaStore
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GalleryViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return GalleryViewModel(application, settingsRepository) as T
+            return GalleryViewModel(application, settingsRepository, removedMediaStore) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

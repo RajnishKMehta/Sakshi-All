@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
+import rajnishkmehta.sakshi.portal.data.deletion.RemovedMediaStore
 import rajnishkmehta.sakshi.portal.ui.gallery.GalleryScreen
 import rajnishkmehta.sakshi.portal.ui.settings.SettingsScreen
 import rajnishkmehta.sakshi.portal.ui.vault.VaultSelectionScreen
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val settingsRepository = SettingsRepository(applicationContext)
+        val removedMediaStore = RemovedMediaStore()
 
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
@@ -47,6 +49,7 @@ class MainActivity : ComponentActivity() {
                         entry<GalleryScreenRoute> {
                             GalleryScreen(
                                 settingsRepository = settingsRepository,
+                                removedMediaStore = removedMediaStore,
                                 onSettingsClick = { backStack.add(SettingsScreenRoute) },
                                 onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
                                 onMediaClick = { fileId, mediaType -> backStack.add(MediaViewerRoute(fileId, mediaType)) }
@@ -57,6 +60,7 @@ class MainActivity : ComponentActivity() {
                                 fileId = route.fileId,
                                 mediaType = route.mediaType,
                                 settingsRepository = settingsRepository,
+                                removedMediaStore = removedMediaStore,
                                 onBackClick = { backStack.removeLastOrNull() }
                             )
                         }

@@ -63,6 +63,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
+import rajnishkmehta.sakshi.portal.data.deletion.RemovedMediaStore
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import android.app.Application
 import android.widget.Toast
@@ -81,13 +82,14 @@ enum class SortOrder {
 fun GalleryScreen(
     modifier: Modifier = Modifier,
     settingsRepository: SettingsRepository,
+    removedMediaStore: RemovedMediaStore,
     onSettingsClick: () -> Unit = {},
     onVaultSelectionClick: () -> Unit = {},
     onMediaClick: (String, MediaType) -> Unit = { _, _ -> }
 ) {
     val application = LocalContext.current.applicationContext as Application
     val viewModel: GalleryViewModel = viewModel(
-        factory = GalleryViewModelFactory(application, settingsRepository)
+        factory = GalleryViewModelFactory(application, settingsRepository, removedMediaStore)
     )
 
     var selectedType by remember { mutableStateOf(MediaType.ALL) }

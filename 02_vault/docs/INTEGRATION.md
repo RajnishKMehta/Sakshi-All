@@ -68,3 +68,16 @@ If you want to understand the inner workings of how the **Vault** responds to th
    - **Photos**: Client sends a `FileCopyRequest` bundle; Vault copies the file and returns a `CopyDoneAck`.
    - **Videos**: Client sends a `VideoSyncRequest`; Vault performs continuous incremental copying and streams `VideoSyncStatus` updates until completion.
 4. **Resiliency**: The Vault Service acts as a background boundary. Even if the Client App is forcefully closed or the original file deleted, the copied data remains safely in the Vault's storage sandbox.
+
+## Scheduled Media Deletion
+
+`SakshiClient.deleteMedia(fileId)` and `SakshiClient.deleteMedia(fileIds)` **schedule** deletion; they never delete immediately.
+
+1. **Scheduling**: Vault validates each file ID and atomically moves the record from `COMPLETED`, `FAILED`, or `STOPPED` to the `DELETE` state, storing `deletionScheduledAt` (plus the monotonic clock and boot count captured at the same time). Unknown IDs and files still being synchronized (`INITIALIZING`, `SYNCING`, `PAUSED`, or an active sync job) are rejected. Repeating a request for an already scheduled file succeeds and keeps the original timestamp. Batch requests report per-file results in `successfulIds` and `failedIds`.
+2. **Visibility**: Records in the `DELETE` state are excluded from `listMedia` and `getMedia` immediately.
+3. **Permanent cleanup**: After at least 30 full days, Vault deletes its private media file and thumbnail, then removes the database record. If any file cannot be deleted, the record stays in `DELETE` and cleanup is retried; already-missing files are treated as deleted. Public exported copies and original camera files are never touched.
+4. **Triggers**: WorkManager is the primary mechanism (a unique one-time request per file plus a daily unique periodic sweep, battery-not-low constraint, exponential backoff). Every Vault `ping` and every Vault service start also run a non-blocking fallback sweep. All triggers share process-wide locks, so duplicate or simultaneous runs are safe.
+
+**Clock limitation**: While the device has not rebooted since scheduling, eligibility uses the monotonic `elapsedRealtime` clock, so wall-clock changes have no effect. After a reboot only the wall clock is available: moving it backwards delays deletion, and moving it forwards on an offline device can shorten the effective retention period. This cannot be fully prevented without a trusted time source.
+
+**Database schema**: The media record field `completionState` was renamed to `state`. Beta builds use a fresh schema without migrations; uninstall the previous beta before installing a new one.
