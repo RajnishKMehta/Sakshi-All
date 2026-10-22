@@ -1,5 +1,5 @@
 [versions]
-sakshi-sdk = "1.0.0-RC.2"
+sakshi-sdk = "1.0.0-RC.3"
 
 agp = "9.4.1"
 mockk = "1.14.11"
