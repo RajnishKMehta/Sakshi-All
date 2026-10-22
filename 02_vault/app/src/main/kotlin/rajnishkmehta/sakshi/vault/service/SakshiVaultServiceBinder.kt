@@ -180,7 +180,7 @@ class SakshiVaultServiceBinder(
             db.mediaRecordDao().getAllRecords()
         }
 
-        val validRecords = records.filter { it.completionState == "COMPLETED" || it.completionState == "FAILED" }
+        val validRecords = records.filter { it.state == "COMPLETED" || it.state == "FAILED" }
 
         val groups = validRecords.groupBy { it.mediaType.lowercase() }
         val result = groups.mapValues { (_, list) ->
@@ -204,9 +204,9 @@ class SakshiVaultServiceBinder(
 
         return Bundle().apply {
             putBoolean("exists", record != null)
-            putString("sync_state", record?.completionState ?: "IDLE_WAITING")
+            putString("sync_state", record?.state ?: "IDLE_WAITING")
             putLong("offset_bytes", record?.lastCopiedOffset ?: 0L)
-            putBoolean("is_completed", record?.completionState == "COMPLETED")
+            putBoolean("is_completed", record?.state == "COMPLETED")
         }
     }
 

@@ -94,14 +94,14 @@ class SyncScheduler(
             try {
                 getMutex(fileId).withLock {
                     val record = database.mediaRecordDao().getRecord(fileId)
-                    if (record != null && record.completionState != "COMPLETED") {
+                    if (record != null && record.state != "COMPLETED") {
                         Log.d(tag, "Performing final sync pass for $fileId")
                         copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType, record.fileExtension)
 
                         val updatedRecord = database.mediaRecordDao().getRecord(fileId)
                         if (updatedRecord != null) {
                             val finalRecord = updatedRecord.copy(
-                                completionState = "COMPLETED",
+                                state = "COMPLETED",
                                 updatedTime = System.currentTimeMillis()
                             )
                             database.mediaRecordDao().insertRecord(finalRecord)
@@ -165,7 +165,7 @@ class SyncScheduler(
     fun resumePendingSyncs() {
         coroutineScope.launch {
             val pendingRecords = database.mediaRecordDao().getAllRecords().filter {
-                it.mediaType != "PHOTO" && (it.completionState == "SYNCING" || it.completionState == "INITIALIZING")
+                it.mediaType != "PHOTO" && (it.state == "SYNCING" || it.state == "INITIALIZING")
             }
             Log.d(tag, "Resuming ${pendingRecords.size} pending syncs after restart")
             for (record in pendingRecords) {
@@ -196,7 +196,7 @@ class SyncScheduler(
         }
 
         val record = database.mediaRecordDao().getRecord(fileId)
-        if (record == null || record.completionState == "COMPLETED") {
+        if (record == null || record.state == "COMPLETED") {
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
                 VaultResponder.sendError(
@@ -209,7 +209,7 @@ class SyncScheduler(
 
         getMutex(fileId).withLock {
             val currentRecord = database.mediaRecordDao().getRecord(fileId)
-            if (currentRecord == null || currentRecord.completionState == "COMPLETED") {
+            if (currentRecord == null || currentRecord.state == "COMPLETED") {
                 val storedCallback = activeCallbacks[fileId]
                 if (storedCallback != null) {
                     VaultResponder.sendError(
@@ -250,7 +250,7 @@ class SyncScheduler(
         }
 
         val record = database.mediaRecordDao().getRecord(fileId)
-        if (record == null || record.completionState != "PAUSED") {
+        if (record == null || record.state != "PAUSED") {
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
                 VaultResponder.sendError(
@@ -263,7 +263,7 @@ class SyncScheduler(
 
         getMutex(fileId).withLock {
             val currentRecord = database.mediaRecordDao().getRecord(fileId)
-            if (currentRecord == null || currentRecord.completionState != "PAUSED") {
+            if (currentRecord == null || currentRecord.state != "PAUSED") {
                 val storedCallback = activeCallbacks[fileId]
                 if (storedCallback != null) {
                     VaultResponder.sendError(
@@ -318,7 +318,8 @@ class SyncScheduler(
                     vaultPath = null,
                     mediaType = mediaType,
                     fileExtension = fileExtension,
-                    completionState = "INITIALIZING",
+                    state = "INITIALIZING",
+                    deletionScheduledAt = null,
                     lastCopiedOffset = 0L,
                     createdTime = now,
                     updatedTime = now
@@ -328,7 +329,7 @@ class SyncScheduler(
 
         while (currentCoroutineContext().isActive) {
             val currentRecord = dao.getRecord(fileId)
-            if (currentRecord?.completionState == "PAUSED") {
+            if (currentRecord?.state == "PAUSED") {
                 delay(syncIntervalMs)
                 continue
             }
@@ -358,7 +359,7 @@ class SyncScheduler(
             try {
                 getMutex(fileId).withLock {
                     val checkRecord = dao.getRecord(fileId)
-                    val state = checkRecord?.completionState
+                    val state = checkRecord?.state
 
                     if (state == "COMPLETED") {
                         copiedBytes = 0L
@@ -398,7 +399,7 @@ class SyncScheduler(
 
             // 3. Heuristic: Check if recording has finished due to inactivity
             val currentRecordCheck = dao.getRecord(fileId)
-            if (currentRecordCheck?.completionState == "PAUSED") {
+            if (currentRecordCheck?.state == "PAUSED") {
                 consecutiveZeroBytePasses = 0
                 isProbingCompletion = false
                 additionalChecksRemaining = additionalChecksLimit
@@ -433,7 +434,7 @@ class SyncScheduler(
         val record = dao.getRecord(fileId)
         if (record != null) {
             val finalRecord = record.copy(
-                completionState = "COMPLETED",
+                state = "COMPLETED",
                 updatedTime = System.currentTimeMillis()
             )
             dao.insertRecord(finalRecord)
@@ -482,7 +483,8 @@ class SyncScheduler(
         if (record != null) {
             dao.insertRecord(
                 record.copy(
-                    completionState = state,
+                    state = state,
+                    deletionScheduledAt = existing?.deletionScheduledAt,
                     updatedTime = System.currentTimeMillis()
                 )
             )

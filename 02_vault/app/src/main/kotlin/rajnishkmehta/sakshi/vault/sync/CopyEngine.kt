@@ -52,7 +52,8 @@ class CopyEngine(
             vaultPath = vaultPath,
             mediaType = mediaType,
             fileExtension = fileExtension,
-            completionState = "COMPLETED",
+            state = "COMPLETED",
+            deletionScheduledAt = existing?.deletionScheduledAt,
             lastCopiedOffset = File(vaultPath).length(),
             createdTime = existing?.createdTime ?: now,
             updatedTime = now
@@ -95,7 +96,8 @@ class CopyEngine(
             vaultPath = vaultPath,
             mediaType = mediaType,
             fileExtension = fileExtension,
-            completionState = existing?.completionState ?: "SYNCING",
+            state = existing?.state ?: "SYNCING",
+            deletionScheduledAt = existing?.deletionScheduledAt,
             lastCopiedOffset = newOffset,
             createdTime = created,
             updatedTime = now

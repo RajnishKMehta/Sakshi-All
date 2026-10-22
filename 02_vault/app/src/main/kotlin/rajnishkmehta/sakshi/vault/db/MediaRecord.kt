@@ -19,7 +19,8 @@ data class MediaRecord(
     val vaultPath: String?,
     val mediaType: String, // "PHOTO", "VIDEO", "AUDIO", or "OTHER"
     val fileExtension: String,
-    val completionState: String, // "INITIALIZING", "SYNCING", "COMPLETED", "STOPPED", "FAILED"
+    val state: String, // "INITIALIZING", "SYNCING", "COMPLETED", "STOPPED", "FAILED", "DELETE"
+    val deletionScheduledAt: Long?,
     val lastCopiedOffset: Long,
     val createdTime: Long,
     val updatedTime: Long
