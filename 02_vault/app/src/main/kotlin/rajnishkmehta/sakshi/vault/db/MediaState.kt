@@ -32,7 +32,7 @@ object MediaState {
     /**
      * The media file is scheduled for permanent deletion.
      *
-     * Records in this state are hidden from `listMedia` but still returned by `getMedia`, and are removed together
+     * Records in this state are hidden from `listMedia`, and are removed together
      * with their files once the retention period since [MediaRecord.deletionScheduledAt] elapsed.
      */
     const val DELETE = "DELETE"
