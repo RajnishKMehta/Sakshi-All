@@ -99,7 +99,7 @@ class SyncScheduler(
             try {
                 getMutex(fileId).withLock {
                     val record = database.mediaRecordDao().getRecord(fileId)
-                    if (record != null && record.state != MediaState.COMPLETED && record.state != MediaState.DELETE) {
+                    if (record != null && record.state != MediaState.COMPLETED) {
                         Log.d(tag, "Performing final sync pass for $fileId")
                         copyEngine.copyMediaIncremental(fileId, record.originalUri, record.mediaType, record.fileExtension)
 
@@ -201,7 +201,7 @@ class SyncScheduler(
         }
 
         val record = database.mediaRecordDao().getRecord(fileId)
-        if (record == null || record.state == MediaState.COMPLETED || record.state == MediaState.DELETE) {
+        if (record == null || record.state == MediaState.COMPLETED) {
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
                 VaultResponder.sendError(
@@ -214,7 +214,7 @@ class SyncScheduler(
 
         getMutex(fileId).withLock {
             val currentRecord = database.mediaRecordDao().getRecord(fileId)
-            if (currentRecord == null || currentRecord.state == MediaState.COMPLETED || currentRecord.state == MediaState.DELETE) {
+            if (currentRecord == null || currentRecord.state == MediaState.COMPLETED) {
                 val storedCallback = activeCallbacks[fileId]
                 if (storedCallback != null) {
                     VaultResponder.sendError(
@@ -333,10 +333,6 @@ class SyncScheduler(
 
         while (currentCoroutineContext().isActive) {
             val currentRecord = dao.getRecord(fileId)
-            if (currentRecord?.state == MediaState.DELETE) {
-                Log.d(tag, "Stopping sync loop for $fileId because it is scheduled for deletion")
-                break
-            }
             if (currentRecord?.state == MediaState.PAUSED) {
                 delay(syncIntervalMs)
                 continue
@@ -369,7 +365,7 @@ class SyncScheduler(
                     val checkRecord = dao.getRecord(fileId)
                     val state = checkRecord?.state
 
-                    if (state == MediaState.COMPLETED || state == MediaState.DELETE) {
+                    if (state == MediaState.COMPLETED) {
                         copiedBytes = 0L
                     } else if (state == MediaState.PAUSED) {
                         // Already drained during pauseSync, do not attempt to copy more bytes
@@ -440,7 +436,7 @@ class SyncScheduler(
     private suspend fun markSyncAsCompleted(fileId: String, callback: ISakshiVaultCallback?) {
         val dao = database.mediaRecordDao()
         val record = dao.getRecord(fileId)
-        if (record != null && record.state != MediaState.DELETE) {
+        if (record != null) {
             val finalRecord = record.copy(
                 state = MediaState.COMPLETED,
                 updatedTime = System.currentTimeMillis()
@@ -488,7 +484,7 @@ class SyncScheduler(
     private suspend fun updateDatabaseState(fileId: String, state: String) {
         val dao = database.mediaRecordDao()
         val record = dao.getRecord(fileId)
-        if (record != null && record.state != MediaState.DELETE) {
+        if (record != null) {
             dao.insertRecord(
                 record.copy(
                     state = state,

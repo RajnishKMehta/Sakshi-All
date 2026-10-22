@@ -210,6 +210,11 @@ class GalleryViewModel(
     }
 }
 
+/**
+ * Factory for [GalleryViewModel].
+ *
+ * @param removedMediaStore Callers must provide the store shared with the viewer to ensure immediate sync of deleted files.
+ */
 class GalleryViewModelFactory(
     private val application: Application,
     private val settingsRepository: SettingsRepository,
