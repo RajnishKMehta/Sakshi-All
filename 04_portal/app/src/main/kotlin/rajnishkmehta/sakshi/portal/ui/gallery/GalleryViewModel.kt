@@ -26,6 +26,7 @@ import rajnishkmehta.sakshi.portal.data.deletion.RemovedMediaStore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
@@ -55,7 +56,7 @@ data class ParsedMediaItem(
 class GalleryViewModel(
     application: Application,
     private val settingsRepository: SettingsRepository,
-    removedMediaStore: RemovedMediaStore
+    private val removedMediaStore: RemovedMediaStore
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.Loading)
@@ -84,7 +85,16 @@ class GalleryViewModel(
         loadMedia(isRefresh = true)
     }
 
+    /**
+     * Loads the media list from Vault. Every load (app start, Vault switch, retry, pull-to-refresh)
+     * first clears [removedMediaStore]; the currently shown list keeps those items hidden until the
+     * fresh Vault result replaces it.
+     */
     fun loadMedia(specificPackage: String? = null, isRefresh: Boolean = false) {
+        val clearedIds = removedMediaStore.clear()
+        if (clearedIds.isNotEmpty()) {
+            _uiState.update { excludeRemovedMedia(it, clearedIds) }
+        }
         val previousJob = loadJob
         loadJob = viewModelScope.launch {
             previousJob?.cancelAndJoin()

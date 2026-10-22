@@ -49,7 +49,7 @@ class WorkManagerMediaCleanupScheduler(context: Context) : MediaCleanupScheduler
     override fun ensurePeriodicSweep() {
         val request = PeriodicWorkRequestBuilder<MediaCleanupWorker>(SWEEP_INTERVAL_HOURS, TimeUnit.HOURS)
             .setConstraints(constraints)
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_DELAY_MINUTES, TimeUnit.MINUTES)
+            .setInputData(workDataOf(MediaCleanupWorker.KEY_PERIODIC_SWEEP to true))
             .addTag(WORK_TAG)
             .build()
         workManager.enqueueUniquePeriodicWork(SWEEP_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)

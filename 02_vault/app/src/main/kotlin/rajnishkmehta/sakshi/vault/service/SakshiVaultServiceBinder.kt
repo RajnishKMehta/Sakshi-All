@@ -230,7 +230,7 @@ class SakshiVaultServiceBinder(
         }
 
         return Bundle().apply {
-            if (record != null && record.state != MediaState.DELETE) {
+            if (record != null) {
                 val mediaTypeLower = record.mediaType.lowercase()
                 putString("contentUri", "content://${applicationContext.packageName}.mediaprovider/media/$mediaTypeLower/$fileId")
                 putString("fileId", record.fileId)

@@ -45,6 +45,9 @@ public data class AVSyncStatus(
         COMPLETED,
 
         /** Synchronization encountered an unrecoverable failure. */
-        FAILED
+        FAILED,
+
+        /** The media is scheduled for permanent deletion in Vault; no further synchronization occurs. */
+        DELETE
     }
 }

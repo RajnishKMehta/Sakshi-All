@@ -219,7 +219,7 @@ lifecycleScope.launch {
 
 == 11. Deleting Media
 
-Client applications can schedule single or multiple media files for deletion. Vault does not delete files immediately: a scheduled file is hidden from `listMedia` and `getMedia` right away and its private Vault copy (media file and thumbnail) is permanently deleted after a 30-day retention period. Public copies exported by client apps and original camera files are never touched.
+Client applications can schedule single or multiple media files for deletion. Vault does not delete files immediately: a scheduled file is hidden from `listMedia` right away (`getMedia` still returns it and its sync state is reported as `DELETE`) and its private Vault copy (media file and thumbnail) is permanently deleted after a 30-day retention period. Public copies exported by client apps and original camera files are never touched.
 
 Rules enforced by Vault:
 

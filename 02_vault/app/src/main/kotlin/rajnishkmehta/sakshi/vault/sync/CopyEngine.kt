@@ -31,12 +31,20 @@ class CopyEngine(
     /**
      * Copies a file from the source URI to secure vault storage, saves metadata, and updates the database.
      *
+     * The whole operation holds the shared per-file lock from [MediaFileLocks], so it cannot interleave
+     * with deletion scheduling or cleanup. Records in the `DELETE` state are never overwritten.
+     *
      * @param fileId Unique identifier for the file.
      * @param sourceUriStr Source URI string of the file.
      *
      * @return The local vault destination path.
      */
-    suspend fun copyFile(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
+    suspend fun copyFile(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String =
+        MediaFileLocks.withFileLock(fileId) {
+            copyFileLocked(fileId, sourceUriStr, mediaType, fileExtension)
+        }
+
+    private suspend fun copyFileLocked(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
         check(mediaRecordDao.getRecord(fileId)?.state != MediaState.DELETE) {
             "File $fileId is scheduled for deletion and cannot be overwritten"
         }

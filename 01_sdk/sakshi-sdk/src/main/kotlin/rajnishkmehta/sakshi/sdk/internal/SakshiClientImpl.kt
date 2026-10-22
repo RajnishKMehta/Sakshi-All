@@ -125,7 +125,7 @@ internal class SakshiClientImpl(
             override fun onAVSyncStatus(syncStatusBundle: Bundle) {
                 val status = AidlMappers.toAVSyncStatus(syncStatusBundle)
                 trySend(SakshiResult.Success(status))
-                if (status.isCompleted || status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED) {
+                if (status.isCompleted || status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.DELETE) {
                     close()
                 }
             }
@@ -231,7 +231,7 @@ internal class SakshiClientImpl(
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
                         }
-                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED) {
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED || status.state == AVSyncStatus.State.DELETE) {
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected sync state: ${status.state}", null)))
                         }
@@ -278,7 +278,7 @@ internal class SakshiClientImpl(
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Success(Unit))
                         }
-                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED) {
+                    } else if (status.state == AVSyncStatus.State.FAILED || status.state == AVSyncStatus.State.STOPPED || status.state == AVSyncStatus.State.COMPLETED || status.state == AVSyncStatus.State.DELETE) {
                         if (continuation.isActive) {
                             continuation.resume(SakshiResult.Failure(SakshiError.Unknown(status.message ?: "Unexpected sync state: ${status.state}", null)))
                         }

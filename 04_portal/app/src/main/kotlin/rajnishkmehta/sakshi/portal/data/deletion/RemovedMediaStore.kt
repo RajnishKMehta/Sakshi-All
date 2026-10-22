@@ -7,6 +7,7 @@ package rajnishkmehta.sakshi.portal.data.deletion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 
 /**
@@ -26,4 +27,11 @@ class RemovedMediaStore {
     fun markRemoved(fileId: String) {
         _removedIds.update { it + fileId }
     }
+
+    /**
+     * Removes all IDs from the store, e.g. before the gallery is refreshed from Vault.
+     *
+     * @return The IDs that were in the store before clearing.
+     */
+    fun clear(): Set<String> = _removedIds.getAndUpdate { emptySet() }
 }

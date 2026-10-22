@@ -108,10 +108,11 @@ public interface SakshiClient {
     /**
      * Schedules a specific media file for deletion in Vault.
      *
-     * Vault does not delete the file immediately: it hides the file from `listMedia` and `getMedia`
-     * and permanently deletes its private copy after a 30-day retention period. Repeated requests
-     * for an already scheduled file succeed without extending the retention period. Files that are
-     * still being synchronized are rejected.
+     * Vault does not delete the file immediately: it hides the file from `listMedia` (other queries
+     * still return it, with sync state [AVSyncStatus.State.DELETE]) and permanently deletes its
+     * private copy after a 30-day retention period. Repeated requests for an already scheduled file
+     * succeed without extending the retention period. Files that are still being synchronized are
+     * rejected.
      *
      * @param fileId The unique identifier of the media.
      * @return [SakshiResult] containing [Unit] once Vault accepted the request, or [SakshiError] on failure.
