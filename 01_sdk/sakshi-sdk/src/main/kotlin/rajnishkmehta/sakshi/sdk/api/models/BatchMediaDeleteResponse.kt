@@ -5,10 +5,12 @@
 package rajnishkmehta.sakshi.sdk.api.models
 
 /**
- * Represents the response from a batch media deletion request.
+ * Represents the response from a batch request to schedule media files for deletion.
  *
- * @property successfulIds A list of file IDs that were successfully deleted.
- * @property failedIds A map of file IDs that failed to delete, with the value being the error message.
+ * Vault permanently deletes scheduled files after its retention period, not immediately.
+ *
+ * @property successfulIds File IDs that were successfully scheduled for deletion (including files already scheduled).
+ * @property failedIds File IDs whose scheduling was rejected, mapped to the error message.
  */
 public data class BatchMediaDeleteResponse(
     val successfulIds: List<String>,

@@ -106,17 +106,26 @@ public interface SakshiClient {
     public suspend fun getThumbnail(): SakshiResult<String>
 
     /**
-     * Deletes a specific media file from Vault.
+     * Schedules a specific media file for deletion in Vault.
+     *
+     * Vault does not delete the file immediately: it hides the file from `listMedia` (other queries
+     * still return it, with sync state [AVSyncStatus.State.DELETE]) and permanently deletes its
+     * private copy after a 30-day retention period. Repeated requests for an already scheduled file
+     * succeed without extending the retention period. Files that are still being synchronized are
+     * rejected.
      *
      * @param fileId The unique identifier of the media.
-     * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     * @return [SakshiResult] containing [Unit] once Vault accepted the request, or [SakshiError] on failure.
      */
     public suspend fun deleteMedia(fileId: String): SakshiResult<Unit>
 
     /**
-     * Deletes multiple media files from Vault in a single batch.
+     * Schedules multiple media files for deletion in Vault in a single batch.
      *
-     * @param fileIds The list of unique identifiers of the media files to delete.
+     * Each file is handled like the single-file [deleteMedia] overload. Per-file results are
+     * reported in [BatchMediaDeleteResponse.successfulIds] and [BatchMediaDeleteResponse.failedIds].
+     *
+     * @param fileIds The list of unique identifiers of the media files to schedule for deletion.
      * @return [SakshiResult] containing [BatchMediaDeleteResponse] on success or [SakshiError] on failure.
      */
     public suspend fun deleteMedia(fileIds: List<String>): SakshiResult<BatchMediaDeleteResponse>

@@ -13,6 +13,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
+import rajnishkmehta.sakshi.vault.deletion.MediaDeletionComponents
+import rajnishkmehta.sakshi.vault.deletion.PingCleanupTrigger
 import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 import rajnishkmehta.sakshi.vault.storage.StorageManager
 import rajnishkmehta.sakshi.vault.sync.CopyEngine
@@ -47,13 +49,27 @@ class SakshiVaultRemoteService : Service() {
             copyEngine = CopyEngine(applicationContext, database!!, storageManager!!)
             scheduler = SyncScheduler(applicationContext, database!!, copyEngine!!)
 
+            val syncScheduler = scheduler!!
+            val deletionComponents = MediaDeletionComponents.from(applicationContext)
+            val pingCleanupTrigger = PingCleanupTrigger(serviceScope!!) {
+                val summary = deletionComponents.cleanupCoordinator.cleanupEligibleRecords()
+                if (summary.hasScheduledRecords) {
+                    deletionComponents.cleanupScheduler.ensurePeriodicSweep()
+                }
+            }
+
             binder = SakshiVaultServiceBinder(
                 applicationContext,
                 database,
                 copyEngine,
                 scheduler,
-                serviceScope
+                serviceScope,
+                deletionScheduler = deletionComponents.deletionScheduler(syncScheduler::isSyncActive),
+                pingCleanupTrigger = pingCleanupTrigger
             )
+
+            // Catch up on deletions that became due while Vault was not running
+            pingCleanupTrigger.onPing()
 
             // Automatically resume any interrupted, pending synchronizations from database
             scheduler?.resumePendingSyncs()

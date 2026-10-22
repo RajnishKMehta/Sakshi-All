@@ -219,7 +219,12 @@ lifecycleScope.launch {
 
 == 11. Deleting Media
 
-Client applications can request to delete single or multiple media files from the Vault database and storage.
+Client applications can schedule single or multiple media files for deletion. Vault does not delete files immediately: a scheduled file is hidden from `listMedia` right away (`getMedia` still returns it and its sync state is reported as `DELETE`) and its private Vault copy (media file and thumbnail) is permanently deleted after a 30-day retention period. Public copies exported by client apps and original camera files are never touched.
+
+Rules enforced by Vault:
+
+* Repeated requests for an already scheduled file succeed and keep the original schedule.
+* Unknown file IDs, invalid file IDs, and files that are still being synchronized are rejected.
 
 === Single File Deletion
 
@@ -229,9 +234,9 @@ import rajnishkmehta.sakshi.sdk.api.SakshiResult
 
 val deleteResult = client.deleteMedia("photo_2026_1001")
 if (deleteResult.isSuccess) {
-    println("Media deleted successfully!")
+    println("Media scheduled for deletion in 30 days")
 } else {
-    println("Failed to delete media: ${deleteResult.errorOrNull()?.message}")
+    println("Failed to schedule deletion: ${deleteResult.errorOrNull()?.message}")
 }
 ----
 
@@ -244,10 +249,10 @@ import rajnishkmehta.sakshi.sdk.api.SakshiResult
 val batchDeleteResult = client.deleteMedia(listOf("photo_1", "photo_2", "photo_invalid"))
 if (batchDeleteResult.isSuccess) {
     val response = batchDeleteResult.getOrNull()!!
-    println("Successfully deleted: ${response.successfulIds}")
-    println("Failed to delete: ${response.failedIds}")
+    println("Scheduled for deletion: ${response.successfulIds}")
+    println("Rejected: ${response.failedIds}")
 } else {
-    println("Batch deletion failed completely: ${batchDeleteResult.errorOrNull()?.message}")
+    println("Batch scheduling failed completely: ${batchDeleteResult.errorOrNull()?.message}")
 }
 ----
 
