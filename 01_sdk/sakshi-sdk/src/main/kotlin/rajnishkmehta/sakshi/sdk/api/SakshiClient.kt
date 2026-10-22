@@ -91,6 +91,15 @@ public interface SakshiClient {
     public suspend fun listMedia(): SakshiResult<String>
 
     /**
+     * Lists all stored media files scheduled for deletion grouped by media type in JSON format.
+     *
+     * Returns only media whose state is scheduled for deletion. Normally listable media are excluded.
+     *
+     * @return [SakshiResult] containing the raw JSON string on success or [SakshiError] on failure.
+     */
+    public suspend fun listDeletedMedia(): SakshiResult<String>
+
+    /**
      * Retrieves the details of a specific media file including its ContentResolver URI.
      *
      * @param fileId The unique identifier of the media.

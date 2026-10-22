@@ -363,6 +363,36 @@ internal class SakshiClientImpl(
         }
     }
 
+    override suspend fun listDeletedMedia(): SakshiResult<String> {
+        val serviceResult = serviceConnection.getService()
+        if (serviceResult.isFailure) {
+            return SakshiResult.Failure(serviceResult.errorOrNull()!!)
+        }
+
+        val service = serviceResult.getOrNull()!!
+
+        return try {
+            val resBundle = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                service.listDeletedMedia()
+            }
+            val json = resBundle.getString("media_list_json")
+            if (json != null) {
+                SakshiResult.Success(json)
+            } else {
+                SakshiResult.Failure(SakshiError.Unknown("No JSON returned from vault", null))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            SakshiResult.Failure(
+                SakshiError.IpcError(
+                    message = e.message ?: "Failed to list deleted media",
+                    cause = e
+                )
+            )
+        }
+    }
+
     override suspend fun getMedia(fileId: String): SakshiResult<MediaDetailsResponse> {
         val serviceResult = serviceConnection.getService()
         if (serviceResult.isFailure) {

@@ -38,6 +38,7 @@ interface ISakshiVaultService {
     void stopAVSync(in String fileId, in ISakshiVaultCallback callback);
     Bundle isAVSynced(in String fileId);
     Bundle listMedia();
+    Bundle listDeletedMedia();
     String getThumbnail();
 }
 ----

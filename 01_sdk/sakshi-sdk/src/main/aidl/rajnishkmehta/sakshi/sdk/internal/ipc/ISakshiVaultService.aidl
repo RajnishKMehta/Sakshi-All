@@ -81,6 +81,11 @@ interface ISakshiVaultService {
      */
     Bundle listMedia();
 
+    /**
+     * Lists all stored media files scheduled for deletion grouped by media type in JSON format.
+     */
+    Bundle listDeletedMedia();
+
 
     /**
      * Retrieves the ContentProvider URI template for accessing media thumbnails.

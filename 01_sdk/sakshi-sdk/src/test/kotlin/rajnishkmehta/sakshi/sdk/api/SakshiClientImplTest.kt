@@ -285,4 +285,48 @@ public class SakshiClientImplTest {
         assertTrue(result is SakshiResult.Failure)
         assertEquals("Total failure", result.errorOrNull()?.message)
     }
+    @Test
+    public fun `listMedia handles valid json correctly`(): Unit = runBlocking {
+        val mockConnection = mockk<VaultServiceConnection>(relaxed = true)
+        val mockService = mockk<ISakshiVaultService>(relaxed = true)
+        coEvery { mockConnection.getService() } returns SakshiResult.Success(mockService)
+
+        val mockBundle = mockk<Bundle>(relaxed = true)
+        every { mockBundle.getString("media_list_json") } returns "{\"VIDEO\":[]}"
+        every { mockService.listMedia() } returns mockBundle
+
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+
+        val field = SakshiClientImpl::class.java.getDeclaredField("serviceConnection")
+        field.isAccessible = true
+        field.set(client, mockConnection)
+        val result = client.listMedia()
+
+        assertTrue(result is SakshiResult.Success)
+        assertEquals("{\"VIDEO\":[]}", (result as SakshiResult.Success).data)
+        verify { mockService.listMedia() }
+    }
+
+    @Test
+    public fun `listDeletedMedia handles valid json correctly`(): Unit = runBlocking {
+        val mockConnection = mockk<VaultServiceConnection>(relaxed = true)
+        val mockService = mockk<ISakshiVaultService>(relaxed = true)
+        coEvery { mockConnection.getService() } returns SakshiResult.Success(mockService)
+
+        val mockBundle = mockk<Bundle>(relaxed = true)
+        every { mockBundle.getString("media_list_json") } returns "{\"VIDEO\":[\"deleted_id\"]}"
+        every { mockService.listDeletedMedia() } returns mockBundle
+
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+
+        val field = SakshiClientImpl::class.java.getDeclaredField("serviceConnection")
+        field.isAccessible = true
+        field.set(client, mockConnection)
+        val result = client.listDeletedMedia()
+
+        assertTrue(result is SakshiResult.Success)
+        assertEquals("{\"VIDEO\":[\"deleted_id\"]}", (result as SakshiResult.Success).data)
+        verify { mockService.listDeletedMedia() }
+    }
+
 }
