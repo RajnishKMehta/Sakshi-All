@@ -14,6 +14,7 @@ import kotlinx.coroutines.cancel
 import rajnishkmehta.sakshi.vault.AppLog as Log
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.deletion.MediaDeletionComponents
+import rajnishkmehta.sakshi.vault.recovery.MediaRecoveryManager
 import rajnishkmehta.sakshi.vault.deletion.PingCleanupTrigger
 import rajnishkmehta.sakshi.vault.storage.AppPrivateStorageManager
 import rajnishkmehta.sakshi.vault.storage.StorageManager
@@ -65,7 +66,8 @@ class SakshiVaultRemoteService : Service() {
                 scheduler,
                 serviceScope,
                 deletionScheduler = deletionComponents.deletionScheduler(syncScheduler::isSyncActive),
-                pingCleanupTrigger = pingCleanupTrigger
+                pingCleanupTrigger = pingCleanupTrigger,
+                recoveryManager = MediaRecoveryManager(database!!.mediaRecordDao())
             )
 
             // Catch up on deletions that became due while Vault was not running

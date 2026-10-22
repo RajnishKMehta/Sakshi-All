@@ -46,6 +46,21 @@ internal class FakeMediaRecordDao(vararg initial: MediaRecord) : MediaRecordDao 
         return 1
     }
 
+
+    override suspend fun recoverScheduledRecord(fileId: String): Int {
+        val record = records[fileId]
+        if (record != null && record.state == MediaState.DELETE) {
+            records[fileId] = record.copy(
+                state = MediaState.COMPLETED,
+                deletionScheduledAt = null,
+                deletionScheduledElapsedRealtime = null,
+                deletionScheduledBootCount = null
+            )
+            return 1
+        }
+        return 0
+    }
+
     override suspend fun deleteScheduledRecord(fileId: String, scheduledAt: Long): Int {
         checkWrite()
         deleteCalls++

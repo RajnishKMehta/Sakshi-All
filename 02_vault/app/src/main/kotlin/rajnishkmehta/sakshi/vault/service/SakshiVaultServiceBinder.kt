@@ -21,6 +21,7 @@ import rajnishkmehta.sakshi.vault.db.MediaState
 import rajnishkmehta.sakshi.vault.db.VaultDatabase
 import rajnishkmehta.sakshi.vault.deletion.DeletionScheduleResult
 import rajnishkmehta.sakshi.vault.deletion.MediaDeletionScheduler
+import rajnishkmehta.sakshi.vault.recovery.MediaRecoveryManager
 import rajnishkmehta.sakshi.vault.deletion.PingCleanupTrigger
 import rajnishkmehta.sakshi.vault.sync.CopyEngine
 import rajnishkmehta.sakshi.vault.sync.SyncScheduler
@@ -40,7 +41,8 @@ class SakshiVaultServiceBinder(
     private val scheduler: SyncScheduler?,
     private val serviceScope: CoroutineScope?,
     private val deletionScheduler: MediaDeletionScheduler? = null,
-    private val pingCleanupTrigger: PingCleanupTrigger? = null
+    private val pingCleanupTrigger: PingCleanupTrigger? = null,
+    private val recoveryManager: MediaRecoveryManager? = null
 ) : ISakshiVaultService.Stub() {
 
     private val tag = "SakshiVaultServiceBinder"
@@ -193,15 +195,23 @@ class SakshiVaultServiceBinder(
         }
 
         val validRecords = filterListableRecords(records)
+        val jsonString = formatMediaList(validRecords) { it.createdTime }
 
-        val groups = validRecords.groupBy { it.mediaType.lowercase() }
-        val result = groups.mapValues { (_, list) ->
-            list.map { record ->
-                MediaItem(record.fileId, record.createdTime)
-            }
+        return Bundle().apply {
+            putString("media_list_json", jsonString)
+        }
+    }
+
+    override fun listDeletedMedia(): Bundle {
+        Log.d(tag, "Received listDeletedMedia query")
+        val records = runBlocking {
+            val db = database ?: throw IllegalStateException("VaultDatabase is not initialized")
+            db.mediaRecordDao().getRecordsInState(MediaState.DELETE)
         }
 
-        val jsonString = Json.encodeToString(result)
+        val jsonString = formatMediaList(records) {
+            it.deletionScheduledAt ?: it.updatedTime
+        }
 
         return Bundle().apply {
             putString("media_list_json", jsonString)
@@ -290,6 +300,42 @@ class SakshiVaultServiceBinder(
     private fun errorBundle(message: String): Bundle = Bundle().apply {
         putBoolean("success", false)
         putString("error", message)
+    }
+
+
+    override fun recoverMedia(fileId: String?): Bundle {
+        Log.d(tag, "Received recoverMedia request: fileId=$fileId")
+        return try {
+            val manager = recoveryManager ?: throw IllegalStateException("Recovery manager is not initialized")
+            when (val result = runBlocking { manager.recover(fileId.orEmpty()) }) {
+                is MediaRecoveryManager.RecoveryResult.Recovered -> Bundle().apply {
+                    putBoolean("success", true)
+                }
+                is MediaRecoveryManager.RecoveryResult.Rejected -> errorBundle(result.reason)
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to recover media for $fileId", e)
+            errorBundle("Failed to recover media: ${e.message}")
+        }
+    }
+
+    override fun recoverMediaBatch(fileIds: MutableList<String>?): Bundle {
+        Log.d(tag, "Received recoverMediaBatch request for ${fileIds?.size ?: 0} files")
+        return try {
+            val manager = recoveryManager ?: throw IllegalStateException("Recovery manager is not initialized")
+            val ids = fileIds?.toList().orEmpty()
+            if (ids.isEmpty()) return errorBundle("fileIds must not be empty")
+            val result = runBlocking { manager.recoverBatch(ids) }
+            Bundle().apply {
+                putStringArrayList("successfulIds", ArrayList(result.successfulIds))
+                putBundle("failedIds", Bundle().apply {
+                    result.failedIds.forEach { (id, reason) -> putString(id, reason) }
+                })
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to recover batch media", e)
+            errorBundle("Failed to recover batch media: ${e.message}")
+        }
     }
 
     override fun getThumbnail(): String {
