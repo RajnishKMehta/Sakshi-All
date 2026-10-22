@@ -10,6 +10,7 @@ import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
 import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.sdk.api.models.RecordingQueryResponse
 import rajnishkmehta.sakshi.sdk.api.models.BatchMediaDeleteResponse
+import rajnishkmehta.sakshi.sdk.api.models.BatchMediaRecoverResponse
 import rajnishkmehta.sakshi.sdk.api.models.MediaDetailsResponse
 import rajnishkmehta.sakshi.sdk.api.models.VaultPingResponse
 import rajnishkmehta.sakshi.sdk.api.models.AVSyncRequest
@@ -129,6 +130,30 @@ public interface SakshiClient {
      * @return [SakshiResult] containing [BatchMediaDeleteResponse] on success or [SakshiError] on failure.
      */
     public suspend fun deleteMedia(fileIds: List<String>): SakshiResult<BatchMediaDeleteResponse>
+
+    /**
+     * Recovers a specific media file previously scheduled for deletion in Vault.
+     *
+     * Vault restores the file to its valid state, preventing its permanent deletion and making
+     * it visible in `listMedia` again. Requests for files that were never scheduled for deletion
+     * succeed without making any changes. Requests for invalid IDs or files that have already been
+     * permanently deleted are rejected.
+     *
+     * @param fileId The unique identifier of the media to recover.
+     * @return [SakshiResult] containing [Unit] once Vault accepted the request, or [SakshiError] on failure.
+     */
+    public suspend fun recoverMedia(fileId: String): SakshiResult<Unit>
+
+    /**
+     * Recovers multiple media files previously scheduled for deletion in Vault in a single batch.
+     *
+     * Each file is handled like the single-file [recoverMedia] overload. Per-file results are
+     * reported in [BatchMediaRecoverResponse.successfulIds] and [BatchMediaRecoverResponse.failedIds].
+     *
+     * @param fileIds The list of unique identifiers of the media files to recover.
+     * @return [SakshiResult] containing [BatchMediaRecoverResponse] on success or [SakshiError] on failure.
+     */
+    public suspend fun recoverMedia(fileIds: List<String>): SakshiResult<BatchMediaRecoverResponse>
 
     /**
      * Explicitly disconnects from Vault IPC service and releases internal resources.

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.every
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
 import rajnishkmehta.sakshi.sdk.internal.ipc.VaultServiceConnection
@@ -173,5 +174,115 @@ public class SakshiClientImplTest {
         val error = (result as SakshiResult.Failure).error
         assertTrue(error is SakshiError.IpcError)
         assertEquals("Internal Server Error", error.message)
+    }
+    @Test
+    public fun `recoverMedia single success calls service correctly`(): Unit = runBlocking {
+        val mockConnection = mockk<VaultServiceConnection>(relaxed = true)
+        val mockService = mockk<ISakshiVaultService>(relaxed = true)
+        coEvery { mockConnection.getService() } returns SakshiResult.Success(mockService)
+
+        val mockBundle = mockk<Bundle>(relaxed = true)
+        every { mockBundle.getBoolean("success", false) } returns true
+
+        every { mockService.recoverMedia(any()) } returns mockBundle
+
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+
+        val field = SakshiClientImpl::class.java.getDeclaredField("serviceConnection")
+        field.isAccessible = true
+        field.set(client, mockConnection)
+
+        val result = client.recoverMedia("file_1")
+        assertTrue(result is SakshiResult.Success)
+        verify { mockService.recoverMedia("file_1") }
+    }
+
+    @Test
+    public fun `recoverMedia batch success calls service correctly`(): Unit = runBlocking {
+        val mockConnection = mockk<VaultServiceConnection>(relaxed = true)
+        val mockService = mockk<ISakshiVaultService>(relaxed = true)
+        coEvery { mockConnection.getService() } returns SakshiResult.Success(mockService)
+
+        val mockBundle = mockk<Bundle>(relaxed = true)
+        val successfulIdsList = arrayListOf("file_1", "file_2")
+        every { mockBundle.getStringArrayList("successfulIds") } returns successfulIdsList
+
+        val failedIdsBundle = mockk<Bundle>(relaxed = true)
+        every { failedIdsBundle.keySet() } returns setOf("file_3")
+        every { failedIdsBundle.getString("file_3") } returns "Invalid ID"
+        every { mockBundle.getBundle("failedIds") } returns failedIdsBundle
+
+        every { mockService.recoverMediaBatch(any()) } returns mockBundle
+
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+
+        val field = SakshiClientImpl::class.java.getDeclaredField("serviceConnection")
+        field.isAccessible = true
+        field.set(client, mockConnection)
+
+        val result = client.recoverMedia(listOf("file_1", "file_2", "file_3"))
+        assertTrue(result is SakshiResult.Success)
+        val response = result.getOrNull()!!
+        assertEquals(2, response.successfulIds.size)
+        assertEquals(1, response.failedIds.size)
+        assertEquals("Invalid ID", response.failedIds["file_3"])
+        verify { mockService.recoverMediaBatch(listOf("file_1", "file_2", "file_3")) }
+    }
+
+    @Test
+    public fun `recoverMedia batch empty list returns immediate success`(): Unit = runBlocking {
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+        val result = client.recoverMedia(emptyList())
+        assertTrue(result is SakshiResult.Success)
+        val response = result.getOrNull()!!
+        assertTrue(response.successfulIds.isEmpty())
+        assertTrue(response.failedIds.isEmpty())
+    }
+
+    @Test
+    public fun `recoverMedia single failure returns error result`(): Unit = runBlocking {
+        val mockConnection = mockk<VaultServiceConnection>(relaxed = true)
+        val mockService = mockk<ISakshiVaultService>(relaxed = true)
+        coEvery { mockConnection.getService() } returns SakshiResult.Success(mockService)
+
+        val mockBundle = mockk<Bundle>(relaxed = true)
+        every { mockBundle.getBoolean("success", false) } returns false
+        every { mockBundle.getString("error") } returns "Invalid ID"
+
+        every { mockService.recoverMedia(any()) } returns mockBundle
+
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+
+        val field = SakshiClientImpl::class.java.getDeclaredField("serviceConnection")
+        field.isAccessible = true
+        field.set(client, mockConnection)
+
+        val result = client.recoverMedia("file_missing")
+        assertTrue(result is SakshiResult.Failure)
+        assertEquals("Invalid ID", result.errorOrNull()?.message)
+    }
+
+    @Test
+    public fun `recoverMedia batch total failure returns error result`(): Unit = runBlocking {
+        val mockConnection = mockk<VaultServiceConnection>(relaxed = true)
+        val mockService = mockk<ISakshiVaultService>(relaxed = true)
+        coEvery { mockConnection.getService() } returns SakshiResult.Success(mockService)
+
+        val mockBundle = mockk<Bundle>(relaxed = true)
+        every { mockBundle.getStringArrayList("successfulIds") } returns null
+        every { mockBundle.getBundle("failedIds") } returns null
+        every { mockBundle.getString("error") } returns "Total failure"
+
+        every { mockService.recoverMediaBatch(any()) } returns mockBundle
+
+        val client = SakshiClientImpl(mockk<Context>(relaxed = true), SakshiClientConfig())
+
+        val field = SakshiClientImpl::class.java.getDeclaredField("serviceConnection")
+        field.isAccessible = true
+        field.set(client, mockConnection)
+
+        val result = client.recoverMedia(listOf("file_1", "file_2"))
+        assertTrue(result is SakshiResult.Failure)
+        assertEquals("Total failure", result.errorOrNull()?.message)
     }
 }
