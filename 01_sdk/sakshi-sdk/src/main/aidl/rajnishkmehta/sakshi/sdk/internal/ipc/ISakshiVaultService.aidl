@@ -109,4 +109,20 @@ interface ISakshiVaultService {
      * @return Bundle containing the lists of successfully scheduled and failed files.
      */
     Bundle deleteMediaBatch(in List<String> fileIds);
+
+    /**
+     * Recovers a specific media file previously scheduled for deletion in the Vault.
+     *
+     * @param fileId Unique identifier of the media file to recover.
+     * @return Bundle containing success status or error details.
+     */
+    Bundle recoverMedia(in String fileId);
+
+    /**
+     * Recovers multiple media files previously scheduled for deletion in the Vault in a single batch.
+     *
+     * @param fileIds List of unique identifiers of the media files to recover.
+     * @return Bundle containing the lists of successfully recovered and failed files.
+     */
+    Bundle recoverMediaBatch(in List<String> fileIds);
 }

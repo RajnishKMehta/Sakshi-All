@@ -256,7 +256,47 @@ if (batchDeleteResult.isSuccess) {
 }
 ----
 
-== 12. Disconnecting
+== 12. Recovering Media
+
+Client applications can recover single or multiple media files that were previously scheduled for deletion. Vault restores the file to its valid state, preventing permanent deletion and making it visible in `listMedia` again.
+
+Rules enforced by Vault:
+
+* Requests for files that were never scheduled for deletion succeed without making any changes.
+* Unknown file IDs, invalid file IDs, and files that have already been permanently deleted are rejected.
+
+=== Single File Recovery
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+val recoverResult = client.recoverMedia("photo_2026_1001")
+if (recoverResult.isSuccess) {
+    println("Media successfully recovered")
+} else {
+    println("Failed to recover media: ${recoverResult.errorOrNull()?.message}")
+}
+----
+
+=== Batch File Recovery
+
+[source,kotlin]
+----
+import rajnishkmehta.sakshi.sdk.api.SakshiResult
+
+val batchRecoverResult = client.recoverMedia(listOf("photo_1", "photo_2", "photo_invalid"))
+if (batchRecoverResult.isSuccess) {
+    val response = batchRecoverResult.getOrNull()!!
+    println("Successfully recovered: ${response.successfulIds}")
+    println("Rejected: ${response.failedIds}")
+} else {
+    println("Batch recovery failed completely: ${batchRecoverResult.errorOrNull()?.message}")
+}
+----
+
+
+== 13. Disconnecting
 
 When the client component is destroyed, disconnect the client to avoid memory leaks and unbind the service:
 
