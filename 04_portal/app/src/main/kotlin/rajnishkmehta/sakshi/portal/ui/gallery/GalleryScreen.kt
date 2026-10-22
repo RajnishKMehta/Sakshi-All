@@ -77,6 +77,11 @@ enum class SortOrder {
     OLD_FIRST
 }
 
+/**
+ * The main gallery screen that displays media from the Vault.
+ *
+ * @param removedMediaStore Store containing media items scheduled for deletion. Must be the store shared with the viewer so its lifetime covers both screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(

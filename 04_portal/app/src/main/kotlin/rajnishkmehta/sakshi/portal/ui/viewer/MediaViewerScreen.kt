@@ -44,6 +44,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 
+/**
+ * Screen for viewing a specific media file from the Vault.
+ *
+ * @param fileId Unique identifier of the media to load.
+ * @param mediaType The type of the media file, used to select the appropriate viewer component.
+ * @param settingsRepository Repository for retrieving app settings like the selected Vault package.
+ * @param removedMediaStore Store that must be the gallery's shared store to communicate successful deletions.
+ * @param onBackClick Callback invoked to navigate back.
+ */
 @Composable
 fun MediaViewerScreen(
     fileId: String,

@@ -334,6 +334,21 @@ class SyncScheduler(
         while (currentCoroutineContext().isActive) {
             val currentRecord = dao.getRecord(fileId)
             if (currentRecord?.state == MediaState.DELETE) {
+                val storedCallback = activeCallbacks[fileId]
+                if (storedCallback != null) {
+                    VaultResponder.sendAVSyncStatus(
+                        storedCallback,
+                        AVSyncStatus(
+                            fileId = fileId,
+                            state = AVSyncStatus.State.valueOf("DELETE"),
+                            lastCopiedOffsetBytes = currentRecord.lastCopiedOffset,
+                            totalBytes = currentRecord.lastCopiedOffset,
+                            isCompleted = true,
+                            message = "Media scheduled for deletion."
+                        )
+                    )
+                    activeCallbacks.remove(fileId)
+                }
                 Log.d(tag, "Stopping sync loop for $fileId because it is scheduled for deletion")
                 break
             }
