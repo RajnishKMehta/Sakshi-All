@@ -26,6 +26,12 @@ import rajnishkmehta.sakshi.vault.sync.MediaFileLocks
  *
  * @param isSyncActive Returns `true` while a synchronization may still write the given file.
  */
+/**
+ * Coordinates moving media files into the deletion state ([rajnishkmehta.sakshi.vault.db.MediaState.DELETE])
+ * and schedules future cleanups.
+ *
+ * Does not perform the actual file deletion; relies on [MediaCleanupScheduler] to enqueue the cleanup sweep.
+ */
 class MediaDeletionScheduler(
     private val dao: MediaRecordDao,
     private val clock: DeletionClock,

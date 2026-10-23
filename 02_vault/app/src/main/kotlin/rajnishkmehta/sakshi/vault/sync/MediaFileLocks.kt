@@ -16,6 +16,12 @@ import java.util.concurrent.ConcurrentHashMap
  * singleton because the IPC service and WorkManager workers are created independently in the same
  * Vault process.
  */
+/**
+ * Provides fine-grained locking mechanism for concurrent operations on individual media files.
+ *
+ * Prevents race conditions between synchronization, deletion, recovery, and cleanup tasks
+ * by enforcing mutually exclusive access to the file state based on its `fileId`.
+ */
 object MediaFileLocks {
 
     private val locks = ConcurrentHashMap<String, Mutex>()

@@ -27,6 +27,12 @@ import kotlinx.coroutines.CancellationException
  * It uses Kotlin Coroutines to run periodic copy passes off the main thread, applies
  * recording completion heuristics, and manages client callbacks.
  */
+/**
+ * Orchestrates media synchronization tasks, managing worker lifecycles, retries, and overall flow.
+ *
+ * Evaluates sync requests and dispatches them to the [CopyEngine], while also resuming
+ * pending syncs after application restarts.
+ */
 class SyncScheduler(
     private val context: Context,
     private val database: VaultDatabase,

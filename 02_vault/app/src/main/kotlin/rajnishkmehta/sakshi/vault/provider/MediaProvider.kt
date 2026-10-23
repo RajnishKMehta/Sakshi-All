@@ -15,6 +15,12 @@ import rajnishkmehta.sakshi.vault.AppLog as Log
 import java.io.File
 import java.io.FileNotFoundException
 
+/**
+ * A readonly [ContentProvider] that exposes fully synced media files stored in the Vault's
+ * internal storage to external applications (like Portal) via `content://` URIs.
+ *
+ * Directory traversal is actively prevented. Write operations will throw [SecurityException].
+ */
 class MediaProvider : ContentProvider() {
 
     private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
@@ -83,6 +89,12 @@ class MediaProvider : ContentProvider() {
         throw SecurityException("Write access is not allowed")
     }
 
+    /**
+     * Opens the media file requested by [uri] for reading.
+     *
+     * @throws SecurityException if [mode] is not `"r"` or path traversal is detected.
+     * @throws FileNotFoundException if the URI format is incorrect or the file doesn't exist.
+     */
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
         if (mode != "r") {
             throw SecurityException("Write access is not allowed")
