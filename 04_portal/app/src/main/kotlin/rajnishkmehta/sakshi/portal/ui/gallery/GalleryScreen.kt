@@ -139,7 +139,7 @@ fun GalleryScreen(
                         ) {
                             if (!isDeletedMode) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.scheduled_deletions_title)) },
+                                    text = { Text(stringResource(R.string.scheduled_deletions_menu_item)) },
                                     onClick = {
                                         showMenu = false
                                         onScheduledDeletionsClick()

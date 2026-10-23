@@ -12,6 +12,7 @@
     <string name="retry_action">Retry</string>
     <string name="scheduled_deletions_title">Scheduled Deletions</string>
     <string name="scheduled_deletions_empty">No scheduled deletions.</string>
+    <string name="scheduled_deletions_menu_item">Recover Media</string>
 
     <!-- External URLs & Links -->
     <string name="vault_download_url">https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/app-release.apk</string>
