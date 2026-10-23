@@ -29,7 +29,7 @@ fun ScheduleDeletionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(painterResource(R.drawable.trash_clock), contentDescription = null) },
+        icon = { Icon(painterResource(R.drawable.ic_trash_clock), contentDescription = null) },
         title = { Text(stringResource(R.string.viewer_schedule_deletion_title)) },
         text = { Text(stringResource(R.string.viewer_schedule_deletion_message)) },
         confirmButton = {

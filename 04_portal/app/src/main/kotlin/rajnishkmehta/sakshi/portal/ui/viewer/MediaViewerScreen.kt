@@ -186,7 +186,7 @@ fun MediaViewerScreen(
                                 LoadingIndicator(modifier = Modifier.size(24.dp))
                             } else {
                                 Icon(
-                                    painterResource(R.drawable.trash_clock),
+                                    painterResource(R.drawable.ic_trash_clock),
                                     contentDescription = stringResource(R.string.viewer_schedule_deletion_content_description),
                                     modifier = Modifier.size(24.dp)
                                 )
