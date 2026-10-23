@@ -46,7 +46,7 @@ sealed interface RecoverMediaResult {
  */
 class MediaDeletionRepository(
     private val deleteMedia: suspend (String) -> SakshiResult<Unit>,
-    private val recoverMedia: suspend (String) -> SakshiResult<Unit> = { SakshiResult.Failure(rajnishkmehta.sakshi.sdk.api.SakshiError.ServiceUnavailable("Not implemented")) },
+    private val recoverMedia: suspend (String) -> SakshiResult<Unit>,
     private val removedMediaStore: RemovedMediaStore
 ) {
 
