@@ -92,7 +92,7 @@ fun GalleryScreen(
     onVaultSelectionClick: () -> Unit = {},
     isDeletedMode: Boolean = false,
     onScheduledDeletionsClick: () -> Unit = {},
-    onMediaClick: (String, MediaType) -> Unit = { _, _ -> },
+    onMediaClick: (String, MediaType, Long) -> Unit = { _, _, _ -> },
     onBackClick: () -> Unit = {}
 ) {
     val application = LocalContext.current.applicationContext as Application
@@ -344,7 +344,7 @@ fun GalleryScreen(
 }
 
 @Composable
-fun MediaItem(item: ParsedMediaItem, onMediaClick: (String, MediaType) -> Unit = { _, _ -> },
+fun MediaItem(item: ParsedMediaItem, onMediaClick: (String, MediaType, Long) -> Unit = { _, _, _ -> },
     onBackClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
@@ -352,7 +352,7 @@ fun MediaItem(item: ParsedMediaItem, onMediaClick: (String, MediaType) -> Unit =
             .aspectRatio(1f) // Ensure strictly 1:1 squares
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable {
-                onMediaClick(item.id, item.type)
+                onMediaClick(item.id, item.type, item.timestamp)
             }
     ) {
         val placeholderRes = when (item.type) {

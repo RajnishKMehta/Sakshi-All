@@ -58,6 +58,7 @@ fun MediaViewerScreen(
     fileId: String,
     mediaType: MediaType,
     isDeletedMode: Boolean = false,
+    scheduledTime: Long = -1L,
     settingsRepository: SettingsRepository,
     removedMediaStore: RemovedMediaStore,
     onBackClick: () -> Unit
@@ -253,6 +254,7 @@ fun MediaViewerScreen(
                         InfoBottomSheet(
                             mediaDetails = mediaDetails,
                             isDeletedMode = isDeletedMode,
+                            scheduledTime = scheduledTime,
                             onDismissRequest = { showInfoSheet = false }
                         )
                     }

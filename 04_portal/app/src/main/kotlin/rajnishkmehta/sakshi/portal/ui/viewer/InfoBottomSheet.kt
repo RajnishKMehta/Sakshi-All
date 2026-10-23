@@ -56,6 +56,7 @@ import kotlinx.coroutines.CancellationException
 fun InfoBottomSheet(
     mediaDetails: MediaDetailsResponse,
     isDeletedMode: Boolean = false,
+    scheduledTime: Long = -1L,
     onDismissRequest: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -74,7 +75,7 @@ fun InfoBottomSheet(
                 "Extension" to mediaDetails.fileExtension.uppercase()
             )
             if (isDeletedMode) {
-                baseInfo.add("Deletion Scheduled" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(mediaDetails.createdTime)))
+                baseInfo.add("Deletion Scheduled" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(scheduledTime)))
             } else {
                 baseInfo.add("Created Time" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(mediaDetails.createdTime)))
             }
@@ -234,7 +235,7 @@ fun InfoBottomSheet(
                     }
                     if (isDeletedMode) {
                         item {
-                            RemainingTimeCountdown(scheduledTime = mediaDetails.createdTime)
+                            RemainingTimeCountdown(scheduledTime = scheduledTime)
                         }
                     }
 
