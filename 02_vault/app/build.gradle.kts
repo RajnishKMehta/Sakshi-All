@@ -19,8 +19,8 @@ android {
         applicationId = "rajnishkmehta.sakshi.vault"
         minSdk = 29
         targetSdk = 37
-        versionCode = 5
-        versionName = "1.0.0-RC.1"
+        versionCode = 6
+        versionName = "1.0.0-RC.2"
     }
 
     buildFeatures {
