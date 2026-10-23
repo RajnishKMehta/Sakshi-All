@@ -16,7 +16,8 @@ import androidx.annotation.OptIn
  * Factory class for creating instances of [FragmentedMedia3Muxer].
  *
  * Provides an initialization mechanism to supply custom fragmented MP4 muxers
- * for video capturing workflows.
+ * for video capturing workflows. This allows CameraX to utilize the Media3-based
+ * fragmented MP4 muxer instead of its default muxer.
  */
 @OptIn(UnstableApi::class)
 class FragmentedMedia3MuxerFactory : MuxerFactory {

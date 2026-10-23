@@ -16,12 +16,22 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import rajnishkmehta.sakshi.camera.R
 
+/**
+ * Adapter for displaying a list of installed applications (e.g., Vault candidates).
+ *
+ * @param onClick A callback invoked when an application item is clicked.
+ */
 class VaultAppAdapter(
     private val onClick: (AppInfo) -> Unit
 ) : RecyclerView.Adapter<VaultAppAdapter.ViewHolder>() {
 
     private var apps: List<AppInfo> = emptyList()
 
+    /**
+     * Submits a new list of applications to be displayed and triggers a UI refresh.
+     *
+     * @param newApps The new list of [AppInfo] items.
+     */
     fun submitList(newApps: List<AppInfo>) {
         apps = newApps
         notifyDataSetChanged()

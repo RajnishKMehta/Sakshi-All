@@ -1947,14 +1947,32 @@ open class MainActivity : AppCompatActivity(),
         }
     }
 
+    /**
+     * Grants temporary read URI permission to the Vault application for a specific file.
+     *
+     * @param fileId The unique identifier of the file (used for tracking, though not strictly in the Android API call).
+     * @param uri The URI of the file to grant access to.
+     */
     fun grantVaultUriPermission(fileId: String, uri: Uri) {
         grantUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
+    /**
+     * Revokes temporary read URI permission from the Vault application for a specific file.
+     *
+     * @param fileId The unique identifier of the file.
+     * @param uri The URI of the file to revoke access from.
+     */
     fun revokeVaultUriPermission(fileId: String, uri: Uri) {
         revokeUriPermission(camConfig.vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
+    /**
+     * Handles the completion of an AV synchronization copy operation.
+     * Stops the synchronization on the SDK side and revokes the temporary URI permissions.
+     *
+     * @param fileId The unique identifier of the synchronized file.
+     */
     fun handleCopyDone(fileId: String) {
         lifecycleScope.launch {
             val result = sakshiClient.stopAVSync(fileId)

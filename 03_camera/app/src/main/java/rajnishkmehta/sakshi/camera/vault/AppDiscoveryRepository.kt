@@ -11,8 +11,18 @@ import android.content.pm.PackageManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Repository responsible for discovering installed applications on the device.
+ * Used primarily to find potential Vault applications.
+ */
 class AppDiscoveryRepository(private val context: Context) {
 
+    /**
+     * Retrieves a list of all installed applications, excluding system apps.
+     * Applications with launcher activities are prioritized or flagged differently.
+     *
+     * @return A list of [AppInfo] representing installed applications.
+     */
     suspend fun getInstalledApplications(): List<AppInfo> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
 

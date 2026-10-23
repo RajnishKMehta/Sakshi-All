@@ -562,6 +562,11 @@ class VideoCapturer(private val mActivity: MainActivity) {
     /**
      * Submits a finalized normal MP4 recording to Vault with the SDK's `copyFile` API.
      * Read access to [uri] is granted to Vault for the copy and revoked once Vault acknowledges it.
+     *
+     * Note: This method does not guarantee successful synchronization in all failure cases.
+     * The application process might be killed before the copy finishes.
+     *
+     * @param uri The URI of the finalized video recording.
      */
     private fun submitFinishedRecordingToVault(uri: Uri) {
         val ctx = mActivity
