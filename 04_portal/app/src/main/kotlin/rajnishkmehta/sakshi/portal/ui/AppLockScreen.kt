@@ -35,6 +35,15 @@ import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
+/**
+ * Displays the application lock screen to prevent unauthorized access.
+ *
+ * Uses [BiometricPrompt] to request user authentication via device credentials or biometrics.
+ *
+ * @param appLockManager Manager handling the locked state of the application.
+ * @param settingsRepository Repository containing user preferences.
+ * @param modifier Modifier to be applied to the lock screen container.
+ */
 @Composable
 fun AppLockScreen(
     appLockManager: AppLockManager,

@@ -62,12 +62,18 @@ class AppLockManager(
         backgroundTime = SystemClock.elapsedRealtime()
     }
 
+    /**
+     * Unlocks the application and resets the background time tracker.
+     */
     fun unlock() {
         _isLocked.value = false
         backgroundTime = 0L // Reset background time on unlock
         Log.i("AppLockManager", "App unlocked.")
     }
 
+    /**
+     * Manually forces the application into a locked state if the lock feature is enabled.
+     */
     fun lock() {
         coroutineScope.launch {
             val enabled = settingsRepository.appLockEnabledFlow.first()

@@ -15,6 +15,12 @@ import kotlinx.coroutines.launch
 import rajnishkmehta.sakshi.portal.R
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 
+/**
+ * Dialog displayed on first launch to allow the user to enable the App Lock feature.
+ *
+ * @param settingsRepository Repository used to save the user choice.
+ * @param onDismiss Callback invoked when the dialog is dismissed or an option is selected.
+ */
 @Composable
 fun AppLockSetupDialog(
     settingsRepository: SettingsRepository,
@@ -46,8 +52,7 @@ fun AppLockSetupDialog(
                     )
 
                     if (canAuthenticate == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
-                                Toast.makeText(context, context.resources.getString(R.string.app_lock_setup_error_no_credentials), Toast.LENGTH_LONG).show()
-
+                        Toast.makeText(context, context.resources.getString(R.string.app_lock_setup_error_no_credentials), Toast.LENGTH_LONG).show()
                     } else {
                         coroutineScope.launch {
                             settingsRepository.setAppLockEnabled(true)

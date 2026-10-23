@@ -17,6 +17,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
+/**
+ * Composable that draws and animates a padlock icon using Canvas.
+ *
+ * @param isUnlocked Whether the lock is in the unlocked state, triggering the open animation.
+ * @param modifier Modifier to be applied to the canvas.
+ */
 @Composable
 fun LockAnimation(isUnlocked: Boolean, modifier: Modifier = Modifier) {
     val shackleOffset = remember { Animatable(0f) }
