@@ -61,6 +61,8 @@ class MainActivity : ComponentActivity() {
                             GalleryScreen(
                                 settingsRepository = settingsRepository,
                                 removedMediaStore = removedMediaStore,
+                                onSettingsClick = { backStack.add(SettingsScreenRoute) },
+                                onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
                                 onMediaClick = { fileId, mediaType -> backStack.add(MediaViewerRoute(fileId, mediaType, true)) },
                                 isDeletedMode = true,
                                 onBackClick = { backStack.removeLastOrNull() }
