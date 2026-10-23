@@ -111,6 +111,9 @@ data object SettingsScreenRoute : NavKey
 @Serializable
 data object VaultSelectionScreenRoute : NavKey
 
+/**
+ * Navigation key for the Scheduled Deletions screen.
+ */
 @Serializable
 data object ScheduledDeletionsScreenRoute : NavKey
 
