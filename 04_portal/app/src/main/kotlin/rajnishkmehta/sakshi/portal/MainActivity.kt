@@ -53,13 +53,24 @@ class MainActivity : ComponentActivity() {
                                 removedMediaStore = removedMediaStore,
                                 onSettingsClick = { backStack.add(SettingsScreenRoute) },
                                 onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
-                                onMediaClick = { fileId, mediaType -> backStack.add(MediaViewerRoute(fileId, mediaType)) }
+                                onMediaClick = { fileId, mediaType -> backStack.add(MediaViewerRoute(fileId, mediaType, false)) },
+                                onScheduledDeletionsClick = { backStack.add(ScheduledDeletionsScreenRoute) }
+                            )
+                        }
+                        entry<ScheduledDeletionsScreenRoute> {
+                            GalleryScreen(
+                                settingsRepository = settingsRepository,
+                                removedMediaStore = removedMediaStore,
+                                onMediaClick = { fileId, mediaType -> backStack.add(MediaViewerRoute(fileId, mediaType, true)) },
+                                isDeletedMode = true,
+                                onBackClick = { backStack.removeLastOrNull() }
                             )
                         }
                         entry<MediaViewerRoute> { route ->
                             MediaViewerScreen(
                                 fileId = route.fileId,
                                 mediaType = route.mediaType,
+                                isDeletedMode = route.isDeletedMode,
                                 settingsRepository = settingsRepository,
                                 removedMediaStore = removedMediaStore,
                                 onBackClick = { backStack.removeLastOrNull() }
@@ -97,12 +108,16 @@ data object SettingsScreenRoute : NavKey
 @Serializable
 data object VaultSelectionScreenRoute : NavKey
 
+@Serializable
+data object ScheduledDeletionsScreenRoute : NavKey
+
 
 /**
  * Navigation key for the Media Viewer screen.
  *
  * @property fileId The unique identifier of the media file to view.
  * @property mediaType The type of media (e.g., photo, video) for rendering logic.
+ * @property isDeletedMode Whether the viewer is opened from the scheduled deletions screen.
  */
 @Serializable
-data class MediaViewerRoute(val fileId: String, val mediaType: MediaType) : NavKey
+data class MediaViewerRoute(val fileId: String, val mediaType: MediaType, val isDeletedMode: Boolean = false) : NavKey

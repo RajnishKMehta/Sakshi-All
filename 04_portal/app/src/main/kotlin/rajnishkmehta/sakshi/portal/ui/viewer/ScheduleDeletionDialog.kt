@@ -50,3 +50,32 @@ fun ScheduleDeletionDialog(
         }
     )
 }
+
+@Composable
+fun RecoverMediaDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(painterResource(R.drawable.ic_restore), contentDescription = null) },
+        title = { Text(stringResource(R.string.viewer_recover_title)) },
+        text = { Text(stringResource(R.string.viewer_recover_message)) },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text("Recover")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.viewer_schedule_deletion_cancel))
+            }
+        }
+    )
+}
