@@ -71,4 +71,19 @@ interface MediaRecordDao {
             "AND deletionScheduledAt = :scheduledAt"
     )
     suspend fun deleteScheduledRecord(fileId: String, scheduledAt: Long): Int
+
+    /**
+     * Atomically recovers a record from [MediaState.DELETE] to [MediaState.COMPLETED]
+     * and clears its deletion scheduling timestamps.
+     *
+     * @return the number of updated rows: 1 if the record was recovered, 0 otherwise.
+     */
+    @Query(
+        "UPDATE media_records SET state = '" + MediaState.COMPLETED + "', " +
+            "deletionScheduledAt = NULL, " +
+            "deletionScheduledElapsedRealtime = NULL, " +
+            "deletionScheduledBootCount = NULL " +
+            "WHERE fileId = :fileId AND state = '" + MediaState.DELETE + "'"
+    )
+    suspend fun recoverScheduledRecord(fileId: String): Int
 }

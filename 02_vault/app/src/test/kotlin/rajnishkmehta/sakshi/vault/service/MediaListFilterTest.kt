@@ -39,4 +39,45 @@ class MediaListFilterTest {
         val records = listOf(record("kept_0001", MediaState.COMPLETED), record("gone_0001", MediaState.DELETE))
         assertEquals(listOf("kept_0001"), filterListableRecords(records).map { it.fileId })
     }
+
+    @Test
+    fun `formatMediaList uses correct timestamp selector for listMedia`() {
+        val records = listOf(
+            MediaRecord(
+                fileId = "file1",
+                originalUri = "",
+                vaultPath = null,
+                mediaType = "PHOTO",
+                fileExtension = "jpg",
+                state = MediaState.COMPLETED,
+                lastCopiedOffset = 0,
+                createdTime = 100,
+                updatedTime = 150,
+                deletionScheduledAt = 200
+            )
+        )
+        val json = formatMediaList(records) { it.createdTime }
+        org.junit.jupiter.api.Assertions.assertTrue(json.contains("\"timestamp\":100"))
+    }
+
+    @Test
+    fun `formatMediaList uses correct timestamp selector for listDeletedMedia`() {
+        val records = listOf(
+            MediaRecord(
+                fileId = "file1",
+                originalUri = "",
+                vaultPath = null,
+                mediaType = "PHOTO",
+                fileExtension = "jpg",
+                state = MediaState.DELETE,
+                lastCopiedOffset = 0,
+                createdTime = 100,
+                updatedTime = 150,
+                deletionScheduledAt = 200
+            )
+        )
+        val json = formatMediaList(records) { it.deletionScheduledAt ?: it.updatedTime }
+        org.junit.jupiter.api.Assertions.assertTrue(json.contains("\"timestamp\":200"))
+    }
+
 }
