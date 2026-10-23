@@ -7,9 +7,10 @@ package rajnishkmehta.sakshi.vault.storage
 import java.io.InputStream
 
 /**
- * Interface defining modular storage operations for the Sakshi Vault.
- * This abstracts how and where media files (photos, videos) are saved and appended,
- * making it easy to swap in encryption or cloud backends in the future.
+ * Contract defining modular storage operations for the Sakshi Vault.
+ *
+ * Abstracts how and where media files are saved, appended, and deleted within the Vault's
+ * internal storage, facilitating potential future integrations like encryption layers.
  */
 interface StorageManager {
 

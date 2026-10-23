@@ -15,6 +15,12 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CopyOnWriteArrayList
 
+/**
+ * Debug-specific logging utility for the Vault application.
+ *
+ * Provides standard `Log.d` and `Log.e` capabilities, while also maintaining an in-memory buffer
+ * of recent logs and supporting continuous log file collection for diagnostics.
+ */
 object AppLog {
     private const val MAX_BUFFER_SIZE = 2000
     private val liveBuffer = ConcurrentLinkedQueue<String>()

@@ -4,6 +4,12 @@
  */
 package rajnishkmehta.sakshi.vault
 
+/**
+ * Release-specific logging utility for the Vault application.
+ *
+ * Stub implementation that discards all debug logs and minimally processes error logs,
+ * ensuring no sensitive information is leaked in production builds.
+ */
 object AppLog {
 
     fun d(tag: String, msg: String) = Unit

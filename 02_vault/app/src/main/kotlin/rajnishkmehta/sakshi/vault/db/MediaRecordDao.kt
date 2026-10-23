@@ -16,22 +16,54 @@ import androidx.room3.Update
 @Dao
 interface MediaRecordDao {
 
+    /**
+     * Inserts a new [MediaRecord] into the database. If a record with the same [MediaRecord.fileId] already exists,
+     * it will be replaced.
+     *
+     * @param record The [MediaRecord] to insert or replace.
+     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecord(record: MediaRecord)
 
+    /**
+     * Updates an existing [MediaRecord] in the database.
+     *
+     * @param record The [MediaRecord] with updated fields.
+     */
     @Update
     suspend fun updateRecord(record: MediaRecord)
 
+    /**
+     * Retrieves a [MediaRecord] by its unique identifier.
+     *
+     * @param fileId The unique identifier of the record.
+     * @return The matching [MediaRecord], or `null` if not found.
+     */
     @Query("SELECT * FROM media_records WHERE fileId = :fileId")
     suspend fun getRecord(fileId: String): MediaRecord?
 
+    /**
+     * Retrieves all [MediaRecord]s stored in the database, ordered by their creation time in descending order.
+     *
+     * @return A list of all [MediaRecord]s.
+     */
     @Query("SELECT * FROM media_records ORDER BY createdTime DESC")
     suspend fun getAllRecords(): List<MediaRecord>
 
-    /** Returns all records currently in [state]. */
+    /**
+     * Retrieves all [MediaRecord]s that match the specified [MediaState].
+     *
+     * @param state The [MediaState] string to filter by.
+     * @return A list of matching [MediaRecord]s.
+     */
     @Query("SELECT * FROM media_records WHERE state = :state")
     suspend fun getRecordsInState(state: String): List<MediaRecord>
 
+    /**
+     * Deletes a [MediaRecord] by its unique identifier.
+     *
+     * @param fileId The unique identifier of the record to delete.
+     */
     @Query("DELETE FROM media_records WHERE fileId = :fileId")
     suspend fun deleteRecord(fileId: String)
 

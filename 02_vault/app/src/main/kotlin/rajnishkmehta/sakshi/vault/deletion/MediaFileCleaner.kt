@@ -22,6 +22,12 @@ import java.io.IOException
  *
  * @param filesDir The application's private files directory (`Context.filesDir`).
  */
+/**
+ * Responsible for permanently removing the files associated with a [MediaRecord] from storage.
+ *
+ * Should only be called after all locking and eligibility checks have passed. Failures to delete
+ * files throw an exception, signaling the cleanup coordinator to retry later.
+ */
 class MediaFileCleaner(private val filesDir: File) {
 
     private val tag = "MediaFileCleaner"

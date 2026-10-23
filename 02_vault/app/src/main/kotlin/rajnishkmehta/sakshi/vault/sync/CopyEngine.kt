@@ -20,6 +20,12 @@ import java.io.File
  * It coordinates reading from source Uris with retry logic, writing to modular storage,
  * and maintaining the synchronization state in the Room database.
  */
+/**
+ * Engine responsible for copying media bytes from external URIs into the Vault's internal storage.
+ *
+ * Coordinates database state transitions, offset management for incremental resumes, and
+ * actual file I/O operations. Integrates with [StorageManager] for low-level storage tasks.
+ */
 class CopyEngine(
     private val context: Context,
     private val database: VaultDatabase,

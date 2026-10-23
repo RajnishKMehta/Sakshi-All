@@ -27,6 +27,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * A debug-only activity that provides a simple UI to view and collect application logs.
+ *
+ * Allows developers to monitor the live log buffer from [AppLog], toggle continuous log
+ * collection to persistent files, and export those files via an intent chooser.
+ */
 class DebugLogActivity : Activity() {
 
     private lateinit var rootLayout: LinearLayout

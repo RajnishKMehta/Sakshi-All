@@ -23,7 +23,10 @@ import kotlinx.coroutines.guava.await
 import rajnishkmehta.sakshi.vault.AppLog as Log
 
 /**
- * Responsible for generating and storing thumbnails for fully copied media files.
+ * Utility object responsible for generating and caching WebP thumbnails for fully synced media files.
+ *
+ * Thumbnails are created asynchronously during synchronization finalization and are stored
+ * in a dedicated `thumbnail` directory within the Vault's internal storage.
  */
 object ThumbnailManager {
     private const val TAG = "ThumbnailManager"

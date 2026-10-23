@@ -12,7 +12,11 @@ import rajnishkmehta.sakshi.vault.db.MediaState
 import rajnishkmehta.sakshi.vault.sync.MediaFileLocks
 
 /**
- * Result of scheduling a batch recovery operation.
+ * Outcome of scheduling multiple media files for recovery, matching the SDK's
+ * `BatchMediaRecoverResponse` contract.
+ *
+ * @property successfulIds Identifiers that were successfully recovered, in request order.
+ * @property failedIds Identifiers that were rejected, mapped to the rejection reason.
  */
 data class BatchRecoveryResult(
     val successfulIds: List<String>,

@@ -19,6 +19,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param scope Scope that owns the background sweep, typically the service scope.
  * @param cleanup Performs one cleanup sweep.
  */
+/**
+ * Triggers a cleanup sweep in response to an IPC ping or generic lifecycle event.
+ *
+ * This acts as a fallback to [MediaCleanupScheduler], ensuring cleanup eventually runs even
+ * if background jobs are severely delayed or disabled by the OS, provided the app is started.
+ */
 class PingCleanupTrigger(
     private val scope: CoroutineScope,
     private val cleanup: suspend () -> Unit
