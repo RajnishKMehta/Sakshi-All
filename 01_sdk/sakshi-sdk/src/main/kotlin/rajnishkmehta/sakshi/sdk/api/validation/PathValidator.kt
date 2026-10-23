@@ -18,6 +18,9 @@ public object PathValidator {
 
     /**
      * Validates that the media type is one of the strictly allowed values.
+     *
+     * @param mediaType The media type string to validate.
+     * @throws IllegalArgumentException If the media type is not allowed.
      */
     public fun validateMediaType(mediaType: String) {
         if (mediaType !in ALLOWED_MEDIA_TYPES) {
@@ -29,6 +32,9 @@ public object PathValidator {
      * Validates the fileId as a safe filename component.
      * Allowed: lowercase a-z, digits 0-9, underscore _, hyphen -
      * Must be between 8 and 128 characters, no path separators or spaces.
+     *
+     * @param fileId The file ID to validate.
+     * @throws IllegalArgumentException If the file ID is invalid.
      */
     public fun validateFileId(fileId: String) {
         if (fileId.length < 8) {
@@ -46,6 +52,9 @@ public object PathValidator {
     /**
      * Validates the file extension.
      * Must be between 1 and 12 characters, not start/end with dot, no path separators/spaces.
+     *
+     * @param extension The file extension to validate.
+     * @throws IllegalArgumentException If the file extension is invalid.
      */
     public fun validateFileExtension(extension: String) {
         if (extension.length < 1) {
@@ -69,6 +78,11 @@ public object PathValidator {
 
     /**
      * Validates all components for a path construction.
+     *
+     * @param fileId The file ID to validate.
+     * @param mediaType The media type to validate.
+     * @param fileExtension The file extension to validate.
+     * @throws IllegalArgumentException If any component is invalid.
      */
     public fun validatePathComponents(fileId: String, mediaType: String, fileExtension: String) {
         validateMediaType(mediaType)
@@ -78,6 +92,10 @@ public object PathValidator {
 
     /**
      * Defense-in-depth: Ensure the constructed canonical path stays within the intended root directory.
+     *
+     * @param rootDirectory The intended root directory.
+     * @param constructedFile The constructed file to validate.
+     * @throws SecurityException If a path traversal attempt is detected.
      */
     public fun validateDestinationPath(rootDirectory: File, constructedFile: File) {
         val canonicalRoot = rootDirectory.canonicalPath

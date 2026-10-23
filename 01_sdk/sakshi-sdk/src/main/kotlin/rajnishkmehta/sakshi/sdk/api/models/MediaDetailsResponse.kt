@@ -11,12 +11,12 @@ package rajnishkmehta.sakshi.sdk.api.models
  * @property fileId The unique identifier of the media file.
  * @property mediaType The type of media (e.g., "PHOTO", "VIDEO").
  * @property fileExtension The extension of the media file.
- * @property createdTime The creation timestamp of the media file.
+ * @property createdTime The creation timestamp of the media file in milliseconds since epoch.
  */
 public data class MediaDetailsResponse(
-    val contentUri: String,
-    val fileId: String,
-    val mediaType: String,
-    val fileExtension: String,
-    val createdTime: Long
+    public val contentUri: String,
+    public val fileId: String,
+    public val mediaType: String,
+    public val fileExtension: String,
+    public val createdTime: Long
 )

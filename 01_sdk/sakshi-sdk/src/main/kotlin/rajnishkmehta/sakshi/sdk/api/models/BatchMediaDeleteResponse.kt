@@ -13,6 +13,6 @@ package rajnishkmehta.sakshi.sdk.api.models
  * @property failedIds File IDs whose scheduling was rejected, mapped to the error message.
  */
 public data class BatchMediaDeleteResponse(
-    val successfulIds: List<String>,
-    val failedIds: Map<String, String>
+    public val successfulIds: List<String>,
+    public val failedIds: Map<String, String>
 )
