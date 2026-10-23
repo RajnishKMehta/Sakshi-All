@@ -10,6 +10,10 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 
+/**
+ * A custom view that draws a semi-transparent scrim with a clear, framed square
+ * in the center. Used as a visual overlay to guide the user when scanning QR codes.
+ */
 class QROverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
     companion object {
         const val RATIO = 0.6f
@@ -35,6 +39,9 @@ class QROverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var boxRect: RectF? = null
 
+    /**
+     * The size of the square viewfinder in pixels.
+     */
     var size: Float = 0f
         private set
 

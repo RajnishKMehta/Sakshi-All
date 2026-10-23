@@ -19,6 +19,11 @@ import com.google.android.material.color.DynamicColors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
+/**
+ * The main application class for the Sakshi Camera app.
+ * Handles application-level initialization, location tracking logic, lifecycle monitoring,
+ * and background cleanup tasks like deleting stale pending recordings.
+ */
 class App : Application() {
 
     companion object {
@@ -74,6 +79,11 @@ class App : Application() {
         }
     }
 
+    /**
+     * Checks if any location provider is currently active and enabled.
+     *
+     * @return True if at least one location provider is enabled, false otherwise.
+     */
     fun isAnyLocationProvideActive(): Boolean {
         if (!locationManager.isLocationEnabled) return false
         val providers = locationManager.allProviders

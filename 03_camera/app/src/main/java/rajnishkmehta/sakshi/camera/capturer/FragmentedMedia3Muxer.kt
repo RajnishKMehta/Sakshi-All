@@ -32,6 +32,9 @@ import androidx.media3.common.C
  * and manages the lifecycle of Fragmented MP4 (fMP4) muxing. It securely handles
  * file descriptors. It assumes the caller provides properly interleaved samples with
  * monotonic timestamps as required by Media3.
+ *
+ * NOTE: This implementation cannot guarantee crash safety on its own; crash resilience
+ * is a property of the fMP4 format itself, provided the stream is incrementally synchronized.
  */
 @UnstableApi
 class FragmentedMedia3Muxer : Muxer {

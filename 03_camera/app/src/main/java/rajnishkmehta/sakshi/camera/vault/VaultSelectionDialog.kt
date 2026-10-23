@@ -34,6 +34,11 @@ import rajnishkmehta.sakshi.camera.CamConfig
 import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import rajnishkmehta.sakshi.camera.R
 
+/**
+ * A BottomSheetDialogFragment that allows the user to discover and select a Vault app.
+ * It filters installed applications, verifies compatibility upon selection, and returns
+ * the selected package name via the Fragment Result API.
+ */
 class VaultSelectionDialog : BottomSheetDialogFragment() {
 
     private val viewModel: VaultSelectionViewModel by viewModels()
@@ -41,6 +46,10 @@ class VaultSelectionDialog : BottomSheetDialogFragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
 
+    /**
+     * Indicates whether the user must select a Vault app to proceed.
+     * If true, dismissing the dialog via the back button requires double-pressing.
+     */
     var isMandatory: Boolean = false
     private var backPressedOnce = false
 

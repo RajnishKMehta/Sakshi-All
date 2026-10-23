@@ -33,6 +33,14 @@ fun MaterialAlertDialogBuilder.showIgnoringShortEdgeMode(): AlertDialog =
     this.create().showIgnoringShortEdgeMode()
 
 
+/**
+ * Shows a custom message dialog using a MaterialAlertDialogBuilder.
+ *
+ * @param iconResId The resource ID for the icon to display.
+ * @param message The text message to display in the dialog.
+ * @param buttonText Optional text for the single action button.
+ * @param onDismiss Optional callback invoked when the dialog is dismissed.
+ */
 fun Context.showCustomMessageDialog(
     iconResId: Int,
     message: String,

@@ -42,8 +42,20 @@ class OptionsSelectionDialog : DialogFragment() {
         private const val ARG_SELECTED_INDEX = "arg_selected_index"
         private const val ARG_REQUEST_KEY = "arg_request_key"
 
+        /**
+         * The key used to extract the selected index from the result bundle.
+         */
         const val RESULT_SELECTED_INDEX = "result_selected_index"
 
+        /**
+         * Creates a new instance of the OptionsSelectionDialog.
+         *
+         * @param titleResId The resource ID for the dialog's title.
+         * @param options An array of strings representing the options to display.
+         * @param selectedIndex The index of the currently selected option.
+         * @param requestKey The request key to use when returning the result.
+         * @return A new instance of OptionsSelectionDialog.
+         */
         fun newInstance(titleResId: Int, options: Array<String>, selectedIndex: Int, requestKey: String): OptionsSelectionDialog {
             val fragment = OptionsSelectionDialog()
             val b = Bundle()
