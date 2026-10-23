@@ -43,8 +43,6 @@ fun AppLockScreen(
     val context = LocalContext.current
     val activity = context as? FragmentActivity
 
-    val biometricAuthEnabled by settingsRepository.biometricAuthEnabledFlow.collectAsState(initial = true)
-
     var showPrompt by remember { mutableStateOf(true) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
     var actionRequired by remember { mutableStateOf<Boolean>(false) }
@@ -52,12 +50,8 @@ fun AppLockScreen(
     val promptTitle = stringResource(R.string.app_lock_prompt_title)
     val noCredentialsMsg = stringResource(R.string.app_lock_no_credentials)
 
-    val promptInfo = remember(biometricAuthEnabled, promptTitle) {
-        val allowedAuthenticators = if (biometricAuthEnabled) {
-            BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        } else {
-            BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        }
+    val promptInfo = remember(promptTitle) {
+        val allowedAuthenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
         BiometricPrompt.PromptInfo.Builder()
             .setTitle(promptTitle)

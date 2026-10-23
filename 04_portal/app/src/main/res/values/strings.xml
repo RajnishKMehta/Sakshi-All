@@ -105,8 +105,6 @@
     <string name="settings_security_title">Security</string>
     <string name="settings_app_lock_title">App Lock</string>
     <string name="settings_app_lock_desc">Require authentication to access Sākṣī Portal</string>
-    <string name="settings_biometric_title">Biometric Authentication</string>
-    <string name="settings_biometric_desc">Use fingerprint or face recognition</string>
     <string name="settings_timeout_title">Automatically lock after</string>
     <string name="settings_timeout_desc">Time away before requiring authentication</string>
 

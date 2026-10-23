@@ -26,7 +26,6 @@ class SettingsRepository(private val context: Context) {
         val DYNAMIC_COLOR_KEY = booleanPreferencesKey("dynamic_color")
         val VAULT_PACKAGE_KEY = stringPreferencesKey("vault_package")
         val APP_LOCK_ENABLED_KEY = booleanPreferencesKey("app_lock_enabled")
-        val BIOMETRIC_AUTH_ENABLED_KEY = booleanPreferencesKey("biometric_auth_enabled")
         val APP_LOCK_TIMEOUT_MS_KEY = longPreferencesKey("app_lock_timeout_ms")
         val APP_LOCK_SETUP_COMPLETED_KEY = booleanPreferencesKey("app_lock_setup_completed")
     }
@@ -46,10 +45,6 @@ class SettingsRepository(private val context: Context) {
             preferences[APP_LOCK_ENABLED_KEY] ?: false
         }
 
-    val biometricAuthEnabledFlow: Flow<Boolean> = context.dataStore.data
-        .map { preferences ->
-            preferences[BIOMETRIC_AUTH_ENABLED_KEY] ?: true
-        }
 
     val appLockTimeoutMsFlow: Flow<Long> = context.dataStore.data
         .map { preferences ->
@@ -91,11 +86,6 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    suspend fun setBiometricAuthEnabled(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[BIOMETRIC_AUTH_ENABLED_KEY] = enabled
-        }
-    }
 
     suspend fun setAppLockTimeoutMs(timeoutMs: Long) {
         context.dataStore.edit { preferences ->

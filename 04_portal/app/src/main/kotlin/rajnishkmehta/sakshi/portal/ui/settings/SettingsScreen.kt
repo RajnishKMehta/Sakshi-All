@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.res.painterResource
@@ -28,12 +29,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,7 +66,6 @@ fun SettingsScreen(
     val vaultPackage by repository.vaultPackageFlow.collectAsState(initial = null)
 
     val appLockEnabled by repository.appLockEnabledFlow.collectAsState(initial = false)
-    val biometricAuthEnabled by repository.biometricAuthEnabledFlow.collectAsState(initial = true)
     val appLockTimeoutMs by repository.appLockTimeoutMsFlow.collectAsState(initial = 60000L)
 
     val context = LocalContext.current
@@ -201,7 +200,6 @@ fun SettingsScreen(
                             )
                             if (canAuthenticate == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
                                 Toast.makeText(context, context.resources.getString(R.string.app_lock_setup_error_no_credentials), Toast.LENGTH_LONG).show()
-
                                 return@Switch
                             }
                         }
@@ -211,30 +209,18 @@ fun SettingsScreen(
             }
 
             if (appLockEnabled) {
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.settings_biometric_title), style = MaterialTheme.typography.bodyLarge)
-                        Text(stringResource(R.string.settings_biometric_desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.settings_timeout_title), style = MaterialTheme.typography.bodyLarge)
+                        Text(stringResource(R.string.settings_timeout_desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
+
                     Spacer(modifier = Modifier.width(16.dp))
-                    Switch(
-                        checked = biometricAuthEnabled,
-                        onCheckedChange = { isChecked ->
-                            coroutineScope.launch { repository.setBiometricAuthEnabled(isChecked) }
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.settings_timeout_title), style = MaterialTheme.typography.bodyLarge)
-                    Text(stringResource(R.string.settings_timeout_desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     var expanded by remember { mutableStateOf(false) }
 
@@ -248,17 +234,13 @@ fun SettingsScreen(
 
                     val currentSelectionText = timeoutOptions.find { it.first == appLockTimeoutMs }?.second ?: stringResource(R.string.timeout_1m)
 
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(
-                            onClick = { expanded = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
+                    Box {
+                        OutlinedButton(onClick = { expanded = true }) {
                             Text(currentSelectionText)
                         }
                         DropdownMenu(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier.fillMaxWidth(0.9f)
+                            onDismissRequest = { expanded = false }
                         ) {
                             timeoutOptions.forEach { (duration, text) ->
                                 DropdownMenuItem(
