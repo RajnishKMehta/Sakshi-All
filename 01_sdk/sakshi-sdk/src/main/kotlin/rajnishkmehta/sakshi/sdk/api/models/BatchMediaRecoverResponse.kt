@@ -13,6 +13,6 @@ package rajnishkmehta.sakshi.sdk.api.models
  * @property failedIds File IDs whose recovery was rejected (e.g., invalid ID, already permanently deleted), mapped to the error message.
  */
 public data class BatchMediaRecoverResponse(
-    val successfulIds: List<String>,
-    val failedIds: Map<String, String>
+    public val successfulIds: List<String>,
+    public val failedIds: Map<String, String>
 )

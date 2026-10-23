@@ -29,6 +29,7 @@ public interface SakshiClient {
      * Performs a ping health check against Vault to verify connection and service availability.
      *
      * @return [SakshiResult] containing [VaultPingResponse] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun pingVault(): SakshiResult<VaultPingResponse>
 
@@ -37,6 +38,7 @@ public interface SakshiClient {
      *
      * @param request [FileCopyRequest] detailing file URI, ID, and metadata.
      * @return [SakshiResult] containing [CopyDoneAck] acknowledgement or [SakshiError] failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun copyFile(request: FileCopyRequest): SakshiResult<CopyDoneAck>
 
@@ -56,6 +58,7 @@ public interface SakshiClient {
      *
      * @param fileId Unique identifier of audio/video recording.
      * @return [SakshiResult] containing [CopyDoneAck] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun stopAVSync(fileId: String): SakshiResult<CopyDoneAck>
 
@@ -64,6 +67,7 @@ public interface SakshiClient {
      *
      * @param fileId Unique identifier of audio/video recording.
      * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun pauseAVSync(fileId: String): SakshiResult<Unit>
 
@@ -72,6 +76,7 @@ public interface SakshiClient {
      *
      * @param fileId Unique identifier of audio/video recording.
      * @return [SakshiResult] containing [Unit] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun resumeAVSync(fileId: String): SakshiResult<Unit>
 
@@ -80,13 +85,18 @@ public interface SakshiClient {
      *
      * @param fileId Unique identifier of audio/video recording.
      * @return [SakshiResult] containing [RecordingQueryResponse] or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun isAVSynced(fileId: String): SakshiResult<RecordingQueryResponse>
 
     /**
      * Lists all stored media files grouped by media type in JSON format.
      *
+     * This method retrieves a JSON string representing the current media catalog,
+     * excluding any media that is currently scheduled for deletion.
+     *
      * @return [SakshiResult] containing the raw JSON string on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun listMedia(): SakshiResult<String>
 
@@ -96,6 +106,7 @@ public interface SakshiClient {
      * Returns only media whose state is scheduled for deletion. Normally listable media are excluded.
      *
      * @return [SakshiResult] containing the raw JSON string on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun listDeletedMedia(): SakshiResult<String>
 
@@ -104,6 +115,7 @@ public interface SakshiClient {
      *
      * @param fileId The unique identifier of the media.
      * @return [SakshiResult] containing [MediaDetailsResponse] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun getMedia(fileId: String): SakshiResult<MediaDetailsResponse>
 
@@ -111,6 +123,7 @@ public interface SakshiClient {
      * Retrieves the ContentProvider URI template for accessing media thumbnails.
      *
      * @return [SakshiResult] containing the URI template string on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
 
     public suspend fun getThumbnail(): SakshiResult<String>
@@ -126,17 +139,21 @@ public interface SakshiClient {
      *
      * @param fileId The unique identifier of the media.
      * @return [SakshiResult] containing [Unit] once Vault accepted the request, or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun deleteMedia(fileId: String): SakshiResult<Unit>
 
     /**
      * Schedules multiple media files for deletion in Vault in a single batch.
      *
-     * Each file is handled like the single-file [deleteMedia] overload. Per-file results are
+     * Each file is handled like the single-file [deleteMedia] overload. If the provided list is
+     * empty, the operation immediately returns a successful response with empty tracking lists.
+     * Per-file results are
      * reported in [BatchMediaDeleteResponse.successfulIds] and [BatchMediaDeleteResponse.failedIds].
      *
      * @param fileIds The list of unique identifiers of the media files to schedule for deletion.
      * @return [SakshiResult] containing [BatchMediaDeleteResponse] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun deleteMedia(fileIds: List<String>): SakshiResult<BatchMediaDeleteResponse>
 
@@ -150,17 +167,21 @@ public interface SakshiClient {
      *
      * @param fileId The unique identifier of the media to recover.
      * @return [SakshiResult] containing [Unit] once Vault accepted the request, or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun recoverMedia(fileId: String): SakshiResult<Unit>
 
     /**
      * Recovers multiple media files previously scheduled for deletion in Vault in a single batch.
      *
-     * Each file is handled like the single-file [recoverMedia] overload. Per-file results are
+     * Each file is handled like the single-file [recoverMedia] overload. If the provided list is
+     * empty, the operation immediately returns a successful response with empty tracking lists.
+     * Per-file results are
      * reported in [BatchMediaRecoverResponse.successfulIds] and [BatchMediaRecoverResponse.failedIds].
      *
      * @param fileIds The list of unique identifiers of the media files to recover.
      * @return [SakshiResult] containing [BatchMediaRecoverResponse] on success or [SakshiError] on failure.
+     * @throws kotlinx.coroutines.CancellationException If the coroutine is cancelled.
      */
     public suspend fun recoverMedia(fileIds: List<String>): SakshiResult<BatchMediaRecoverResponse>
 

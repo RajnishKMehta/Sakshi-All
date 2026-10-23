@@ -57,8 +57,11 @@ public sealed interface SakshiResult<out T> {
 }
 
 /**
- * Transforms the success value using [transform] if this is a [Success],
- * or returns the original [Failure].
+ * Transforms the success value using [transform] if this is a [SakshiResult.Success],
+ * or returns the original [SakshiResult.Failure].
+ *
+ * @param transform The transformation function to apply.
+ *
  */
 public inline fun <T, R> SakshiResult<T>.map(transform: (T) -> R): SakshiResult<R> = when (this) {
     is SakshiResult.Success -> SakshiResult.Success(transform(data))
