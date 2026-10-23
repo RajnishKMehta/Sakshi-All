@@ -51,6 +51,14 @@ import androidx.compose.ui.Alignment
 import androidx.media3.common.Format
 import kotlinx.coroutines.CancellationException
 
+/**
+ * Bottom sheet displaying detailed metadata for a media item.
+ *
+ * @param mediaDetails The core media properties (name, size, type, location).
+ * @param isDeletedMode True if displaying info for a media item scheduled for deletion; affects metadata visibility.
+ * @param scheduledTime The timestamp when deletion was scheduled (used only when isDeletedMode is true).
+ * @param onDismissRequest Callback to dismiss the bottom sheet.
+ */
 @ExperimentalMaterial3Api
 @Composable
 fun InfoBottomSheet(
@@ -275,7 +283,7 @@ private fun InfoRow(key: String, value: String) {
 
 
 @Composable
-fun RemainingTimeCountdown(scheduledTime: Long) {
+private fun RemainingTimeCountdown(scheduledTime: Long) {
     var remainingText by remember { mutableStateOf("") }
     var isOverdue by remember { mutableStateOf(false) }
 

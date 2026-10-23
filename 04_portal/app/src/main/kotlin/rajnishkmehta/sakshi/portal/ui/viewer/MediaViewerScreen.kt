@@ -49,6 +49,8 @@ import androidx.compose.ui.platform.LocalResources
  *
  * @param fileId Unique identifier of the media to load.
  * @param mediaType The type of the media file, used to select the appropriate viewer component.
+ * @param isDeletedMode True if viewing an item scheduled for deletion; limits available actions (e.g., hiding delete button, showing recover option).
+ * @param scheduledTime Timestamp when deletion was scheduled, only applicable when isDeletedMode is true.
  * @param settingsRepository Repository for retrieving app settings like the selected Vault package.
  * @param removedMediaStore Store that must be the gallery's shared store to communicate successful deletions.
  * @param onBackClick Callback invoked to navigate back.

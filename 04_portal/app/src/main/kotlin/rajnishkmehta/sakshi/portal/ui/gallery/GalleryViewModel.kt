@@ -216,6 +216,7 @@ class GalleryViewModel(
  * Factory for [GalleryViewModel].
  *
  * @param removedMediaStore Callers must provide the store shared with the viewer to ensure immediate sync of deleted files.
+ * @param isDeletedMode When true, configures the ViewModel to load data exclusively from the deleted media data source.
  */
 class GalleryViewModelFactory(
     private val application: Application,

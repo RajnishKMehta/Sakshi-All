@@ -51,6 +51,12 @@ fun ScheduleDeletionDialog(
     )
 }
 
+/**
+ * Dialog to confirm the recovery of media scheduled for deletion.
+ *
+ * @param onConfirm Callback invoked when the user confirms the recovery action.
+ * @param onDismiss Callback invoked when the user dismisses the dialog without confirming.
+ */
 @Composable
 fun RecoverMediaDialog(
     onConfirm: () -> Unit,

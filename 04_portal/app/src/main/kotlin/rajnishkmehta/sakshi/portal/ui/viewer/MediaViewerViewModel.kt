@@ -61,6 +61,8 @@ class MediaViewerViewModel(
     val deletionState: StateFlow<MediaDeletionUiState> = _deletionState.asStateFlow()
 
     private val _recoverState = MutableStateFlow<MediaDeletionUiState>(MediaDeletionUiState.Idle)
+
+    /** State of the recovery action for media scheduled for deletion. */
     val recoverState: StateFlow<MediaDeletionUiState> = _recoverState.asStateFlow()
 
     private var sakshiClient: SakshiClient? = null
@@ -200,6 +202,7 @@ class MediaViewerViewModel(
         }
     }
 
+    /** Resets a failed recovery back to [MediaDeletionUiState.Idle] once its feedback was shown. */
     fun onRecoveryFailureShown() {
         if (_recoverState.value is MediaDeletionUiState.Failed) {
             _recoverState.value = MediaDeletionUiState.Idle
