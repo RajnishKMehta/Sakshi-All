@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -98,7 +99,7 @@ fun VaultSelectionScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.vault_selection_title)) },
                 navigationIcon = {
-                    androidx.compose.material3.TextButton(onClick = {
+                    TextButton(onClick = {
                         viewModel.cancelVerification()
                         searchQuery = ""
                         viewModel.filter("")
@@ -112,7 +113,7 @@ fun VaultSelectionScreen(
                     }
                 },
                 actions = {
-                    androidx.compose.material3.TextButton(onClick = {
+                    TextButton(onClick = {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.resources.getString(R.string.vault_download_url)))
                         try {
                             if (intent.resolveActivity(context.packageManager) != null) {
