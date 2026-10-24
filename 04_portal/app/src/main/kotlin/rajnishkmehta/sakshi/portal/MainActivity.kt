@@ -35,6 +35,10 @@ import rajnishkmehta.sakshi.portal.ui.AppLockManager
 import rajnishkmehta.sakshi.portal.ui.AppLockScreen
 import rajnishkmehta.sakshi.portal.ui.AppLockSetupDialog
 
+/**
+ * The main entry point Activity for the Portal application.
+ * Hosts the Jetpack Compose navigation graph and manages the App Lock lifecycle.
+ */
 class MainActivity : FragmentActivity() {
     private lateinit var appLockManager: AppLockManager
 
@@ -131,12 +135,15 @@ class MainActivity : FragmentActivity() {
     }
 }
 
+/** Navigation key for the Gallery screen. */
 @Serializable
 data object GalleryScreenRoute : NavKey
 
+/** Navigation key for the Settings screen. */
 @Serializable
 data object SettingsScreenRoute : NavKey
 
+/** Navigation key for the Vault Selection screen. */
 @Serializable
 data object VaultSelectionScreenRoute : NavKey
 
