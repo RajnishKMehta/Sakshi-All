@@ -207,7 +207,7 @@ fun SettingsScreen(
                             val canAuthenticate = biometricManager.canAuthenticate(
                                 BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL
                             )
-                            if (canAuthenticate == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
+                            if (canAuthenticate != BiometricManager.BIOMETRIC_SUCCESS) {
                                 Toast.makeText(context, context.resources.getString(R.string.app_lock_setup_error_no_credentials), Toast.LENGTH_LONG).show()
                                 return@Switch
                             }
