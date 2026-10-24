@@ -96,10 +96,7 @@ fun AppLockScreen(
                         super.onAuthenticationSucceeded(result)
                         Log.i("AppLockScreen", "Auth succeeded.")
                         isUnlocked = true
-                        coroutineScope.launch {
-                            delay(400) // Wait for animation to finish
-                            appLockManager.unlock()
-                        }
+                        appLockManager.unlock()
                     }
 
                     override fun onAuthenticationFailed() {
