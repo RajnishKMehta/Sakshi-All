@@ -53,6 +53,13 @@ import rajnishkmehta.sakshi.portal.BuildConfig
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 import rajnishkmehta.sakshi.portal.ui.AppLockManager
 
+/**
+ * A screen displaying configuration options for the Portal app.
+ *
+ * @param onVaultSelectionClick Callback invoked to navigate to the vault selection screen.
+ * @param repository The SettingsRepository to read and write user preferences.
+ * @param onBackClick Callback invoked to navigate back.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(

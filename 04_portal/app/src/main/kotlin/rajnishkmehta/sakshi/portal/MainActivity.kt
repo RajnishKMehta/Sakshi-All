@@ -35,6 +35,9 @@ import rajnishkmehta.sakshi.portal.ui.AppLockManager
 import rajnishkmehta.sakshi.portal.ui.AppLockScreen
 import rajnishkmehta.sakshi.portal.ui.AppLockSetupDialog
 
+/**
+ * The main entry point for the Portal application. Handles navigation and thematic setup.
+ */
 class MainActivity : FragmentActivity() {
     private lateinit var appLockManager: AppLockManager
 

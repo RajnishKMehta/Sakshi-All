@@ -70,6 +70,11 @@ import androidx.media3.ui.compose.material3.PlayerDefaults
 
 
 
+/**
+ * Displays an image loaded from a specific URI with pan and zoom capabilities.
+ *
+ * @param uri The content URI of the photo.
+ */
 @Composable
 fun PhotoViewer(uri: String) {
     var scale by remember { mutableStateOf(1f) }
@@ -112,6 +117,11 @@ fun PhotoViewer(uri: String) {
 
 
 
+/**
+ * Displays a video loaded from a specific URI using ExoPlayer/Media3.
+ *
+ * @param uri The content URI of the video.
+ */
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoViewer(uri: String) {
@@ -183,6 +193,11 @@ fun VideoViewer(uri: String) {
 }
 
 
+/**
+ * Displays an audio player for a specific URI, with optional album art or audio visualization.
+ *
+ * @param uri The content URI of the audio file.
+ */
 @OptIn(UnstableApi::class)
 @Composable
 fun AudioViewer(uri: String) {
@@ -288,6 +303,12 @@ fun AudioViewer(uri: String) {
 }
 
 
+/**
+ * Renders a decorative animated audio visualization for the audio player.
+ *
+ * @param isPlaying True if audio is currently playing and visualization should animate.
+ * @param modifier The layout modifier for the visualizer.
+ */
 @Composable
 fun AudioVisualization(isPlaying: Boolean, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "audioBars")
@@ -336,6 +357,11 @@ fun AudioVisualization(isPlaying: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Displays a fallback generic viewer for media types that are not explicitly supported.
+ *
+ * @param mediaDetails The detailed metadata of the media file.
+ */
 @Composable
 fun OtherViewer(mediaDetails: MediaDetailsResponse) {
     Column(

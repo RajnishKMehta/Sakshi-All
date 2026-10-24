@@ -17,6 +17,12 @@ import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
  */
 class AppDiscoveryRepository(private val context: Context) {
 
+    /**
+     * Discovers all installed applications on the device, excluding system apps,
+     * and prioritizes potential vault applications.
+     *
+     * @return A sorted list of [AppInfo] representing discovered applications.
+     */
     suspend fun getInstalledApplications(): List<AppInfo> = withContext(Dispatchers.IO) {
         // try { Log.i(tag = "VaultSelection", message = "AppDiscoveryRepository: getInstalledApplications started") } catch (e: Exception) {}
         val pm = context.packageManager

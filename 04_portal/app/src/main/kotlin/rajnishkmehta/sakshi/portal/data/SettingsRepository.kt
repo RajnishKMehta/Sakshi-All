@@ -15,6 +15,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * The DataStore instance used for persisting Portal settings.
+ */
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 /**
@@ -56,12 +59,22 @@ class SettingsRepository(private val context: Context) {
             preferences[APP_LOCK_SETUP_COMPLETED_KEY] ?: false
         }
 
+    /**
+     * Enables or disables dynamic coloring (Material You) for the application theme.
+     *
+     * @param useDynamicColor True to enable dynamic color, false otherwise.
+     */
     suspend fun setUseDynamicColor(useDynamicColor: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[DYNAMIC_COLOR_KEY] = useDynamicColor
         }
     }
 
+    /**
+     * Sets the package name of the selected Vault application.
+     *
+     * @param packageName The package name to save, or null to clear it.
+     */
     suspend fun setVaultPackage(packageName: String?) {
         context.dataStore.edit { preferences ->
             if (packageName == null) {
@@ -72,6 +85,11 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Sets the package name of the Vault application only if one is not already selected.
+     *
+     * @param packageName The package name to set as default.
+     */
     suspend fun setVaultPackageIfUnset(packageName: String) {
         context.dataStore.edit { preferences ->
             if (!preferences.contains(VAULT_PACKAGE_KEY)) {
@@ -80,6 +98,11 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Enables or disables the app lock security feature.
+     *
+     * @param enabled True to enable app lock, false otherwise.
+     */
     suspend fun setAppLockEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[APP_LOCK_ENABLED_KEY] = enabled
@@ -87,12 +110,22 @@ class SettingsRepository(private val context: Context) {
     }
 
 
+    /**
+     * Sets the timeout duration before the app locks itself after being backgrounded.
+     *
+     * @param timeoutMs The timeout duration in milliseconds.
+     */
     suspend fun setAppLockTimeoutMs(timeoutMs: Long) {
         context.dataStore.edit { preferences ->
             preferences[APP_LOCK_TIMEOUT_MS_KEY] = timeoutMs
         }
     }
 
+    /**
+     * Marks the initial app lock setup dialog as completed or pending.
+     *
+     * @param completed True if the user has completed or dismissed the setup, false otherwise.
+     */
     suspend fun setAppLockSetupCompleted(completed: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[APP_LOCK_SETUP_COMPLETED_KEY] = completed

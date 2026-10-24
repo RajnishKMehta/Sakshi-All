@@ -69,6 +69,12 @@ import rajnishkmehta.sakshi.portal.vault.AppInfo
 import rajnishkmehta.sakshi.portal.vault.VaultSelectionViewModel
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 
+/**
+ * A screen that allows the user to browse and select an installed application to act as their Vault.
+ *
+ * @param onAppSelected Callback invoked when a vault app is successfully selected and verified.
+ * @param onBackClick Callback invoked when the user wishes to navigate back.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaultSelectionScreen(

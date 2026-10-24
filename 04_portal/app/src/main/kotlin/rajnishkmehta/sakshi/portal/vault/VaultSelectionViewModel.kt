@@ -54,6 +54,11 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    /**
+     * Filters the currently loaded list of applications by name or package name.
+     *
+     * @param query The search text to filter by.
+     */
     fun filter(query: String) {
         val currentState = _uiState.value
         if (currentState is UiState.Success || currentState is UiState.Filtering) {
@@ -69,11 +74,20 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    /**
+     * Cancels any ongoing Vault application verification request.
+     */
     fun cancelVerification() {
         verificationJob?.cancel()
         verificationJob = null
     }
 
+    /**
+     * Verifies if a selected application is a compatible Vault by sending a ping request.
+     *
+     * @param packageName The package name to verify.
+     * @param onResult Callback invoked with the success status and an optional error message.
+     */
     fun verifyVaultApp(packageName: String, onResult: (Boolean, String?) -> Unit) {
         cancelVerification()
         verificationJob = viewModelScope.launch {
@@ -104,6 +118,9 @@ class VaultSelectionViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    /**
+     * Represents the various states of the vault selection UI.
+     */
     sealed class UiState {
         object Loading : UiState()
         data class Success(val apps: List<AppInfo>) : UiState()
