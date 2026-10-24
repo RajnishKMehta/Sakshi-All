@@ -23,6 +23,12 @@ import androidx.compose.ui.unit.dp
  * @param isUnlocked Whether the lock is in the unlocked state, triggering the open animation.
  * @param modifier Modifier to be applied to the canvas.
  */
+/**
+ * A decorative animated lock icon used primarily in lock screens and setup flows.
+ *
+ * @param isUnlocked Whether the animation should depict an unlocked state.
+ * @param modifier The layout modifier for the animation.
+ */
 @Composable
 fun LockAnimation(isUnlocked: Boolean, modifier: Modifier = Modifier) {
     val shackleOffset = remember { Animatable(0f) }

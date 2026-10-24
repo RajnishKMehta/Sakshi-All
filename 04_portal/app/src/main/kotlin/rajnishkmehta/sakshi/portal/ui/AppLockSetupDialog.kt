@@ -21,6 +21,12 @@ import rajnishkmehta.sakshi.portal.data.SettingsRepository
  * @param settingsRepository Repository used to save the user choice.
  * @param onDismiss Callback invoked when the dialog is dismissed or an option is selected.
  */
+/**
+ * A dialog prompting the user to set up application locking upon initial launch or when the setting is toggled.
+ *
+ * @param settingsRepository The repository to update lock preferences.
+ * @param onDismiss Callback invoked when the setup is completed or dismissed.
+ */
 @Composable
 fun AppLockSetupDialog(
     settingsRepository: SettingsRepository,

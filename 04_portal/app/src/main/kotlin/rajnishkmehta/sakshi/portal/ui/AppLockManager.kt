@@ -17,6 +17,11 @@ import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 /**
  * Manages the app lock state based on lifecycle events and user settings.
  */
+/**
+ * Manages the application lock state based on user settings and background timeouts.
+ *
+ * @param settingsRepository The repository to read lock settings from.
+ */
 class AppLockManager(
     private val settingsRepository: SettingsRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)

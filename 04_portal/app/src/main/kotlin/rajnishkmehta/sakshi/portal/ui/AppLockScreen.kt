@@ -44,6 +44,12 @@ import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
  * @param settingsRepository Repository containing user preferences.
  * @param modifier Modifier to be applied to the lock screen container.
  */
+/**
+ * A screen displayed when the application is locked, requiring biometric or device credential authentication to proceed.
+ *
+ * @param appLockManager The manager handling the lock state.
+ * @param settingsRepository The repository containing lock preferences.
+ */
 @Composable
 fun AppLockScreen(
     appLockManager: AppLockManager,
