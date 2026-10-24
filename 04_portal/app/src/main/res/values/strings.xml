@@ -22,7 +22,7 @@
     <string name="settings_debug_logs_title">Debug Logs</string>
     <string name="settings_debug_logs_desc">View and export application logs</string>
     <string name="settings_debug_logs_button">Open</string>
-    <string name="settings_dynamic_color_title">Material You (Dynamic Colors)</string>
+    <string name="settings_dynamic_color_title">Dynamic Colors</string>
     <string name="settings_dynamic_color_desc">Use system colors for app theme</string>
     <string name="settings_select_vault_title">Select Vault App</string>
     <string name="settings_no_vault_selected">No vault selected</string>
