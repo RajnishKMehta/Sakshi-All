@@ -45,13 +45,16 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val settingsRepository = SettingsRepository(applicationContext)
+        val app = application as PortalApp
+        val settingsRepository = app.settingsRepository
+        appLockManager = app.appLockManager
+
         val removedMediaStore = ViewModelProvider(this)[RemovedMediaViewModel::class.java].removedMediaStore
-        appLockManager = AppLockManager(settingsRepository)
 
         setContent {
             val useDynamicColor by settingsRepository.useDynamicColorFlow.collectAsState(initial = true)
             val isLocked by appLockManager.isLocked.collectAsState()
+            val isInitialized by appLockManager.isInitialized.collectAsState()
             val setupCompleted by settingsRepository.appLockSetupCompletedFlow.collectAsState(initial = true)
 
             var showSetupDialog by remember(setupCompleted) { mutableStateOf(!setupCompleted) }
@@ -60,75 +63,77 @@ class MainActivity : FragmentActivity() {
             val backStack = rememberNavBackStack(GalleryScreenRoute)
 
             PortalTheme(useDynamicColor = useDynamicColor) {
-                if (isLocked) {
-                    AppLockScreen(appLockManager = appLockManager,
+                if (isInitialized) {
+                    if (isLocked) {
+                        AppLockScreen(appLockManager = appLockManager,
 
-                        settingsRepository = settingsRepository
-                    )
-                } else {
-                    if (showSetupDialog) {
-                        AppLockSetupDialog(
-                            settingsRepository = settingsRepository,
-                            onDismiss = { showSetupDialog = false }
+                            settingsRepository = settingsRepository
+                        )
+                    } else {
+                        if (showSetupDialog) {
+                            AppLockSetupDialog(
+                                settingsRepository = settingsRepository,
+                                onDismiss = { showSetupDialog = false }
+                            )
+                        }
+
+                        NavDisplay(
+                            backStack = backStack,
+                            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() else finish() },
+                            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
+                            entryProvider = entryProvider {
+                                entry<GalleryScreenRoute> {
+                                    GalleryScreen(
+                                        settingsRepository = settingsRepository,
+                                        removedMediaStore = removedMediaStore,
+                                        onSettingsClick = { backStack.add(SettingsScreenRoute) },
+                                        onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
+                                        onMediaClick = { fileId, mediaType, timestamp -> backStack.add(MediaViewerRoute(fileId, mediaType, false, timestamp)) },
+                                        onScheduledDeletionsClick = { backStack.add(ScheduledDeletionsScreenRoute) }
+                                    )
+                                }
+                                entry<ScheduledDeletionsScreenRoute> {
+                                    GalleryScreen(
+                                        settingsRepository = settingsRepository,
+                                        removedMediaStore = removedMediaStore,
+                                        onSettingsClick = { backStack.add(SettingsScreenRoute) },
+                                        onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
+                                        onMediaClick = { fileId, mediaType, timestamp -> backStack.add(MediaViewerRoute(fileId, mediaType, true, timestamp)) },
+                                        isDeletedMode = true,
+                                        onBackClick = { backStack.removeLastOrNull() }
+                                    )
+                                }
+                                entry<MediaViewerRoute> { route ->
+                                    MediaViewerScreen(
+                                        fileId = route.fileId,
+                                        mediaType = route.mediaType,
+                                        isDeletedMode = route.isDeletedMode,
+                                        scheduledTime = route.scheduledTime,
+                                        settingsRepository = settingsRepository,
+                                        removedMediaStore = removedMediaStore,
+                                        onBackClick = { backStack.removeLastOrNull() }
+                                    )
+                                }
+                                entry<SettingsScreenRoute> {
+                                    SettingsScreen(
+                                        onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
+                                        repository = settingsRepository,
+                                        onBackClick = { backStack.removeLastOrNull() },
+
+                                    )
+                                }
+                                entry<VaultSelectionScreenRoute> {
+                                    VaultSelectionScreen(
+                                        onAppSelected = { packageName ->
+                                            coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
+                                            backStack.removeLastOrNull()
+                                        },
+                                        onBackClick = { backStack.removeLastOrNull() }
+                                    )
+                                }
+                            }
                         )
                     }
-
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { if (backStack.size > 1) backStack.removeLastOrNull() else finish() },
-                        entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
-                        entryProvider = entryProvider {
-                            entry<GalleryScreenRoute> {
-                                GalleryScreen(
-                                    settingsRepository = settingsRepository,
-                                    removedMediaStore = removedMediaStore,
-                                    onSettingsClick = { backStack.add(SettingsScreenRoute) },
-                                    onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
-                                    onMediaClick = { fileId, mediaType, timestamp -> backStack.add(MediaViewerRoute(fileId, mediaType, false, timestamp)) },
-                                    onScheduledDeletionsClick = { backStack.add(ScheduledDeletionsScreenRoute) }
-                                )
-                            }
-                            entry<ScheduledDeletionsScreenRoute> {
-                                GalleryScreen(
-                                    settingsRepository = settingsRepository,
-                                    removedMediaStore = removedMediaStore,
-                                    onSettingsClick = { backStack.add(SettingsScreenRoute) },
-                                    onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
-                                    onMediaClick = { fileId, mediaType, timestamp -> backStack.add(MediaViewerRoute(fileId, mediaType, true, timestamp)) },
-                                    isDeletedMode = true,
-                                    onBackClick = { backStack.removeLastOrNull() }
-                                )
-                            }
-                            entry<MediaViewerRoute> { route ->
-                                MediaViewerScreen(
-                                    fileId = route.fileId,
-                                    mediaType = route.mediaType,
-                                    isDeletedMode = route.isDeletedMode,
-                                    scheduledTime = route.scheduledTime,
-                                    settingsRepository = settingsRepository,
-                                    removedMediaStore = removedMediaStore,
-                                    onBackClick = { backStack.removeLastOrNull() }
-                                )
-                            }
-                            entry<SettingsScreenRoute> {
-                                SettingsScreen(
-                                    onVaultSelectionClick = { backStack.add(VaultSelectionScreenRoute) },
-                                    repository = settingsRepository,
-                                    onBackClick = { backStack.removeLastOrNull() },
-
-                                )
-                            }
-                            entry<VaultSelectionScreenRoute> {
-                                VaultSelectionScreen(
-                                    onAppSelected = { packageName ->
-                                        coroutineScope.launch { settingsRepository.setVaultPackage(packageName) }
-                                        backStack.removeLastOrNull()
-                                    },
-                                    onBackClick = { backStack.removeLastOrNull() }
-                                )
-                            }
-                        }
-                    )
                 }
             }
         }

@@ -28,18 +28,26 @@ class AppLockManager(
     private val _isLocked = MutableStateFlow(false)
     val isLocked: StateFlow<Boolean> = _isLocked.asStateFlow()
 
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
+
     private var backgroundTime: Long = 0L
 
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
 
-        // When initialized, we might be starting fresh, so check if we should lock immediately
+    /**
+     * Checks if the app should be locked on a fresh start.
+     */
+    fun checkColdStart() {
         coroutineScope.launch {
             val enabled = settingsRepository.appLockEnabledFlow.first()
+            _isLocked.value = enabled
             if (enabled) {
-                _isLocked.value = true
                 Log.i("AppLockManager", "App started, locking immediately.")
             }
+            _isInitialized.value = true
         }
     }
 
@@ -54,7 +62,7 @@ class AppLockManager(
 
                 if (enabled && timeAway >= timeout) {
                     _isLocked.value = true
-                    Log.i("AppLockManager", "App returned from background after \${timeAway}ms, locking.")
+                    Log.i("AppLockManager", "App returned from background after ${timeAway}ms, locking.")
                 }
             }
         }
