@@ -53,6 +53,15 @@ import rajnishkmehta.sakshi.portal.BuildConfig
 import rajnishkmehta.sakshi.portal.data.SettingsRepository
 import rajnishkmehta.sakshi.portal.ui.AppLockManager
 
+/**
+ * Displays the application settings screen.
+ * Allows configuration of appearance, vault selection, and security preferences.
+ *
+ * @param onVaultSelectionClick Callback invoked to navigate to the vault selection screen.
+ * @param repository Repository for persisting and retrieving user settings.
+ * @param onBackClick Callback invoked to navigate back.
+ * @param appLockManager Manager for the application lock functionality (optional).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
