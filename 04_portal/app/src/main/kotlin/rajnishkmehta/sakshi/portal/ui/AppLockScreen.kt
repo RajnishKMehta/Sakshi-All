@@ -78,7 +78,7 @@ fun AppLockScreen(
                 object : BiometricPrompt.AuthenticationCallback() {
                     override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                         super.onAuthenticationError(errorCode, errString)
-                        Log.e("AppLockScreen", "Auth error: \$errorCode, \$errString")
+                        Log.e("AppLockScreen", "Auth error: $errorCode, $errString")
 
                         if (errorCode == BiometricPrompt.ERROR_CANCELED || errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
                             showPrompt = false
