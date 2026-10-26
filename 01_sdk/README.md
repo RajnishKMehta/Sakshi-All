@@ -1,31 +1,35 @@
-# Sakshi SDK 📱⚡
+<div id="top" align="center">
+
+# Sākṣī SDK (साक्षी SDK)
 
 [![Release](https://img.shields.io/maven-central/v/io.github.rajnishkmehta.sakshi/sakshi-sdk?logo=apache-maven&style=flat-square)](https://central.sonatype.com/artifact/io.github.rajnishkmehta.sakshi/sakshi-sdk)
 [![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=plastic&logo=Android)](../../)
 [![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-SDK?style=flat-square&logo=Apache)](https://github.com/RajnishKMehta/Sakshi-SDK/raw/refs/heads/main/LICENSE)
 
-**Sakshi SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sakshi Camera_ or _Sakshi Audio_) and the **Sakshi Vault** application.
+</div>
+
+**Sākṣī SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sākṣī Camera_ or _Sākṣī Portal_) and the **Sākṣī Vault** application.
 
 > [!WARNING]
 > **Early Beta:** The SDK supports photo functionality and incremental audio/video synchronization. APIs and behavior may change in future releases.
 
 ---
 
-## 💡 What is Sakshi SDK?
+## 💡 What is Sākṣī SDK?
 
-Sakshi SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
+Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
 
-1. **Client Developers (Camera, Audio, Viewer)**: Send photos, manage incremental audio/video sync, ping Vault, query recording status, and observe file copy completion acknowledgements (`CopyDoneAck`).
+1. **Client Developers (Camera, Portal)**: Send photos, manage incremental audio/video sync, ping Vault, query recording status, observe file copy completion acknowledgements (`CopyDoneAck`), and browse/manage stored media.
 2. **Vault Developers**: Implement remote AIDL service binding and send structured responses, sync progress, copy completion acknowledgements, and error events using `VaultResponder`.
 
 ---
 
 ## 🏗️ Dual-Side Architecture & Responsibilities
 
-```
+```text
 +------------------------------------+                 +-----------------------------------+
-|       Client Application           |                 |        Sakshi Vault App           |
-|  (e.g., Camera / Audio / Viewer)   |                 |       (External Service)          |
+|       Client Application           |                 |        Sākṣī Vault App            |
+|  (e.g., Camera / Portal)           |                 |       (External Service)          |
 |                                    |                 |                                   |
 |  +------------------------------+  |   Android IPC   |  +-----------------------------+  |
 |  |        SakshiClient          |  | <=============> |  |   Incremental Copy Engine   |  |
@@ -39,6 +43,7 @@ Sakshi SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
 - Inter-process communication bridge with Vault service.
 - Hiding Binder proxy transactions, AIDL interfaces, and death recipient handling.
 - Providing `SakshiClient` for client applications and `VaultResponder` for Vault applications.
+- **Strictly Headless**: The SDK contains no UI components (Activities, Fragments, Compose, or XML layouts).
 
 ### Vault Responsibilities (External App)
 
@@ -88,7 +93,7 @@ dependencies {
 
 ## 🚀 Quick Start Examples
 
-### A. Client App Example (Camera / Audio)
+### A. Client App Example (Camera / Portal)
 
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
@@ -234,4 +239,4 @@ Detailed technical specifications are available in the [`/docs`](docs) directory
 
 ## 📄 License
 
-This project is licensed under the [![LICENSE](https://img.shields.io/github/license/RajnishKMehta/Sakshi-SDK?logo=apache&label=%20&color=7C297D)](LICENSE).
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

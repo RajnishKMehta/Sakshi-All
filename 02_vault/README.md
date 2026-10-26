@@ -1,6 +1,6 @@
 <div id="top" align="center">
 
-# Sakshi Vault (साक्षी वॉल्ट)
+# Sākṣī Vault (साक्षी वॉल्ट)
 
 [![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Vault?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Vault/releases)
 [![Build Status](https://github.com/RajnishKMehta/Sakshi-Vault/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Vault/actions/workflows/checks.yml)
@@ -12,50 +12,43 @@
 </div>
 
 > [!WARNING]
-> **Early Beta:** Sakshi Vault currently supports **photo, video, and audio transfer**. APIs and behavior may change in future releases.
+> **Early Beta:** Sākṣī Vault currently supports **photo, video, and audio transfer**. APIs and behavior may change in future releases.
 
-**Sakshi Vault** ("Sakshi (साक्षी)" = "Witness" in Sanskrit) is the secure storage application of the open-source Sakshi Android ecosystem.
+**Sākṣī Vault** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the secure storage application of the open-source Sākṣī Android ecosystem.
 
-It runs as a separate background application and receives media from client applications such as Sakshi Camera.
+It runs as a separate background application without a user interface, dedicated to receiving and protecting media from client applications such as Sākṣī Camera over local IPC.
 
 ---
 
-## Why Sakshi Vault Exists
+## Why Sākṣī Vault Exists
 
-Sakshi Vault is designed to keep a separate copy of important media captured by another app.
+Sākṣī Vault is designed to keep a separate, independent copy of important media captured by another app.
 
-Instead of keeping the only copy inside the camera or recorder, a client app can send the captured media to Sakshi Vault over Android IPC. This keeps the storage layer separate from the capture app.
+Instead of keeping the only copy inside the camera or recorder, a client app can send the captured media to Sākṣī Vault over Android IPC. This keeps the storage layer entirely separate from the capture app and viewing interfaces.
 
 ---
 
 ## Features
 
+- **Background-Only Execution:** Operates entirely in the background without any UI to minimize the surface area for compromise.
 - **Media Transfer:** Receives photos, videos, and audio from client applications over Android Binder IPC (AIDL).
-- **Secure Local Storage:** Stores received media privately on the device.
-- **Metadata Management:** Stores file metadata using Room.
-- **Scheduled Deletion:** Deletion requests hide media immediately and permanently remove the Vault copy after 30 days using WorkManager, with a ping-triggered fallback. See [docs/INTEGRATION.md](docs/INTEGRATION.md#scheduled-media-deletion).
-- **Independent Architecture:** Runs separately from the applications that capture the media.
-- **Offline Capable:** Does not require an internet connection.
+- **Secure Local Storage:** Stores received media privately on the device in a separate app container.
+- **Metadata Management:** Stores file metadata and synchronization state using Room 3.
+- **Scheduled Deletion:** Handles delayed deletion safely. Deletion requests immediately hide the media but permanently remove the Vault copy only after a set delay (30 days) using WorkManager and monotonic clock validation, resisting simple time-tampering.
+- **Independent Architecture:** Runs completely separately from the applications that capture or view the media.
+- **Offline Capable:** Requires no internet connection, keeping data local.
 
 ---
 
-## Architecture
+## Ecosystem Architecture
 
-The Sakshi ecosystem consists of three main components:
+The Sākṣī ecosystem connects components locally:
 
-1. **Sakshi Vault** (this repo) — stores received media.
-2. **[Sakshi SDK](https://github.com/RajnishKMehta/Sakshi-SDK)** — provides the AIDL/IPC interface used by client apps.
-3. **Client Apps** — such as Sakshi Camera or future audio/video applications.
+1. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the AIDL/IPC interface.
+2. **Sākṣī Vault** (this repo) — safely stores received media as an external service.
+3. **Client Apps** — such as [Sākṣī Camera](../../../../Sakshi-Camera) and [Sākṣī Portal](../../../../Sakshi-Portal).
 
-Vault exposes the `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE` service and receives data from client applications through Android Binder IPC.
-
----
-
-## Integration
-
-If you want to build a client app that sends media to Sakshi Vault, see the integration guide:
-
-👉 [Integration & Developer Guide](docs/INTEGRATION.md)
+Vault exposes the `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE` service to receive IPC calls securely.
 
 ---
 
@@ -79,3 +72,7 @@ Standard Gradle commands can be used to build and test the project:
 ## Contributing
 
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+
+## License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
