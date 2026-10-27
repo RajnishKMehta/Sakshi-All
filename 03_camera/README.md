@@ -1,6 +1,6 @@
 <div id="top" align="center">
 
-# Sakshi Camera (साक्षी कैमरा)
+# Sākṣī Camera (साक्षी कैमरा)
 
 [![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Camera?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Camera/releases)
 [![Build Status](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml)
@@ -12,72 +12,60 @@
 </div>
 
 
-**Sakshi Camera** ("Sakshi (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sakshi Android ecosystem.
+**Sākṣī Camera** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sākṣī Android ecosystem.
 
-It is designed to capture media and work with Sakshi Vault when an independent local copy is needed.
+It is designed to capture media and work with **Sākṣī Vault** to preserve an independent local copy while recording.
 
 ---
 
-## Why Sakshi Camera Exists
+## Why Sākṣī Camera Exists
 
-A camera app is the starting point of the Sakshi ecosystem. Sakshi Camera handles capture, while the Sakshi SDK provides communication with Sakshi Vault.
+A camera app is the starting point of the Sākṣī ecosystem. Sākṣī Camera strictly handles capture, utilizing the Sākṣī SDK to securely transfer media over local IPC to the independent Sākṣī Vault.
 
-Keeping these responsibilities separate lets the capture app focus on the camera while Vault handles independent storage.
+By separating capture from storage, deleting a recording in the Camera app does not itself delete a completed Vault copy. However, because Vault’s unrestricted IPC API lets apps that bind to it schedule copies for deletion, the Vault does not independently preserve evidence if the Camera app (or another bound app) is compromised.
 
 ---
 
 ## Features
 
-- **Photo & Video Capture:** Capture photos and videos using the device camera (Supports standard MP4 and crash-safe fMP4 containers).
-- **Photo & Video Transfer:** Send captured photos and videos to Sakshi Vault through the Sakshi SDK.
-- **Local-only:** No internet connection needed.
-- **Sakshi Integration:** Works with the Sakshi SDK and Sakshi Vault as part of the Sakshi ecosystem.
+- **Photo & Video Capture:** Capture photos and videos using the device camera.
+- **Crash-Safe fMP4 Support:** Supports Fragmented MP4 (fMP4) natively for interruption-resilient recording.
+- **Incremental Transfer:** Sends captured photos and incrementally synchronizes fMP4 videos to Sākṣī Vault through the Sākṣī SDK *while the recording is happening*.
+- **Local-only:** No internet connection needed, prioritizing user privacy and local security.
+- **XML Architecture:** Built with reliable XML layouts and Material 3 Views.
 
 ---
 
 ## Recording Architecture
 
-Sakshi Camera uses modern Jetpack CameraX and Media3 APIs for video recording:
+Sākṣī Camera uses modern Jetpack CameraX and AndroidX Media3 APIs for video recording:
 
-1. **Standard MP4 Recording**: Utilizes the default official CameraX `Recorder` implementation (via platform muxer) without redundant abstractions.
-2. **Fragmented MP4 (fMP4) Recording**: Implements a custom, crash-safe recording pipeline using Media3's `FragmentedMp4Muxer` injected via CameraX's `MuxerFactory` interface, preserving data integrity upon unexpected terminations.
+1. **Fragmented MP4 (fMP4) Recording (Default)**: Implements a custom, crash-safe recording pipeline using Media3's `FragmentedMp4Muxer` injected via CameraX's `MuxerFactory` interface. Because fMP4 writes data in fragments, this preserves data integrity upon unexpected terminations or interruptions.
+2. **Standard MP4 Recording**: Utilizes the default official CameraX `Recorder` implementation via the platform muxer.
 
-fMP4 is the default. The container format (More Settings → Video Container Format) also decides how a video reaches Sakshi Vault:
+The chosen container format dictates the Vault synchronization behavior:
 
-- **fMP4**: copied to Vault while recording, using the SDK's incremental audio/video synchronization API.
-- **Normal MP4**: not crash-safe, so it is not copied while recording. After recording finishes, the file is submitted once with the SDK's `copyFile` (`FileCopyRequest`) API. Switching to normal MP4 asks the user to confirm this first.
-
-## Ecosystem Architecture
-
-Sakshi Camera is one part of the Sakshi ecosystem:
-
-1. **Sakshi Camera** (this repo) — captures media.
-2. **[Sakshi SDK](../../../../Sakshi-SDK)** — provides the client-side API and IPC layer.
-3. **[Sakshi Vault](../../../../Sakshi-Vault)** — receives and stores media independently.
-
-The basic flow is:
-
-```text
-Sakshi Camera
-      │
-      │ Sakshi SDK
-      │
-      ▼
-Sakshi Vault
-      │
-      ▼
-Local storage
-```
-
-For the current beta, this flow supports photos and videos.
+- **fMP4**: Automatically streams to Vault while recording using the SDK's incremental audio/video synchronization API.
+- **Normal MP4**: Not crash-safe, so it cannot be synced incrementally. It is only transferred to Vault after the entire recording finishes, using the SDK's standard file copy API. Switching to normal MP4 requires user confirmation of this security trade-off.
 
 ---
 
-## Integration
+## Ecosystem Architecture
 
-Sakshi Camera uses the [Sakshi SDK](https://github.com/RajnishKMehta/Sakshi-SDK) to communicate with [Sakshi Vault](https://github.com/RajnishKMehta/Sakshi-Vault).
+Sākṣī Camera is one integrated part of the ecosystem:
 
-If you are building another client application for the Sakshi ecosystem, see the SDK documentation for integration details.
+1. **Sākṣī Camera** (this repo) — captures media.
+2. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the client-side API and IPC layer.
+3. **[Sākṣī Vault](../../../../Sakshi-Vault)** — safely stores received media independently.
+
+```text
+Sākṣī Camera (Capture)
+      │
+      │ Sākṣī SDK (Local IPC)
+      │
+      ▼
+Sākṣī Vault (Secure Independent Storage)
+```
 
 ---
 
@@ -96,7 +84,6 @@ Standard Gradle commands can be used to build and test the project:
 ./gradlew check
 ```
 
-*Note on Debug Builds: GitHub Actions workflows dynamically set the `versionCode` for debug builds based on the action run number.*
 
 ---
 
@@ -108,4 +95,4 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [C
 
 ## License
 
-This project is licensed under the Apache-2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
