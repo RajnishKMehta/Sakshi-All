@@ -27,7 +27,7 @@ The user-facing management application. Built entirely with Jetpack Compose, it 
 
 ## 📖 Documentation & Guides
 
-Technical documentation and GitBook links will be added here once the individual repositories are separated and the documentation website is finalized.
+Technical documentation and GitBook links will be added here once the documentation website is finalized.
 
 ---
 ## 🤝 Contributing
