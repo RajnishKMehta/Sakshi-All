@@ -10,8 +10,6 @@
 
 **Sākṣī SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sākṣī Camera_ or _Sākṣī Portal_) and the **Sākṣī Vault** application.
 
-> [!WARNING]
-> **Early Beta:** The SDK supports photo functionality and incremental audio/video synchronization. APIs and behavior may change in future releases.
 
 ---
 

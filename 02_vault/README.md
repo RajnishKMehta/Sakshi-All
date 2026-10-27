@@ -11,8 +11,6 @@
 
 </div>
 
-> [!WARNING]
-> **Early Beta:** Sākṣī Vault currently supports **photo, video, and audio transfer**. APIs and behavior may change in future releases.
 
 **Sākṣī Vault** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the secure storage application of the open-source Sākṣī Android ecosystem.
 
@@ -67,7 +65,6 @@ Standard Gradle commands can be used to build and test the project:
 ./gradlew check
 ```
 
-***Note on Debug Builds**: GitHub Actions workflows dynamically set the versionCode for debug builds based on the action run number.*
 
 ## Contributing
 

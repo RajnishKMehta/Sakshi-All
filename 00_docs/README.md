@@ -4,8 +4,6 @@
 
 When recording evidence of wrongdoing, intimidation, corruption, or abuse of power, individuals often face pressure to delete their recordings. Sākṣī addresses this by transparently copying captured media into an independent, secure storage layer (the **Vault**) over Android IPC. Even if a bad actor forces the user to delete the recording from the camera app, a preserved copy remains safely hidden in the background.
 
-> [!WARNING]
-> **Early Beta:** The Sākṣī ecosystem is actively under development. Currently, it supports photo functionality, robust video transfers, and incremental audio/video synchronization. Do not rely on Sākṣī as an absolute protection against all physical device compromises, extreme forensic attacks, or hardware failures.
 
 ---
 
@@ -29,20 +27,9 @@ The user-facing management application. Built entirely with Jetpack Compose, it 
 
 ## 📖 Documentation & Guides
 
-Technical documentation for integrating, developing, and understanding the Sākṣī architecture is available within the SDK repository:
-
-- 📑 [System Architecture](../01_sdk/docs/architecture.adoc)
-- 📑 [Client API Usage](../01_sdk/docs/api_usage.adoc)
-- 📑 [Vault Integration Guide](../01_sdk/docs/vault_integration.adoc)
-- 📑 [AIDL IPC Specification](../01_sdk/docs/ipc_specification.adoc)
-- 📑 [Development Guide](../01_sdk/docs/development.adoc)
+Technical documentation and GitBook links will be added here once the individual repositories are separated and the documentation website is finalized.
 
 ---
-
 ## 🤝 Contributing
 
-Contributions are welcome. Please read the `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` files located in each respective repository before contributing. We strictly follow English-only communication for all source code, documentation, and pull requests.
-
-## 📄 License
-
-The Sākṣī Ecosystem projects are licensed under the Apache License 2.0. See the `LICENSE` file in the root directory for details.
+Contributions are welcome. Please read the `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` files located in each respective repository before contributing.

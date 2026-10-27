@@ -84,7 +84,6 @@ Standard Gradle commands can be used to build and test the project:
 ./gradlew check
 ```
 
-*Note on Debug Builds: GitHub Actions workflows dynamically set the `versionCode` for debug builds based on the action run number.*
 
 ---
 
