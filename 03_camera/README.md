@@ -1,98 +1,38 @@
-<div id="top" align="center">
+# Sākṣī Camera
 
-# Sākṣī Camera (साक्षी कैमरा)
+Sākṣī Camera is the specialized capture application of the open-source Sākṣī Android ecosystem.
 
-[![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Camera?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Camera/releases)
-[![Build Status](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml)
+It is designed to capture media and work transparently with Sākṣī Vault to preserve an independent local copy while recording.
 
-[![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-Camera?logo=apache&logoColor=DDC06F)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
+## About
 
-</div>
-
-
-**Sākṣī Camera** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sākṣī Android ecosystem.
-
-It is designed to capture media and work with **Sākṣī Vault** to preserve an independent local copy while recording.
-
----
-
-## Why Sākṣī Camera Exists
-
-A camera app is the starting point of the Sākṣī ecosystem. Sākṣī Camera strictly handles capture, utilizing the Sākṣī SDK to securely transfer media over local IPC to the independent Sākṣī Vault.
-
-By separating capture from storage, deleting a recording in the Camera app does not itself delete a completed Vault copy. However, because Vault’s unrestricted IPC API lets apps that bind to it schedule copies for deletion, the Vault does not independently preserve evidence if the Camera app (or another bound app) is compromised.
-
----
+Sākṣī Camera serves as the starting point of the ecosystem. It strictly handles media capture, utilizing the Sākṣī SDK to securely transfer media over local IPC to the independent Sākṣī Vault. By separating capture from storage, deleting a recording in the Camera app does not inherently delete the completed Vault copy, providing a safety net when a user is forced to delete evidence.
 
 ## Features
 
-- **Photo & Video Capture:** Capture photos and videos using the device camera.
-- **Crash-Safe fMP4 Support:** Supports Fragmented MP4 (fMP4) natively for interruption-resilient recording.
-- **Incremental Transfer:** Sends captured photos and incrementally synchronizes fMP4 videos to Sākṣī Vault through the Sākṣī SDK *while the recording is happening*.
-- **Local-only:** No internet connection needed, prioritizing user privacy and local security.
-- **XML Architecture:** Built with reliable XML layouts and Material 3 Views.
+- **Photo & Video Capture**: Capture photos and videos using the device camera.
+- **Crash-Safe fMP4 Support**: Supports Fragmented MP4 (fMP4) natively for interruption-resilient recording.
+- **Incremental Transfer**: Sends captured photos and incrementally synchronizes fMP4 videos to Sākṣī Vault through the SDK *while the recording is happening*.
+- **Local-Only**: Operates completely offline, prioritizing user privacy and local security.
+- **XML Architecture**: Built with reliable XML layouts and Material 3 Views.
 
----
+## Architecture / How It Works
 
-## Recording Architecture
+Sākṣī Camera integrates modern Jetpack CameraX and AndroidX Media3 APIs to enable secure recording and synchronization:
 
-Sākṣī Camera uses modern Jetpack CameraX and AndroidX Media3 APIs for video recording:
+- **Fragmented MP4 (fMP4)**: By default, the camera uses a custom, crash-safe pipeline using Media3's `FragmentedMp4Muxer`. Because fMP4 writes data in fragments, this preserves data integrity even during unexpected interruptions. fMP4 streams to the Vault automatically while recording via the SDK's incremental sync API.
+- **Standard MP4**: Standard MP4 is supported but is not crash-safe. It is only transferred to Vault after the entire recording finishes, using the SDK's standard file copy API.
+- **Ecosystem Flow**: Sākṣī Camera records media -> Sākṣī SDK handles local IPC -> Sākṣī Vault provides secure independent storage.
 
-1. **Fragmented MP4 (fMP4) Recording (Default)**: Implements a custom, crash-safe recording pipeline using Media3's `FragmentedMp4Muxer` injected via CameraX's `MuxerFactory` interface. Because fMP4 writes data in fragments, this preserves data integrity upon unexpected terminations or interruptions.
-2. **Standard MP4 Recording**: Utilizes the default official CameraX `Recorder` implementation via the platform muxer.
+## Requirements / Compatibility
 
-The chosen container format dictates the Vault synchronization behavior:
+- Minimum Android Version: Android 10 (API Level 29)
+- Language: Kotlin
 
-- **fMP4**: Automatically streams to Vault while recording using the SDK's incremental audio/video synchronization API.
-- **Normal MP4**: Not crash-safe, so it cannot be synced incrementally. It is only transferred to Vault after the entire recording finishes, using the SDK's standard file copy API. Switching to normal MP4 requires user confirmation of this security trade-off.
+## Security and Privacy
 
----
-
-## Ecosystem Architecture
-
-Sākṣī Camera is one integrated part of the ecosystem:
-
-1. **Sākṣī Camera** (this repo) — captures media.
-2. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the client-side API and IPC layer.
-3. **[Sākṣī Vault](../../../../Sakshi-Vault)** — safely stores received media independently.
-
-```text
-Sākṣī Camera (Capture)
-      │
-      │ Sākṣī SDK (Local IPC)
-      │
-      ▼
-Sākṣī Vault (Secure Independent Storage)
-```
-
----
-
-## Building & Testing
-
-Standard Gradle commands can be used to build and test the project:
-
-```bash
-# Debug APK
-./gradlew assembleDebug
-
-# Run unit tests
-./gradlew test
-
-# Run lint and code checks
-./gradlew check
-```
-
-
----
-
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
-
----
+While Sākṣī Camera automatically mirrors recordings to the Vault, it is important to note that the Vault's API allows connected apps to schedule deletions. Sākṣī does not guarantee absolute evidence preservation if the device is compromised or physically destroyed.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0. See the LICENSE file for details.
