@@ -32,7 +32,7 @@ Instead of keeping the only copy inside the camera or recorder, a client app can
 - **Media Transfer:** Receives photos, videos, and audio from client applications over Android Binder IPC (AIDL).
 - **Secure Local Storage:** Stores received media privately on the device in a separate app container.
 - **Metadata Management:** Stores file metadata and synchronization state using Room 3.
-- **Scheduled Deletion:** Handles delayed deletion safely. Deletion requests immediately hide the media but permanently remove the Vault copy only after a set delay (30 days) using WorkManager and monotonic clock validation, resisting simple time-tampering.
+- **Scheduled Deletion:** Handles delayed deletion. Deletion requests immediately hide the media but permanently remove the Vault copy only after a set delay (30 days) using WorkManager and monotonic clock validation, resisting simple time-tampering. The `DeletionEligibilityChecker` uses elapsed realtime only when boot metadata is valid and falls back to wall-clock time when metadata is missing or mismatched, or elapsed realtime moves backwards.
 - **Independent Architecture:** Runs completely separately from the applications that capture or view the media.
 - **Offline Capable:** Requires no internet connection, keeping data local.
 

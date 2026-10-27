@@ -22,7 +22,7 @@ It is designed to capture media and work with **Sākṣī Vault** to preserve an
 
 A camera app is the starting point of the Sākṣī ecosystem. Sākṣī Camera strictly handles capture, utilizing the Sākṣī SDK to securely transfer media over local IPC to the independent Sākṣī Vault.
 
-By separating capture from storage, the ecosystem ensures that if the Camera app is compromised or a user is forced to delete their recording in the camera interface, the Vault independently preserves the evidence.
+By separating capture from storage, deleting a recording in the Camera app does not itself delete a completed Vault copy. However, because Vault’s unrestricted IPC API lets apps that bind to it schedule copies for deletion, the Vault does not independently preserve evidence if the Camera app (or another bound app) is compromised.
 
 ---
 
