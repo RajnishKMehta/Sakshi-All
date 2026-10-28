@@ -1,28 +1,36 @@
-# Sākṣī Documentation
+<div align="center">
+  <h1>Sākṣī (साक्षी)</h1>
+  <p><b>Preserving a separate, independent copy of important media.</b></p>
+  <p><i>Sākṣī ≈ Sakshi</i></p>
+</div>
 
-**Preserving a separate, independent copy of important media.**
+---
 
-Sākṣī (साक्षी, meaning "Witness" in Sanskrit) is an open-source Android ecosystem designed to help you securely retain personal, private, or important media. When capturing evidence of wrongdoing, individuals are often pressured or forced to delete recordings from their phones. Sākṣī addresses this risk by keeping a separate copy of your media. Even if the visible original is permanently deleted from your phone's normal gallery, your evidence remains preserved.
+Sākṣī (meaning "Witness" in Sanskrit) is an open-source Android ecosystem designed to help you securely retain personal, private, or important media. When capturing evidence of wrongdoing, individuals are often pressured or forced to delete recordings from their phones. Sākṣī addresses this risk by keeping a separate copy of your media. Even if the visible original is permanently deleted from your phone's normal gallery, your evidence remains preserved.
 
-## The Sākṣī Ecosystem
+## The Ecosystem
 
 Sākṣī consists of four independent but tightly integrated components. Depending on your goals, you can use the ready-made applications or integrate the underlying SDK into your own projects.
 
-### Sākṣī Vault (The Secure Storage)
+### Sākṣī Vault
+**The Secure Storage**
 The core of the ecosystem. Sākṣī Vault is a background-only application without a user interface, dedicated to receiving and securely storing independent copies of your media. It handles synchronization metadata, delayed permanent deletions, and runs entirely offline.
-* **[View Sākṣī Vault Repository](https://github.com/RajnishKMehta/Sakshi-Vault)**
+* **[Explore Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault)**
 
-### Sākṣī Camera (The Capture App)
+### Sākṣī Camera
+**The Capture App**
 A fully functional camera application designed to capture photos and videos and synchronize them with the Vault. It natively supports crash-safe Fragmented MP4 (fMP4) recording, which syncs to the Vault incrementally while you are still recording, helping preserve data even if the recording is unexpectedly interrupted.
-* **[View Sākṣī Camera Repository](https://github.com/RajnishKMehta/Sakshi-Camera)**
+* **[Explore Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera)**
 
-### Sākṣī Portal (The User Interface)
+### Sākṣī Portal
+**The User Interface**
 The gateway for browsing, playing, and managing the files stored in your Vault. Sākṣī Portal is completely offline-capable, guaranteeing your private data never leaves your device unless you explicitly export it. Because it is independent of the Vault, you can uninstall the Portal to remove the viewing interface from your device without immediately deleting the underlying stored data.
-* **[View Sākṣī Portal Repository](https://github.com/RajnishKMehta/Sakshi-Portal)**
+* **[Explore Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal)**
 
-### Sākṣī SDK (The Developer Library)
+### Sākṣī SDK
+**The Developer Library**
 A lightweight, headless IPC (Inter-Process Communication) Android library. It provides the standardized APIs required for client applications to securely transfer files and stream video data to the background Vault service.
-* **[View Sākṣī SDK Repository](https://github.com/RajnishKMehta/Sakshi-SDK)**
+* **[Explore Sākṣī SDK](https://github.com/RajnishKMehta/Sakshi-SDK)**
 
 ## Security & Privacy Scope
 
