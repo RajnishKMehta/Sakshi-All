@@ -1,0 +1,34 @@
+version: 1
+site:
+  title: Sākṣī Documentation
+  structure:
+    - type: space
+      key: space-docs
+      title: Root Docs
+      path: /
+      content:
+        directory: 00_docs
+    - type: space
+      key: space-sdk
+      title: SDK
+      path: sdk
+      content:
+        directory: 01_sdk
+    - type: space
+      key: space-vault
+      title: Vault
+      path: vault
+      content:
+        directory: 02_vault
+    - type: space
+      key: space-camera
+      title: Camera
+      path: camera
+      content:
+        directory: 03_camera
+    - type: space
+      key: space-portal
+      title: Portal
+      path: portal
+      content:
+        directory: 04_portal
