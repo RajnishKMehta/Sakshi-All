@@ -29,22 +29,19 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 |       Client Application           |                 |        Sākṣī Vault App            |
 |  (e.g., Camera / Portal)           |                 |       (External Service)          |
 |                                    |                 |                                   |
-|  +------------------------------+  |   Android IPC   |  +-----------------------------+  |
-|  |        SakshiClient          |  | <=============> |  |   Incremental Copy Engine   |  |
-|  +------------------------------+  |   (AIDL/Binder) |  |   VaultResponder Helper     |  |
-|  (Copy Files & Video Sync)         |                 |  |   Media Records Database    |  |
+|  +------------------------------+  |  +-----------+  |  +-----------------------------+  |
+|  |        SakshiClient          |  |  | Sākṣī SDK |  |  |   Incremental Copy Engine   |  |
+|  +------------------------------+  |  +-----------+  |  |   VaultResponder Helper     |  |
+|  (Copy Files & Video Sync)         |  (AIDL IPC)     |  |   Media Records Database    |  |
 +------------------------------------+                 +-----------------------------------+
 ```
 
 ### SDK Responsibilities
 
-The SDK acts as the essential bridge connecting the two sides of the Sākṣī ecosystem. It handles:
-
-- **Inter-Process Communication:** Managing the complex Android Binder proxy transactions and AIDL interfaces required for local app-to-app communication.
-- **Client Side (`SakshiClient`):** Providing client applications with easy-to-use, coroutine-based functions to send media files, manage real-time video synchronization, and query storage state.
-- **Service Side (`VaultResponder`):** Providing Vault applications with structured methods to correctly format and send responses, progress updates, and completion events back to the client.
-- **Death Recipient Handling:** Automatically managing connection drops or unexpected process deaths.
-- **Strictly Headless Operation:** Delivering pure functional capabilities without any UI elements (Activities, Fragments, Compose, or XML layouts), ensuring seamless integration into any client's existing architecture.
+- Inter-process communication bridge with Vault service.
+- Hiding Binder proxy transactions, AIDL interfaces, and death recipient handling.
+- Providing `SakshiClient` for client applications and `VaultResponder` for Vault applications.
+- **Strictly Headless**: The SDK contains no UI components (Activities, Fragments, Compose, or XML layouts).
 
 ### Vault Responsibilities (External App)
 
