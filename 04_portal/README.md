@@ -63,7 +63,7 @@ Standard Gradle commands can be used to build and test the project:
 
 ## Contributing
 
-Contributions are welcome.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
 
 ---
 
