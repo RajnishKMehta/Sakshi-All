@@ -6,7 +6,7 @@
 
 ---
 
-Sākṣī (meaning "Witness" in Sanskrit) is an open-source Android ecosystem designed to help you securely retain personal, private, or important media. When capturing evidence of wrongdoing, individuals are often pressured or forced to delete recordings from their phones. Sākṣī addresses this risk by keeping a separate copy of your media. Even if the visible original is permanently deleted from your phone's normal gallery, your evidence remains preserved.
+Sākṣī (meaning "Witness" in Sanskrit) is an open-source Android ecosystem designed to help you securely retain personal, private, or important media. When capturing evidence of wrongdoing, individuals are often pressured or forced to delete recordings from their phones. Sākṣī addresses this risk by keeping a separate copy of your media. After Vault has received and stored the copy, deleting the visible original from your phone's normal gallery does not delete the Vault copy.
 
 ## The Ecosystem
 
