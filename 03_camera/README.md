@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-Camera?logo=apache&logoColor=DDC06F)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
+[![Docs](https://img.shields.io/badge/Docs-Sākṣī_Documentation-blue.svg?logo=gitbook)](https://github.com/RajnishKMehta/Sakshi-Docs)
 
 </div>
 

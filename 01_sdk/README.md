@@ -5,6 +5,7 @@
 [![Release](https://img.shields.io/maven-central/v/io.github.rajnishkmehta.sakshi/sakshi-sdk?logo=apache-maven&style=flat-square)](https://central.sonatype.com/artifact/io.github.rajnishkmehta.sakshi/sakshi-sdk)
 [![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=plastic&logo=Android)](https://github.com/RajnishKMehta/Sakshi-SDK)
 [![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-SDK?style=flat-square&logo=Apache)](https://github.com/RajnishKMehta/Sakshi-SDK/raw/refs/heads/main/LICENSE)
+[![Docs](https://img.shields.io/badge/Docs-Sākṣī_Documentation-blue.svg?logo=gitbook)](https://github.com/RajnishKMehta/Sakshi-Docs)
 
 </div>
 
@@ -21,7 +22,7 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 
 ---
 
-## Dual-Side Architecture & Responsibilities
+## Architecture & Responsibilities
 
 ```text
 +------------------------------------+                 +-----------------------------------+
@@ -37,10 +38,13 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 
 ### SDK Responsibilities
 
-- Inter-process communication bridge with Vault service.
-- Hiding Binder proxy transactions, AIDL interfaces, and death recipient handling.
-- Providing `SakshiClient` for client applications and `VaultResponder` for Vault applications.
-- **Strictly Headless**: The SDK contains no UI components (Activities, Fragments, Compose, or XML layouts).
+The SDK acts as the essential bridge connecting the two sides of the Sākṣī ecosystem. It handles:
+
+- **Inter-Process Communication:** Managing the complex Android Binder proxy transactions and AIDL interfaces required for local app-to-app communication.
+- **Client Side (`SakshiClient`):** Providing client applications with easy-to-use, coroutine-based functions to send media files, manage real-time video synchronization, and query storage state.
+- **Service Side (`VaultResponder`):** Providing Vault applications with structured methods to correctly format and send responses, progress updates, and completion events back to the client.
+- **Death Recipient Handling:** Automatically managing connection drops or unexpected process deaths.
+- **Strictly Headless Operation:** Delivering pure functional capabilities without any UI elements (Activities, Fragments, Compose, or XML layouts), ensuring seamless integration into any client's existing architecture.
 
 ### Vault Responsibilities (External App)
 
@@ -64,7 +68,7 @@ dependencies {
 }
 ```
 
-> **Note**: A GitHub Packages distribution is also available. See the [detailed documentation](https://github.com/RajnishKMehta/Sakshi-Docs) for alternative setup instructions.
+> **Note**: A GitHub Packages distribution is also available. See the [Sākṣī Documentation](https://github.com/RajnishKMehta/Sakshi-Docs) for alternative setup instructions.
 
 ---
 
