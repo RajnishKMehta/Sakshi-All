@@ -4,25 +4,15 @@
 
 [![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Camera?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Camera/releases)
 [![Build Status](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Camera/actions/workflows/checks.yml)
-
 [![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-Camera?logo=apache&logoColor=DDC06F)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
 
 </div>
 
-
 **Sākṣī Camera** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the camera application of the open-source Sākṣī Android ecosystem.
 
-It is designed to capture media and work with **Sākṣī Vault** to preserve an independent local copy while recording.
-
----
-
-## Why Sākṣī Camera Exists
-
-A camera app is the starting point of the Sākṣī ecosystem. Sākṣī Camera strictly handles capture, utilizing the Sākṣī SDK to securely transfer media over local IPC to the independent Sākṣī Vault.
-
-By separating capture from storage, deleting a recording in the Camera app does not itself delete a completed Vault copy. However, because Vault’s unrestricted IPC API lets apps that bind to it schedule copies for deletion, the Vault does not independently preserve evidence if the Camera app (or another bound app) is compromised.
+It is designed to capture media and work with **[Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault)** to preserve an independent local copy while recording.
 
 ---
 
@@ -55,8 +45,8 @@ The chosen container format dictates the Vault synchronization behavior:
 Sākṣī Camera is one integrated part of the ecosystem:
 
 1. **Sākṣī Camera** (this repo) — captures media.
-2. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the client-side API and IPC layer.
-3. **[Sākṣī Vault](../../../../Sakshi-Vault)** — safely stores received media independently.
+2. **[Sākṣī SDK](https://github.com/RajnishKMehta/Sakshi-SDK)** — provides the client-side API and IPC layer.
+3. **[Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault)** — safely stores received media independently.
 
 ```text
 Sākṣī Camera (Capture)
@@ -84,12 +74,11 @@ Standard Gradle commands can be used to build and test the project:
 ./gradlew check
 ```
 
-
 ---
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+Contributions are welcome. Please read the contributing guidelines in the central [Sākṣī Documentation Repository](https://github.com/RajnishKMehta/Sakshi-Docs) before contributing.
 
 ---
 

@@ -3,17 +3,16 @@
 # Sākṣī SDK (साक्षी SDK)
 
 [![Release](https://img.shields.io/maven-central/v/io.github.rajnishkmehta.sakshi/sakshi-sdk?logo=apache-maven&style=flat-square)](https://central.sonatype.com/artifact/io.github.rajnishkmehta.sakshi/sakshi-sdk)
-[![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=plastic&logo=Android)](../../)
+[![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=plastic&logo=Android)](https://github.com/RajnishKMehta/Sakshi-SDK)
 [![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-SDK?style=flat-square&logo=Apache)](https://github.com/RajnishKMehta/Sakshi-SDK/raw/refs/heads/main/LICENSE)
 
 </div>
 
-**Sākṣī SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sākṣī Camera_ or _Sākṣī Portal_) and the **Sākṣī Vault** application.
-
+**Sākṣī SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as [Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera) or [Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal)) and the [Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault) application.
 
 ---
 
-## 💡 What is Sākṣī SDK?
+## What is Sākṣī SDK?
 
 Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
 
@@ -22,7 +21,7 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 
 ---
 
-## 🏗️ Dual-Side Architecture & Responsibilities
+## Dual-Side Architecture & Responsibilities
 
 ```text
 +------------------------------------+                 +-----------------------------------+
@@ -32,7 +31,7 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 |  +------------------------------+  |   Android IPC   |  +-----------------------------+  |
 |  |        SakshiClient          |  | <=============> |  |   Incremental Copy Engine   |  |
 |  +------------------------------+  |   (AIDL/Binder) |  |   VaultResponder Helper     |  |
-|  (Copy Files & Video Sync)     |                 |  |   Media Records Database    |  |
+|  (Copy Files & Video Sync)         |                 |  |   Media Records Database    |  |
 +------------------------------------+                 +-----------------------------------+
 ```
 
@@ -51,11 +50,9 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 
 ---
 
-## 📦 Installation & Gradle Integration
+## Installation
 
 Add the dependency to your app or library module's `build.gradle.kts`:
-
-### Maven Central
 
 ```kotlin
 repositories {
@@ -67,29 +64,11 @@ dependencies {
 }
 ```
 
-### GitHub Packages
-
-```kotlin
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/RajnishKMehta/sakshi-sdk")
-        credentials {
-            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
-            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
-}
-
-dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.3")
-}
-```
-
-> **Note:** GitHub Packages requires authentication using a Personal Access Token (PAT), even for many public packages.
+> **Note**: A GitHub Packages distribution is also available. See the [detailed documentation](https://github.com/RajnishKMehta/Sakshi-Docs) for alternative setup instructions.
 
 ---
 
-## 🚀 Quick Start Examples
+## Quick Start Examples
 
 ### A. Client App Example (Camera / Portal)
 
@@ -141,38 +120,12 @@ coroutineScope.launch {
     when (result) {
         is SakshiResult.Success -> {
             val ack = result.data
-            println("Copy Completed! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
+            println("Copy Completed! File ID: ${ack.fileId}")
         }
         is SakshiResult.Failure -> {
             println("Stop AVSync error: ${result.error.message}")
         }
     }
-}
-
-// 5. Retrieve Thumbnail & Media URI template
-coroutineScope.launch {
-    val thumbnailResult = client.getThumbnail() // content://<authority>/media/{mediaType}/thumbnail/{fileId}
-    val mediaResult = client.getMedia("photo_001")
-    if (mediaResult is SakshiResult.Success) {
-        val details = mediaResult.data
-        // details.contentUri => content://<authority>/media/photo/photo_001
-        // details.fileExtension => jpg
-    }
-}
-
-// 6. List Media
-coroutineScope.launch {
-    val result = client.listMedia()
-    // To get only files scheduled for deletion, use client.listDeletedMedia()
-    if (result is SakshiResult.Success) {
-        println("Media JSON: ${result.data}")
-    }
-}
-
-// 7. Disconnect in lifecycle cleanup
-override fun onDestroy() {
-    super.onDestroy()
-    client.disconnect()
 }
 ```
 
@@ -208,33 +161,17 @@ class SakshiVaultServiceBinder : ISakshiVaultService.Stub() {
             )
         )
     }
-    // ...
-}
-
-class SakshiVaultRemoteService : Service() {
-    private var binder: SakshiVaultServiceBinder? = null
-    override fun onCreate() {
-        super.onCreate()
-        binder = SakshiVaultServiceBinder()
-    }
-    override fun onBind(intent: Intent?): IBinder? = binder
 }
 ```
 
 ---
 
-## 📄 Documentation
+## Documentation
 
-Detailed technical specifications are available in the [`/docs`](docs) directory:
-
-- 📑 [System Architecture](docs/architecture.adoc)
-- 📑 [Client API Usage](docs/api_usage.adoc)
-- 📑 [Vault Integration Guide](docs/vault_integration.adoc)
-- 📑 [AIDL IPC Specification](docs/ipc_specification.adoc)
-- 📑 [Development Guide](docs/development.adoc)
+Detailed technical specifications and integration guides are available in the [Sākṣī Documentation Repository](https://github.com/RajnishKMehta/Sakshi-Docs).
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
