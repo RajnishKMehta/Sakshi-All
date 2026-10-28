@@ -1,61 +1,34 @@
-<div id="top" align="center">
+# Sākṣī Vault
 
-# Sākṣī Vault (साक्षी वॉल्ट)
+Sākṣī Vault is the secure, background-only storage application for the Sākṣī Android ecosystem.
 
-[![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Vault?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Vault/releases)
-[![Build Status](https://github.com/RajnishKMehta/Sakshi-Vault/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Vault/actions/workflows/checks.yml)
-
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache)](https://opensource.org/licenses/Apache-2.0)
-[![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
-
-</div>
-
-
-**Sākṣī Vault** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the secure storage application of the open-source Sākṣī Android ecosystem.
-
-It runs as a separate background application without a user interface, dedicated to receiving and protecting media from client applications such as Sākṣī Camera over local IPC.
-
----
-
-## Why Sākṣī Vault Exists
-
-Sākṣī Vault is designed to keep a separate, independent copy of important media captured by another app.
-
-Instead of keeping the only copy inside the camera or recorder, a client app can send the captured media to Sākṣī Vault over Android IPC. This keeps the storage layer entirely separate from the capture app and viewing interfaces.
-
----
+It securely receives and protects media from client applications (such as Sākṣī Camera) over local IPC, keeping a separate, independent copy of important media beyond the ordinary gallery or file manager.
 
 ## Features
 
-- **Background-Only Execution:** Operates entirely in the background without any UI to minimize the surface area for compromise.
-- **Media Transfer:** Receives photos, videos, and audio from client applications over Android Binder IPC (AIDL).
-- **Secure Local Storage:** Stores received media privately on the device in a separate app container.
-- **Metadata Management:** Stores file metadata and synchronization state using Room 3.
-- **Scheduled Deletion:** Handles delayed deletion. Deletion requests immediately hide the media but permanently remove the Vault copy only after a set delay (30 days) using WorkManager and monotonic clock validation, resisting simple time-tampering. The `DeletionEligibilityChecker` uses elapsed realtime only when boot metadata is valid and falls back to wall-clock time when metadata is missing or mismatched, or elapsed realtime moves backwards.
-- **Independent Architecture:** Runs completely separately from the applications that capture or view the media.
-- **Offline Capable:** Requires no internet connection, keeping data local.
+- **Background-Only Execution:** Operates entirely in the background without any user interface, reducing visibility and the surface area for compromise.
+- **Independent Storage:** Stores a separate copy of media locally on the device, independent of the capture application.
+- **Media Transfer & Sync:** Receives media, including incremental synchronization for fMP4 recordings, from client apps over Android IPC.
+- **Metadata Management:** Manages file metadata and synchronization state using Room 3.
+- **Scheduled Deletion:** Implements delayed deletion. Deletion requests hide the media immediately, but permanent deletion from the Vault occurs only after a set delay (30 days). This mechanism uses elapsed realtime (when boot metadata is valid) and falls back to wall-clock time to resist simple time-tampering.
+- **Offline Capable:** Requires no internet connection; all operations and storage are entirely local.
 
----
+## Architecture and Role
 
-## Ecosystem Architecture
+Sākṣī Vault is a core component of the Sākṣī ecosystem:
 
-The Sākṣī ecosystem connects components locally:
+1. **[Sākṣī SDK](../01_sdk/README.md):** Provides the IPC interface to connect to the Vault.
+2. **Sākṣī Vault (this repository):** Exposes a service (`rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE`) to securely receive IPC calls and stores media separately.
+3. **Client Apps:** Capture apps like [Sākṣī Camera](../03_camera/README.md) and viewing apps like [Sākṣī Portal](../04_portal/README.md) communicate with the Vault via the SDK.
 
-1. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the AIDL/IPC interface.
-2. **Sākṣī Vault** (this repo) — safely stores received media as an external service.
-3. **Client Apps** — such as [Sākṣī Camera](../../../../Sakshi-Camera) and [Sākṣī Portal](../../../../Sakshi-Portal).
+**Note:** The Vault is a separate background application, but it is not completely undetectable. Its presence can be discovered through system settings and app lists. Furthermore, it does not guarantee absolute protection against device seizure, factory resets, physical destruction, or privileged system attacks.
 
-Vault exposes the `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE` service to receive IPC calls securely.
+## Building from Source
 
----
-
-## Building & Testing
-
-Standard Gradle commands can be used to build and test the project:
+To build Sākṣī Vault from source, use standard Gradle commands:
 
 ```bash
-# Debug APK
+# Build Debug APK
 ./gradlew assembleDebug
 
 # Run unit tests
@@ -64,7 +37,6 @@ Standard Gradle commands can be used to build and test the project:
 # Run lint and code checks
 ./gradlew check
 ```
-
 
 ## Contributing
 
