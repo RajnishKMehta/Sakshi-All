@@ -10,15 +10,7 @@
 </div>
 
 **Sākṣī SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as [Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera) or [Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal)) and the [Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault) application.
-
----
-
-## What is Sākṣī SDK?
-
-Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
-
-1. **Client Developers (Camera, Portal)**: Send photos, manage incremental audio/video sync, ping Vault, query recording status, observe file copy completion acknowledgements (`CopyDoneAck`), and browse/manage stored media.
-2. **Vault Developers**: Implement remote AIDL service binding and send structured responses, sync progress, copy completion acknowledgements, and error events using `VaultResponder`.
+> Sākṣī ≈ Sakshi
 
 ---
 
@@ -42,12 +34,6 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 - Hiding Binder proxy transactions, AIDL interfaces, and death recipient handling.
 - Providing `SakshiClient` for client applications and `VaultResponder` for Vault applications.
 - **Strictly Headless**: The SDK contains no UI components (Activities, Fragments, Compose, or XML layouts).
-
-### Vault Responsibilities (External App)
-
-- File storage, incremental byte copying, and persistence.
-- Interval timers, queue scheduling, and non-overlapping copy pass execution.
-- Emitting `CopyDoneAck` (including File ID, optional original source URI, and total copied bytes) upon completing file transfers.
 
 ---
 
