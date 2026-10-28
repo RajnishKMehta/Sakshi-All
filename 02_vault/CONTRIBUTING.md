@@ -4,7 +4,7 @@ Thank you for your interest in contributing to **Sakshi Vault**! We welcome and 
 
 ## Code Guidelines
 
-- **English, Hindi Only**: All code, comments, documentation, commit messages, and issues must be in English or Hindi.
+- **English Only**: All code comments, documentation, commit messages, must be in English.
 - **Best Practices**: Keep code clean, modern, and production-ready.
 - **Kotlin Standard**: Follow modern Kotlin style guides and use structured coroutines for background tasks.
 - **KDoc**: Add proper KDoc documentation for any new public APIs or important classes.
