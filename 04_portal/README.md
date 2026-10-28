@@ -1,81 +1,45 @@
-<div id="top" align="center">
+# Sākṣī Portal
 
-# Sākṣī Portal (साक्षी पोर्टल)
+Sākṣī Portal is the user-facing interface for the Sākṣī ecosystem. It allows users to safely browse, view, and manage media stored independently in the Sākṣī Vault.
 
-[![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Portal?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Portal/releases)
-[![Build Status](https://github.com/RajnishKMehta/Sakshi-Portal/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Portal/actions/workflows/checks.yml)
+## About
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache)](https://opensource.org/licenses/Apache-2.0)
-[![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
+Sākṣī helps people retain important media and evidence by keeping a separate copy beyond the ordinary gallery or file manager. While the Vault acts as a background-only storage layer, Sākṣī Portal acts as the secure gateway to access those files.
 
-</div>
-
-**Sākṣī Portal** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the user-facing application for the open-source Sākṣī Android ecosystem. It provides the interface for browsing, viewing, and managing media safely stored in the independent **Sākṣī Vault**.
-
----
-
-## Why Sākṣī Portal Exists
-
-While **Sākṣī Camera** captures media and **Sākṣī Vault** safely stores it, an interface is required for users to interact with this stored media. **Sākṣī Portal** acts as this secure gateway.
-
-By keeping the viewing and management UI separate from the Vault and Camera, the ecosystem maintains a strict separation of concerns, ensuring that the Vault remains a background-only service dedicated solely to secure storage.
-
----
+By separating the viewing interface from the storage engine, the ecosystem maintains strict boundaries, ensuring the Vault remains entirely hidden from normal view. Sākṣī Portal can be installed, used to manage files, and then uninstalled to reduce casual visibility, while leaving the Vault's data intact.
 
 ## Features
 
-- **Media Browsing:** Browse photos and videos securely stored within Sākṣī Vault.
-- **Media Playback & Viewing:** Built-in viewer for photos and smooth playback of normal MP4 and crash-safe fMP4 video containers using AndroidX Media3.
-- **Export & Management:** Securely export or manage your files. Relies on modern `MediaStore` APIs.
-- **Modern UI:** Built fully with Jetpack Compose and Navigation 3 for a responsive and intuitive user experience.
-- **Offline Capable:** Does not require an internet connection, keeping your media completely local and secure.
+- **Media Browsing:** Securely browse photos and videos preserved in the Sākṣī Vault.
+- **Media Playback:** Built-in viewer for photos and seamless playback of standard MP4 and interruption-resilient Fragmented MP4 (fMP4) videos using AndroidX Media3.
+- **Export and Manage:** Export preserved media out of the Vault to the device's public storage using modern `MediaStore` APIs.
+- **App Lock:** Secure the application using built-in Android biometric authentication (`androidx.biometric`).
+- **Modern UI:** Built entirely with Jetpack Compose and Navigation 3 for a responsive experience.
+- **Local-Only:** Requires no internet connection, keeping your data local and secure.
 
----
+## Architecture
 
-## Ecosystem Architecture
+Sākṣī Portal connects to Sākṣī Vault to fetch and display the user's stored media:
 
-Sākṣī Portal connects with Sākṣī Vault to fetch and display the user's stored media.
+1. **Sākṣī Camera:** Captures the media.
+2. **Sākṣī SDK:** Handles the API and IPC layer between apps.
+3. **Sākṣī Vault:** Safely stores media independently in the background.
+4. **Sākṣī Portal (This Project):** Connects to the Vault via the SDK to browse, view, and export stored media.
 
-1. **[Sākṣī Camera](../../../../Sakshi-Camera)** — captures media.
-2. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the API and IPC layer.
-3. **[Sākṣī Vault](../../../../Sakshi-Vault)** — safely stores media independently.
-4. **Sākṣī Portal** (this repo) — browses and manages the stored media.
+If you are a developer looking to integrate or extend functionality, refer to the documentation in the Sākṣī SDK repository.
 
----
+## Build From Source
 
-## Integration
-
-Sākṣī Portal utilizes the [Sākṣī SDK](https://github.com/RajnishKMehta/Sakshi-SDK) for inter-process communication with [Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault).
-
-If you are a developer looking to integrate or extend functionality, refer to the SDK documentation.
-
----
-
-## Building & Testing
-
-Standard Gradle commands can be used to build and test the project:
+To build Sākṣī Portal locally:
 
 ```bash
-# Debug APK
 ./gradlew assembleDebug
-
-# Run unit tests
-./gradlew test
-
-# Run lint and code checks
-./gradlew check
 ```
 
+## Security and Privacy
 
----
-
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
-
----
+Sākṣī Portal provides an interface to access media stored in the Vault. It is not designed to provide absolute device-level security. Uninstalling Sākṣī Portal makes accessing the Vault harder for casual observers, but it does not make the Vault or its data undetectable to forensic tools, MDM profiles, or users with root access.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0.

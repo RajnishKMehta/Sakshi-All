@@ -1,61 +1,25 @@
-<div id="top" align="center">
+# Sākṣī SDK
 
-# Sākṣī SDK (साक्षी SDK)
+Sākṣī SDK is the official Android client and IPC library for the Sākṣī ecosystem. It provides the communication bridge between client applications (such as a camera) and the independent Sākṣī Vault.
 
-[![Release](https://img.shields.io/maven-central/v/io.github.rajnishkmehta.sakshi/sakshi-sdk?logo=apache-maven&style=flat-square)](https://central.sonatype.com/artifact/io.github.rajnishkmehta.sakshi/sakshi-sdk)
-[![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=plastic&logo=Android)](../../)
-[![License](https://img.shields.io/github/license/RajnishKMehta/Sakshi-SDK?style=flat-square&logo=Apache)](https://github.com/RajnishKMehta/Sakshi-SDK/raw/refs/heads/main/LICENSE)
+By using this SDK, client apps can send photos, synchronize videos incrementally, and schedule media deletion without needing to manage the Vault's underlying storage or database mechanisms.
 
-</div>
+## About
 
-**Sākṣī SDK** (`rajnishkmehta.sakshi.sdk`) is a lightweight, headless Android client and IPC library designed for local-first inter-process communication between trusted client applications (such as _Sākṣī Camera_ or _Sākṣī Portal_) and the **Sākṣī Vault** application.
+Sākṣī helps people retain important media and evidence by keeping a separate copy beyond the ordinary gallery or file manager. The SDK is the headless communication layer that makes this possible. It handles Android Binder/AIDL complexity, providing clean, coroutine-powered Kotlin APIs for developers building tools that integrate with the Vault.
 
+## Features
 
----
+- **Local IPC Communication:** Securely connect to the Vault application using Android Binder (AIDL).
+- **Media Transfer:** Send photos and initiate incremental audio/video synchronization.
+- **Background Sync Management:** Pause, resume, and stop video synchronization.
+- **Media Management:** Query recording status, list preserved media, and schedule media for delayed deletion.
+- **Headless Design:** Contains no UI components; strictly a communication library.
+- **Coroutine Support:** Clean, non-blocking execution using Kotlin Coroutines and structured concurrency.
 
-## 💡 What is Sākṣī SDK?
+## Installation
 
-Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs for:
-
-1. **Client Developers (Camera, Portal)**: Send photos, manage incremental audio/video sync, ping Vault, query recording status, observe file copy completion acknowledgements (`CopyDoneAck`), and browse/manage stored media.
-2. **Vault Developers**: Implement remote AIDL service binding and send structured responses, sync progress, copy completion acknowledgements, and error events using `VaultResponder`.
-
----
-
-## 🏗️ Dual-Side Architecture & Responsibilities
-
-```text
-+------------------------------------+                 +-----------------------------------+
-|       Client Application           |                 |        Sākṣī Vault App            |
-|  (e.g., Camera / Portal)           |                 |       (External Service)          |
-|                                    |                 |                                   |
-|  +------------------------------+  |   Android IPC   |  +-----------------------------+  |
-|  |        SakshiClient          |  | <=============> |  |   Incremental Copy Engine   |  |
-|  +------------------------------+  |   (AIDL/Binder) |  |   VaultResponder Helper     |  |
-|  (Copy Files & Video Sync)     |                 |  |   Media Records Database    |  |
-+------------------------------------+                 +-----------------------------------+
-```
-
-### SDK Responsibilities
-
-- Inter-process communication bridge with Vault service.
-- Hiding Binder proxy transactions, AIDL interfaces, and death recipient handling.
-- Providing `SakshiClient` for client applications and `VaultResponder` for Vault applications.
-- **Strictly Headless**: The SDK contains no UI components (Activities, Fragments, Compose, or XML layouts).
-
-### Vault Responsibilities (External App)
-
-- File storage, incremental byte copying, and persistence.
-- Interval timers, queue scheduling, and non-overlapping copy pass execution.
-- Emitting `CopyDoneAck` (including File ID, optional original source URI, and total copied bytes) upon completing file transfers.
-
----
-
-## 📦 Installation & Gradle Integration
-
-Add the dependency to your app or library module's `build.gradle.kts`:
-
-### Maven Central
+Add the dependency to your app's `build.gradle.kts` file:
 
 ```kotlin
 repositories {
@@ -67,174 +31,25 @@ dependencies {
 }
 ```
 
-### GitHub Packages
+The SDK requires a minimum Android version of 10 (API 29).
 
-```kotlin
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/RajnishKMehta/sakshi-sdk")
-        credentials {
-            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
-            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
-}
+## Architecture
 
-dependencies {
-    implementation("io.github.rajnishkmehta.sakshi:sakshi-sdk:1.0.0-RC.3")
-}
-```
+The Sākṣī ecosystem relies on separated responsibilities:
 
-> **Note:** GitHub Packages requires authentication using a Personal Access Token (PAT), even for many public packages.
+- **Client App (e.g., Camera or Portal):** Captures or views media and uses the `SakshiClient` to send commands and data.
+- **Sākṣī SDK (This Project):** Marshals these commands across the IPC bridge to the Vault service.
+- **Sākṣī Vault:** The background service that receives data, performs incremental copying, manages persistence, and handles delayed deletions.
 
----
+## Documentation
 
-## 🚀 Quick Start Examples
+For detailed technical specifications and integration guides, see the `/docs` directory:
+- [Client API Usage](docs/api_usage.adoc)
+- [Vault Integration Guide](../02_vault/docs/INTEGRATION.md)
+- [System Architecture](docs/architecture.adoc)
+- [AIDL IPC Specification](docs/ipc_specification.adoc)
+- [Development Guide](docs/development.adoc)
 
-### A. Client App Example (Camera / Portal)
+## License
 
-```kotlin
-import rajnishkmehta.sakshi.sdk.api.SakshiClient
-import rajnishkmehta.sakshi.sdk.api.models.*
-
-val client = SakshiClient.create(context)
-
-// 1. Copy File (returns SakshiResult<CopyDoneAck>)
-coroutineScope.launch {
-    val result = client.copyFile(FileCopyRequest(fileId = "photo_001", uri = photoUri, mediaType = "PHOTO", fileExtension = "jpg"))
-    when (result) {
-        is SakshiResult.Success -> {
-            val ack = result.data
-            println("File Copied! File ID: ${ack.fileId}, Copied Bytes: ${ack.totalCopiedBytes}")
-        }
-        is SakshiResult.Failure -> {
-            println("File ingestion failed: ${result.error.message}")
-        }
-    }
-}
-
-// 2. Start AVSync (returns Flow<SakshiResult<AVSyncStatus>>)
-coroutineScope.launch {
-    client.startAVSync(AVSyncRequest(fileId = "rec_999", uri = avUri, mediaType = "VIDEO", fileExtension = "mp4")).collect { result ->
-        when (result) {
-            is SakshiResult.Success -> {
-                val status = result.data
-                println("Sync State: ${status.state}, Copied Bytes: ${status.lastCopiedOffsetBytes}")
-            }
-            is SakshiResult.Failure -> {
-                println("Sync Error: ${result.error.message}")
-            }
-        }
-    }
-}
-
-// 3. Pause & Resume AVSync
-coroutineScope.launch {
-    client.pauseAVSync("rec_999") // Pauses ongoing sync
-    // ... later ...
-    client.resumeAVSync("rec_999") // Resumes sync
-}
-
-// 4. Stop AVSync and Receive Copy Completion Acknowledgement
-coroutineScope.launch {
-    val result: SakshiResult<CopyDoneAck> = client.stopAVSync("rec_999")
-    when (result) {
-        is SakshiResult.Success -> {
-            val ack = result.data
-            println("Copy Completed! File ID: ${ack.fileId}, Original URI: ${ack.originalUri}, Copied Bytes: ${ack.totalCopiedBytes}")
-        }
-        is SakshiResult.Failure -> {
-            println("Stop AVSync error: ${result.error.message}")
-        }
-    }
-}
-
-// 5. Retrieve Thumbnail & Media URI template
-coroutineScope.launch {
-    val thumbnailResult = client.getThumbnail() // content://<authority>/media/{mediaType}/thumbnail/{fileId}
-    val mediaResult = client.getMedia("photo_001")
-    if (mediaResult is SakshiResult.Success) {
-        val details = mediaResult.data
-        // details.contentUri => content://<authority>/media/photo/photo_001
-        // details.fileExtension => jpg
-    }
-}
-
-// 6. List Media
-coroutineScope.launch {
-    val result = client.listMedia()
-    // To get only files scheduled for deletion, use client.listDeletedMedia()
-    if (result is SakshiResult.Success) {
-        println("Media JSON: ${result.data}")
-    }
-}
-
-// 7. Disconnect in lifecycle cleanup
-override fun onDestroy() {
-    super.onDestroy()
-    client.disconnect()
-}
-```
-
-### B. Vault App Example (Service Side)
-
-```kotlin
-import android.app.Service
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.os.IBinder
-import rajnishkmehta.sakshi.sdk.api.vault.VaultResponder
-import rajnishkmehta.sakshi.sdk.api.models.CopyDoneAck
-import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultCallback
-import rajnishkmehta.sakshi.sdk.internal.ipc.ISakshiVaultService
-
-class SakshiVaultServiceBinder : ISakshiVaultService.Stub() {
-
-    override fun startAVSync(avSyncBundle: Bundle, callback: ISakshiVaultCallback) {
-        val fileId = avSyncBundle.getString("file_id", "")
-        val sourceUriStr = avSyncBundle.getString("uri", "")
-
-        // Vault copies bytes incrementally...
-        val totalCopied = performVaultCopy(fileId)
-
-        // Vault sends CopyDoneAck back to Client app
-        VaultResponder.sendCopyDone(
-            callback,
-            CopyDoneAck(
-                fileId = fileId,
-                originalUri = if (sourceUriStr.isNullOrEmpty()) null else Uri.parse(sourceUriStr),
-                totalCopiedBytes = totalCopied
-            )
-        )
-    }
-    // ...
-}
-
-class SakshiVaultRemoteService : Service() {
-    private var binder: SakshiVaultServiceBinder? = null
-    override fun onCreate() {
-        super.onCreate()
-        binder = SakshiVaultServiceBinder()
-    }
-    override fun onBind(intent: Intent?): IBinder? = binder
-}
-```
-
----
-
-## 📄 Documentation
-
-Detailed technical specifications are available in the [`/docs`](docs) directory:
-
-- 📑 [System Architecture](docs/architecture.adoc)
-- 📑 [Client API Usage](docs/api_usage.adoc)
-- 📑 [Vault Integration Guide](docs/vault_integration.adoc)
-- 📑 [AIDL IPC Specification](docs/ipc_specification.adoc)
-- 📑 [Development Guide](docs/development.adoc)
-
----
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0.

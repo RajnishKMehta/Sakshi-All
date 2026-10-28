@@ -1,75 +1,47 @@
-<div id="top" align="center">
+# Sākṣī Vault
 
-# Sākṣī Vault (साक्षी वॉल्ट)
+Sākṣī Vault is the secure, background-only storage application for the Sākṣī Android ecosystem. It receives and preserves an independent copy of media captured by client applications over local IPC.
 
-[![Release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Vault?include_prereleases&logo=github)](https://github.com/RajnishKMehta/Sakshi-Vault/releases)
-[![Build Status](https://github.com/RajnishKMehta/Sakshi-Vault/actions/workflows/checks.yml/badge.svg)](https://github.com/RajnishKMehta/Sakshi-Vault/actions/workflows/checks.yml)
+## About
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache)](https://opensource.org/licenses/Apache-2.0)
-[![Kotlin](https://img.shields.io/badge/Lang-kotlin-blue.svg?logo=kotlin)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-Android_10+-green.svg?logo=android)](https://developer.android.com)
+Sākṣī helps people retain important media and evidence by keeping a separate copy beyond the ordinary gallery or file manager. Sākṣī Vault acts as this separate storage layer. By operating entirely in the background without a conventional user interface, it minimizes its footprint while providing a dedicated space for preserving photos and videos.
 
-</div>
-
-
-**Sākṣī Vault** ("Sākṣī (साक्षी)" = "Witness" in Sanskrit) is the secure storage application of the open-source Sākṣī Android ecosystem.
-
-It runs as a separate background application without a user interface, dedicated to receiving and protecting media from client applications such as Sākṣī Camera over local IPC.
-
----
-
-## Why Sākṣī Vault Exists
-
-Sākṣī Vault is designed to keep a separate, independent copy of important media captured by another app.
-
-Instead of keeping the only copy inside the camera or recorder, a client app can send the captured media to Sākṣī Vault over Android IPC. This keeps the storage layer entirely separate from the capture app and viewing interfaces.
-
----
+Please note that the Vault is not an invisibility or anti-detection guarantee. It provides an additional layer of preservation, not absolute immunity from device-level attacks, privileged access, or discovery through system settings.
 
 ## Features
 
-- **Background-Only Execution:** Operates entirely in the background without any UI to minimize the surface area for compromise.
-- **Media Transfer:** Receives photos, videos, and audio from client applications over Android Binder IPC (AIDL).
-- **Secure Local Storage:** Stores received media privately on the device in a separate app container.
-- **Metadata Management:** Stores file metadata and synchronization state using Room 3.
-- **Scheduled Deletion:** Handles delayed deletion. Deletion requests immediately hide the media but permanently remove the Vault copy only after a set delay (30 days) using WorkManager and monotonic clock validation, resisting simple time-tampering. The `DeletionEligibilityChecker` uses elapsed realtime only when boot metadata is valid and falls back to wall-clock time when metadata is missing or mismatched, or elapsed realtime moves backwards.
-- **Independent Architecture:** Runs completely separately from the applications that capture or view the media.
-- **Offline Capable:** Requires no internet connection, keeping data local.
+- **Background Operation:** Runs as an external service without a user interface to minimize exposure.
+- **Incremental Receiving:** Continuously synchronizes Fragmented MP4 (fMP4) video segments from client apps while recording is ongoing.
+- **Independent Storage:** Stores media in a separate app container, ensuring that deleting the visible original does not automatically destroy the Vault's copy.
+- **Delayed Deletion:** Deletion requests immediately hide the media, but the Vault retains the actual files for 30 days before permanently deleting them, helping prevent forced, immediate erasure.
+- **Time-Tampering Mitigation:** Uses the device's monotonic clock, where possible, to validate deletion eligibility, resisting simple wall-clock manipulation.
+- **Local-Only:** Requires no internet connection, keeping your data entirely on the device.
 
----
+## Architecture
 
-## Ecosystem Architecture
+Sākṣī Vault operates as a distinct service within the ecosystem:
 
-The Sākṣī ecosystem connects components locally:
+1. **Client Apps (e.g., Sākṣī Camera):** Capture media.
+2. **Sākṣī SDK:** Provides the IPC bridge.
+3. **Sākṣī Vault (This Project):** Receives media via the `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE` action, performs incremental byte copying, and manages the database of stored files using Room 3.
+4. **Sākṣī Portal:** Connects to the Vault to allow users to view and export the preserved media.
 
-1. **[Sākṣī SDK](../../../../Sakshi-SDK)** — provides the AIDL/IPC interface.
-2. **Sākṣī Vault** (this repo) — safely stores received media as an external service.
-3. **Client Apps** — such as [Sākṣī Camera](../../../../Sakshi-Camera) and [Sākṣī Portal](../../../../Sakshi-Portal).
+## Documentation
 
-Vault exposes the `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE` service to receive IPC calls securely.
+For developers looking to integrate a client application with Sākṣī Vault, refer to the [Integration Guide](docs/INTEGRATION.md) and the documentation provided in the Sākṣī SDK repository.
 
----
+## Build From Source
 
-## Building & Testing
-
-Standard Gradle commands can be used to build and test the project:
+To build Sākṣī Vault locally:
 
 ```bash
-# Debug APK
 ./gradlew assembleDebug
-
-# Run unit tests
-./gradlew test
-
-# Run lint and code checks
-./gradlew check
 ```
 
+## Security and Privacy
 
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+Sākṣī Vault is designed to provide a layer of preservation against forced deletion of the ordinary original copy. It does not guarantee protection against root-level attacks, device seizure, factory resets, or physical destruction. If the client app scheduling copies for deletion is compromised, the Vault cannot independently preserve the evidence, as it honors the API requests it receives.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0.
