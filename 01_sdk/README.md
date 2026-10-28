@@ -30,7 +30,7 @@ Sākṣī SDK provides clean, idiomatic, coroutine-powered Kotlin public APIs fo
 |  (e.g., Camera / Portal)           |                 |       (External Service)          |
 |                                    |                 |                                   |
 |  +------------------------------+  |  +-----------+  |  +-----------------------------+  |
-|  |        SakshiClient          |  |  | Sākṣī SDK |  |  |   Incremental Copy Engine   |  |
+|  |        SakshiClient          |  |<=| Sākṣī SDK |=>|  |   Incremental Copy Engine   |  |
 |  +------------------------------+  |  +-----------+  |  |   VaultResponder Helper     |  |
 |  (Copy Files & Video Sync)         |  (AIDL IPC)     |  |   Media Records Database    |  |
 +------------------------------------+                 +-----------------------------------+
