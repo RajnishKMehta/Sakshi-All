@@ -1,0 +1,35 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: Sākṣī
+  structure:
+    - type: space
+      key: space-docs
+      title: Sākṣī
+      path: docs
+      default: true
+      content:
+        directory: ./00_docs
+    - type: space
+      key: space-sdk
+      title: Sākṣī SDK
+      path: sdk
+      content:
+        directory: ./01_sdk
+    - type: space
+      key: space-vault
+      title: Sākṣī Vault
+      path: vault
+      content:
+        directory: ./02_vault
+    - type: space
+      key: space-camera
+      title: Sākṣī Camera
+      path: camera
+      content:
+        directory: ./03_camera
+    - type: space
+      key: space-portal
+      title: Sākṣī Portal
+      path: portal
+      content:
+        directory: ./04_portal
