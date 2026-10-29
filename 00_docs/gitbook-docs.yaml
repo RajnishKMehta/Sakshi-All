@@ -1,0 +1,11 @@
+
+site:
+  title: Sākṣī Docs
+  structure:
+    - type: space
+      key: space-home
+      title: Home
+      path: home
+      default: true
+      content:
+        directory: ./
