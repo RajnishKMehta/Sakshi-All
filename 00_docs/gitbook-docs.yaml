@@ -8,4 +8,4 @@ site:
       path: home
       default: true
       content:
-        directory: /
+        directory: ./
