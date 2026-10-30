@@ -2,7 +2,7 @@
 
 Getting started with Sākṣī involves installing the components you intend to use. You do not need to install every application to use Sākṣī.
 
-For example, **Sākṣī Camera** can be used completely independently as a standard camera application. However, if you wish to use the full media preservation features of the ecosystem, you will need to install the **Sākṣī Vault** to store the media and the **Sākṣī Portal** to view it. The **Sākṣī SDK** is included automatically inside these applications to allow them to communicate securely.
+For example, **Sākṣī Camera** can be used completely independently as a standard camera application for Fragmented mpr recording. However, if you wish to use the full media preservation features of the ecosystem, you will need to install the **Sākṣī Vault** to store the media and the **Sākṣī Portal** to view it. The **Sākṣī SDK** is included automatically inside these applications to allow them to communicate securely.
 
 ## Requirements
 
