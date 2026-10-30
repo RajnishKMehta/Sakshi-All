@@ -1,48 +1,25 @@
 # Installation
 
-Getting started with Sākṣī involves installing the independent applications that make up the ecosystem. Because Sākṣī is composed of modular apps, you only need to install the components you intend to use.
+Getting started with Sākṣī involves installing the components you intend to use. You do not need to install every application to use Sākṣī.
+
+For example, **Sākṣī Camera** can be used completely independently as a standard camera application. However, if you wish to use the full media preservation features of the ecosystem, you will need to install the **Sākṣī Vault** to store the media and the **Sākṣī Portal** to view it. The **Sākṣī SDK** is included automatically inside these applications to allow them to communicate securely.
 
 ## Requirements
 
 * **Android Version**: All Sākṣī applications require a minimum of **Android 10 (API Level 29)** or newer.
 * **Storage**: Sufficient local device storage to hold your captured media. Sākṣī does not use cloud storage; all data is kept locally on your device.
 
-## Core Applications
+## Download Applications
 
-To fully utilize the ecosystem for capturing, preserving, and viewing media, you will need to install three separate applications:
+You can download the latest releases of the Sākṣī applications directly using the links below. We recommend installing the **Sākṣī Vault** first, as the other apps depend on it for storage.
 
-1. **Sākṣī Vault**: The mandatory background storage service.
-2. **Sākṣī Camera**: The application used to capture photos and videos.
-3. **Sākṣī Portal**: The application used to view and manage your saved media.
+*(Important: You will not see an app icon for Sākṣī Vault in your app drawer because it operates entirely in the background without a user interface).*
 
-*(Note: The Sākṣī SDK is a developer library included within the Camera and Portal apps, and does not need to be installed separately by users).*
+[![Download Sākṣī Vault](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Vault?label=Download%20Sākṣī%20Vault&style=for-the-badge&color=blue&logo=android)](https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest/download/Sakshi-Vault.apk)
 
-## Installation Steps
+[![Download Sākṣī Camera](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Camera?label=Download%20Sākṣī%20Camera&style=for-the-badge&color=green&logo=android)](https://github.com/RajnishKMehta/Sakshi-Camera/releases/latest/download/Sakshi-Camera.apk)
 
-Currently, Sākṣī is in active development. If pre-built APKs are not available in the respective GitHub Releases pages, you will need to clone the repositories and build the applications from source using Android Studio.
-
-### Step 1: Install Sākṣī Vault
-
-You must install Sākṣī Vault first, as the Camera and Portal depend on it to function securely.
-
-1. Navigate to the [Sākṣī Vault repository](https://github.com/RajnishKMehta/Sakshi-Vault) and check the Releases page for a `.apk` file.
-2. If available, download and install the `.apk`. Otherwise, clone the repository and build the project via Android Studio.
-3. *Important:* You will not see an app icon for Vault in your app drawer because it is designed as a background-only service without a user interface.
-
-### Step 2: Install Sākṣī Camera
-
-Once the Vault is installed, you can install the capture application.
-
-1. Navigate to the [Sākṣī Camera repository](https://github.com/RajnishKMehta/Sakshi-Camera) and check the Releases page.
-2. Download and install the `.apk` file, or build from source.
-3. Upon opening Sākṣī Camera for the first time, grant the necessary permissions (Camera and Microphone) so it can function.
-
-### Step 3: Install Sākṣī Portal
-
-To view the media you have captured and safely stored in the Vault, install the Portal interface.
-
-1. Navigate to the [Sākṣī Portal repository](https://github.com/RajnishKMehta/Sakshi-Portal) and check the Releases page.
-2. Download and install the `.apk` file, or build from source.
+[![Download Sākṣī Portal](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Portal?label=Download%20Sākṣī%20Portal&style=for-the-badge&color=purple&logo=android)](https://github.com/RajnishKMehta/Sakshi-Portal/releases/latest/download/Sakshi-Portal.apk)
 
 ## Working Together
 
