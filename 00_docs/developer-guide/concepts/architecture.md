@@ -6,10 +6,10 @@ The Sākṣī ecosystem is composed of several independent Android applications 
 
 Sākṣī relies on four core components:
 
-1.  **Vault (`02_vault`)**: A background-only, secure storage layer application. It does not provide a user interface. Its sole responsibility is securely persisting media files, scheduling synchronization, and managing file lifecycles (deletion, recovery). It acts as the IPC Server.
-2.  **SDK (`01_sdk`)**: A headless Android IPC client library (`rajnishkmehta.sakshi.sdk`). It encapsulates the raw AIDL communication and exposes a clean, coroutine-based Kotlin interface (`SakshiClient`) to client applications.
-3.  **Camera (`03_camera`)**: A client application utilizing CameraX and Media3 to capture and stream fragmented MP4s (fMP4) directly to the Vault using the SDK.
-4.  **Portal (`04_portal`)**: A user-facing Jetpack Compose client application. It uses the SDK to query the Vault for stored media, allowing users to view, delete, and recover files.
+1.  **Vault** ([Sakshi-Vault](https://github.com/RajnishKMehta/Sakshi-Vault)): A background-only secure storage application with no user interface. Its responsibilities include securely persisting media files, scheduling synchronization, and managing file lifecycles such as deletion and recovery. It acts as the IPC Server.
+2.  **SDK** ([Sakshi-SDK](https://github.com/RajnishKMehta/Sakshi-SDK)): A headless Android IPC client library (`rajnishkmehta.sakshi.sdk`). It encapsulates raw AIDL communication and exposes a clean, coroutine-based Kotlin interface (`SakshiClient`) to client applications.
+3.  **Camera** ([Sakshi-Camera](https://github.com/RajnishKMehta/Sakshi-Camera)): A client application using CameraX and Media3 to capture and stream fragmented MP4 (fMP4) data directly to the Vault through the SDK.
+4.  **Portal** ([Sakshi-Portal](https://github.com/RajnishKMehta/Sakshi-Portal)): A user-facing Jetpack Compose client application. It uses the SDK to query the Vault for stored media, allowing users to view, delete, and recover files.
 
 All core Sākṣī Android modules strictly enforce a minimum SDK version of API 29 (Android 10).
 

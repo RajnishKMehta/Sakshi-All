@@ -1,6 +1,6 @@
 # Shared Vault Integration
 
-All requests made through the `SakshiClient` ultimately route to the Vault application (`02_vault`). This document explains the common patterns used by the Vault to handle these requests.
+All requests made through the `SakshiClient` ultimately route to the [Vault application](https://github.com/RajnishKMehta/Sakshi-Vault). This document explains the common patterns used by the Vault to handle these requests.
 
 ## `SakshiVaultServiceBinder`
 
