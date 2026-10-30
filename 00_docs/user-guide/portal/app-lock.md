@@ -17,7 +17,7 @@ Your Android device must already have a secure lock screen configured (PIN, Pass
 
 ## Configuring the Timeout
 
-By default, Portal may require you to authenticate immediately when you leave and return to the app. You can change how long the app waits before locking.
+By default, Portal locks after 1 minute when you leave the app. You can change the timeout before Portal requires you to authenticate again.
 
 1. In the Portal **Settings**, under the **Security** section (with App Lock enabled), tap **Automatically lock after**.
 2. Select your preferred timeout duration:

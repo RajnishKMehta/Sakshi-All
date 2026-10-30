@@ -24,8 +24,8 @@ flowchart TD
     SDK["Sākṣī SDK"]
     subgraph Storage["Storage Layer"]
         V["Sākṣī Vault Service"]
-        DB[("Vault Database")]
-        FS[("Vault Private File Storage")]
+        DB[("Room3 Database")]
+        FS[("Private File Storage")]
     end
 
     C <--> SDK

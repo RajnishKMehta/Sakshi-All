@@ -17,5 +17,5 @@ You can switch the video format to Normal MP4 in the settings. This format is wi
 
 **How it works:**
 * Normal MP4 videos are **not** copied to the Vault while recording is in progress.
-* The video is only sent to the Vault *after* you have finished recording and pressed the stop button.
+* The video is only copied to the Vault *after* you have finished recording and pressed the stop button just like photo.
 * If the app closes or the phone turns off while recording, the video may be completely lost.
