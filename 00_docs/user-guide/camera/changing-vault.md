@@ -9,7 +9,7 @@ By default, Sākṣī Camera automatically detects and connects to the official 
 1. Open the **Sākṣī Camera** app.
 2. Tap the **Settings** icon.
 3. Tap **More Settings**.
-4. Scroll to find the **Change Vault App** setting. (The current Vault package name or "Vault Unavailable" is displayed underneath it).
+4. Scroll to find the **Change Vault App** setting.
 5. Tap **Change Vault App** (or the row containing the package name).
 6. The "Select Vault App" dialog will appear, listing all installed apps that are compatible with the Sākṣī SDK.
 7. Tap the alternative Vault app you want to use.
