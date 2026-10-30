@@ -27,11 +27,11 @@ flowchart TD
 
     subgraph Secure Storage Layer
         V[Sākṣī Vault Service]
-        DB[(Room Database)]
+        DB[(Room3 Database)]
         FS[(Private File Storage)]
     end
 
-    C & P --> SDK
+    C & P <--> SDK
 
     SDK <-->|Local IPC / AIDL| V
 
