@@ -1,36 +1,51 @@
-# Installation & Setup
+# Install Sākṣī
 
-Getting started with the Sākṣī ecosystem requires installing at least two applications: the **Vault** (for storage) and a client application (**Camera** or **Portal**) to interact with it.
+Sākṣī is a modular Android ecosystem. Install the components you need; you do not have to install every component.
 
-## 1. Install Sākṣī Vault First
+The **Vault** stores the independent copy of your media. **Camera** captures media, while **Portal** lets you browse and manage what Vault has stored. Camera can also be used as a regular camera without Vault, but the Sākṣī preservation workflow requires Vault to be installed.
 
-Sākṣī Vault is the core storage component. **It must be installed before you can use the other apps.**
+## Requirements
 
-1. Download the latest Vault APK from the [Sākṣī Vault Releases](https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest).
-2. Install the application on your Android device.
+- **Android:** Android 10 (API level 29) or newer.
+- **Storage:** enough free local storage for the media you capture.
+- **Internet:** not required for normal local communication and storage. Internet access is only needed when downloading the APKs or checking for releases.
 
-**Important Note about Vault:**
-Sākṣī Vault runs entirely in the background. It does **not** have a user interface, and it will **not** appear in your app drawer. You cannot open it. There is no manual setup or configuration required. Simply installing it is all that is needed.
+## Download the Applications
 
-## 2. Install Sākṣī Client Apps
+The badges below show the latest stable release tag for each application. Pre-releases are not included. Select a badge to open that application's latest GitHub release page; the APK can then be downloaded from the release assets.
 
-After installing the Vault, you can install one or both of the client applications depending on your needs.
+**Recommended installation order:** install Vault first, then install Camera and/or Portal.
+
+### Sākṣī Vault
+
+[![Latest Sākṣī Vault release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Vault?label=Latest%20Vault&style=for-the-badge&color=blue&logo=android)](https://github.com/RajnishKMehta/Sakshi-Vault/releases/latest)
+
+Vault is a background service and does not provide a normal app-drawer interface. After installing it, there is no manual pairing or initial setup to complete.
 
 ### Sākṣī Camera
-Use this app to capture photos and crash-safe videos that are automatically sent to the Vault.
 
-1. Download and install the [Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera/releases/latest).
-2. Open the Camera app.
-3. Grant the required permissions (Camera, Microphone) when prompted.
-4. The Camera will automatically detect and connect to the installed Vault.
+[![Latest Sākṣī Camera release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Camera?label=Latest%20Camera&style=for-the-badge&color=green&logo=android)](https://github.com/RajnishKMehta/Sakshi-Camera/releases/latest)
+
+Install Camera and grant the requested camera and microphone permissions. When Vault is installed, Camera automatically detects and connects to the official Vault.
 
 ### Sākṣī Portal
-Use this app to view, manage, and export the media stored in your Vault.
 
-1. Download and install the [Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal/releases/latest).
-2. Open the Portal app.
-3. The Portal will automatically detect and connect to the installed Vault.
+[![Latest Sākṣī Portal release](https://img.shields.io/github/v/release/RajnishKMehta/Sakshi-Portal?label=Latest%20Portal&style=for-the-badge&color=purple&logo=android)](https://github.com/RajnishKMehta/Sakshi-Portal/releases/latest)
+
+Install and open Portal. It automatically detects and connects to the installed Vault, allowing you to browse and manage stored media.
+
+## How the Applications Work Together
+
+1. Install Vault to provide local storage for preserved media.
+2. Install Camera to capture photos and videos. With Vault installed, supported media is transferred to it automatically.
+3. Open Portal whenever you want to browse, play, manage, or export media stored in Vault.
 
 ## No Manual Pairing Required
 
-You do not need to "pair," "link," or manually configure the connection between the apps during your initial setup. As long as the official Sākṣī Vault is installed, both Camera and Portal will find it and use it automatically.
+For the official Sākṣī applications, you do not need to pair or manually configure Camera and Portal with Vault. They detect the installed official Vault and connect to it automatically.
+
+## Continue Reading
+
+- [Camera: Recording and Sync](../camera/recording-and-sync.md)
+- [Portal: Browsing and Exporting](../portal/browsing-and-exporting.md)
+- [Troubleshooting](../troubleshooting/common-issues.md)

@@ -3,18 +3,12 @@ site:
   title: Sākṣī Docs
   structure:
     - type: space
-      key: space-home
-      title: Home
-      path: home
+      key: space-overview
+      title: Overview
+      path: overview
       default: true
       content:
-        directory: ./
-    - type: space
-      key: space-getting-started
-      title: Getting Started
-      path: getting-started
-      content:
-        directory: ./getting-started
+        directory: ./overview
     - type: space
       key: space-user-guide
       title: User Guide
