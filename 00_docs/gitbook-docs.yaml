@@ -1,4 +1,4 @@
-
+$schema: https://api.gitbook.com/gitbook-docs.yaml
 site:
   title: Sākṣī Docs
   structure:
@@ -9,3 +9,9 @@ site:
       default: true
       content:
         directory: ./
+    - type: space
+      key: space-getting-started
+      title: Getting Started
+      path: getting-started
+      content:
+        directory: ./getting-started
