@@ -4,7 +4,7 @@ Sākṣī Camera captures media and securely synchronizes a separate copy to the
 
 ## Fragmented MP4 (fMP4) - Default & Recommended
 
-By default, Sākṣī Camera records video in the Fragmented MP4 (fMP4) format. This format is crash-safe and designed for high-risk situations.
+By default, Sākṣī Camera records video in the [Fragmented MP4](https://liveapi.com/blog/fragmented-mp4/) (fMP4) format. This format is crash-safe and designed for high-risk situations.
 
 **How it works:**
 * As you record, the video is split into tiny fragments.
@@ -19,5 +19,3 @@ You can switch the video format to Normal MP4 in the settings. This format is wi
 * Normal MP4 videos are **not** copied to the Vault while recording is in progress.
 * The video is only sent to the Vault *after* you have finished recording and pressed the stop button.
 * If the app closes or the phone turns off while recording, the video may be completely lost.
-
-*Note: The Camera app will warn you about these risks if you attempt to switch to the Normal MP4 format.*
