@@ -15,3 +15,9 @@ site:
       path: user-guide
       content:
         directory: ./user-guide
+    - type: space
+      key: space-developer-guide
+      title: Developer Guide
+      path: developer-guide
+      content:
+        directory: ./developer-guide
