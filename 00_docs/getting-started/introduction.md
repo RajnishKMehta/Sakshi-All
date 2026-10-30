@@ -17,6 +17,6 @@ By utilizing a dedicated, background-only storage application, Sākṣī allows 
 To provide this functionality securely and modularly, Sākṣī is built as an ecosystem consisting of four independent but tightly integrated components:
 
 * **Sākṣī Vault**: The secure storage engine. It is a background-only application without a user interface, dedicated to receiving, protecting, and independently storing media locally on your device.
-* **Sākṣī Camera**: The capture application. It allows you to take photos and record videos, automatically and incrementally synchronizing them directly to the Vault.
+* **Sākṣī Camera**: The capture application. It allows you to take photos and record videos, safely transferring them to the Vault. Fragmented MP4 (fMP4) videos synchronize incrementally while recording, providing crash safety, while standard MP4 videos are copied entirely to the Vault after recording finishes.
 * **Sākṣī Portal**: The user interface gateway. It provides a secure way to browse, view, and manage the media safely stored in your Vault.
 * **Sākṣī SDK**: The developer library. A headless integration tool that enables other Android applications to communicate securely with the Vault.

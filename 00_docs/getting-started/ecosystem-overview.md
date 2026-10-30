@@ -7,7 +7,7 @@ This approach minimizes the attack surface of the storage layer and ensures your
 ## Component Responsibilities
 
 1. **[Sākṣī SDK](https://github.com/RajnishKMehta/Sakshi-SDK)**: The communication bridge. This headless library handles all Inter-Process Communication (IPC) via Android Binder (AIDL), allowing the user-facing apps to securely send requests and stream data to the Vault.
-2. **[Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault)**: The secure storage engine. Operating entirely in the background without a UI, Vault receives incoming media via the SDK and safely stores it in its own private, isolated app container. It manages synchronization states, delayed media deletion processes, and file metadata.
+2. **[Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault)**: The secure storage engine. Operating entirely in the background without a UI, Vault receives incoming media via the SDK and safely stores it in its own private app container. *(Note: While stored in a private container, this does not currently prevent other installed apps from accessing the media because the exported service and provider lack strict caller access controls).* It manages synchronization states, delayed media deletion processes, and file metadata.
 3. **[Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera)**: The capture interface. It handles hardware interactions (camera lenses, microphones), writes the media files locally, and orchestrates sending those files to the Vault using the SDK.
 4. **[Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal)**: The viewing interface. It communicates with the Vault via the SDK to fetch metadata, stream stored media for viewing, and handle secure exports back to your public gallery if requested.
 
@@ -52,8 +52,8 @@ How Sākṣī Camera syncs media to Sākṣī Vault depends heavily on the forma
 Fragmented MP4 (fMP4) is the default and recommended video format in Sākṣī Camera.
 
 Because fMP4 writes video data in small, distinct fragments, Sākṣī Camera can read these fragments and send them to the Vault *while the recording is still happening*.
-* **Benefits**: This is highly interruption-resilient (crash-safe). If the phone is suddenly shut off, destroyed, or the app is force-closed, the fragments that have already been written and incrementally transferred to the Vault are preserved.
-* **Flow**: Camera records an fMP4 fragment $\rightarrow$ Camera instantly streams fragment via SDK to Vault $\rightarrow$ Vault appends fragment to its independent copy $\rightarrow$ Camera records next fragment.
+* **Benefits**: This is highly interruption-resilient (crash-safe). If the app is force-closed or the recording interrupted, the fragments that have already been written and incrementally transferred to the Vault are preserved, provided the device and its Vault data remain available.
+* **Flow**: Camera records an fMP4 fragment $\rightarrow$ Camera registers the source URI through the SDK $\rightarrow$ Vault periodically copies newly available bytes into its independent copy $\rightarrow$ Camera records next fragment.
 
 ### Standard MP4 - Post-Recording Synchronization
 

@@ -19,33 +19,30 @@ To fully utilize the ecosystem for capturing, preserving, and viewing media, you
 
 ## Installation Steps
 
-Currently, the Sākṣī applications are available via their respective GitHub repositories. Public download links or App Store releases may not be universally available yet, so you will need to download the APK files directly from the GitHub Releases pages.
+Currently, Sākṣī is in active development. If pre-built APKs are not available in the respective GitHub Releases pages, you will need to clone the repositories and build the applications from source using Android Studio.
 
 ### Step 1: Install Sākṣī Vault
 
 You must install Sākṣī Vault first, as the Camera and Portal depend on it to function securely.
 
-1. Navigate to the [Sākṣī Vault Releases](https://github.com/RajnishKMehta/Sakshi-Vault/releases) page.
-2. Download the latest `.apk` file under the "Assets" section.
-3. Open the downloaded file on your Android device and proceed with the installation.
-4. *Important:* You will not see an app icon for Vault in your app drawer because it is designed as a background-only service without a user interface.
+1. Navigate to the [Sākṣī Vault repository](https://github.com/RajnishKMehta/Sakshi-Vault) and check the Releases page for a `.apk` file.
+2. If available, download and install the `.apk`. Otherwise, clone the repository and build the project via Android Studio.
+3. *Important:* You will not see an app icon for Vault in your app drawer because it is designed as a background-only service without a user interface.
 
 ### Step 2: Install Sākṣī Camera
 
 Once the Vault is installed, you can install the capture application.
 
-1. Navigate to the [Sākṣī Camera Releases](https://github.com/RajnishKMehta/Sakshi-Camera/releases) page.
-2. Download the latest `.apk` file.
-3. Install the application on your device.
-4. Upon opening Sākṣī Camera for the first time, grant the necessary permissions (Camera and Microphone) so it can function.
+1. Navigate to the [Sākṣī Camera repository](https://github.com/RajnishKMehta/Sakshi-Camera) and check the Releases page.
+2. Download and install the `.apk` file, or build from source.
+3. Upon opening Sākṣī Camera for the first time, grant the necessary permissions (Camera and Microphone) so it can function.
 
 ### Step 3: Install Sākṣī Portal
 
 To view the media you have captured and safely stored in the Vault, install the Portal interface.
 
-1. Navigate to the [Sākṣī Portal Releases](https://github.com/RajnishKMehta/Sakshi-Portal/releases) page.
-2. Download the latest `.apk` file.
-3. Install the application on your device.
+1. Navigate to the [Sākṣī Portal repository](https://github.com/RajnishKMehta/Sakshi-Portal) and check the Releases page.
+2. Download and install the `.apk` file, or build from source.
 
 ## Working Together
 
