@@ -7,6 +7,9 @@
 
 ## SDK Integration
 * [Integration Setup](sdk/integration.md)
+* [Connection Lifecycle](sdk/connection-lifecycle.md)
+* [Data Models](sdk/data-models.md)
+* [Error Handling](sdk/error-handling.md)
 
 ## API Reference
 * [API Index](sdk/api/README.md)
