@@ -15,3 +15,9 @@ site:
       path: getting-started
       content:
         directory: ./getting-started
+    - type: space
+      key: space-user-guide
+      title: User Guide
+      path: user-guide
+      content:
+        directory: ./user-guide
