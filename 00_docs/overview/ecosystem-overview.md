@@ -42,4 +42,4 @@ Vault stores media in its own application storage, but this alone should not be 
 ## Continue Reading
 
 - **[User Guide](../user-guide/index.md):** learn how to install and use the Sākṣī applications.
-- **Developer Guide:** coming soon. SDK integration and architecture documentation will be added here.
+- **[Developer Guide](../developer-guide/README.md):** understand the architecture and integrate with the Sākṣī ecosystem.

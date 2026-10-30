@@ -4,6 +4,7 @@
 
 ## Architecture & Concepts
 * [Architecture](concepts/architecture.md)
+* [Architecture Flow](concepts/architecture-flow.md)
 
 ## SDK Integration
 * [Integration Setup](sdk/integration.md)
