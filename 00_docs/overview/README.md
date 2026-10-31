@@ -60,4 +60,4 @@ Sākṣī provides an additional layer of media preservation. It is not an absol
 Choose the documentation that matches what you want to do:
 
 - **[User Guide](../user-guide/index.md):** installation, everyday workflows, camera and portal usage, and troubleshooting.
-- **Developer Guide:** coming soon. This section will cover SDK integration, architecture, and development workflows.
+- **[Developer Guide](../developer-guide/README.md):** understand the architecture and integrate with the Sākṣī ecosystem.

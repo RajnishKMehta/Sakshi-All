@@ -27,4 +27,6 @@ Under the hood, the `SakshiClient` (specifically `SakshiClientImpl`) binds to th
 5.  **Response Delivery**: The Vault returns an Android `Bundle` containing the results or error information.
 6.  **Client Translation**: The SDK unpacks the `Bundle` and returns a strongly-typed `SakshiResult.Success` or `SakshiResult.Failure`.
 
+[View the Detailed Architecture Flowchart](architecture-flow.md)
+
 This architecture ensures process isolation and centralizes media lifecycle management within the Vault application.
