@@ -3,6 +3,21 @@
 This flowchart illustrates the detailed sequence of interactions between client applications, the Sākṣī SDK, and the Vault service during a typical operation. It outlines the responsibilities of each component and the specific Android and IPC mechanisms involved.
 
 ```mermaid
+%%{
+  init: {
+    "flowchart": { "defaultRenderer": "elk" },
+    "theme": "base",
+    "themeVariables": {
+      "primaryColor": "#ffffff",
+      "primaryTextColor": "#333333",
+      "primaryBorderColor": "#7c4dff",
+      "lineColor": "#7c4dff",
+      "secondaryColor": "#f3e5f5",
+      "tertiaryColor": "#ede7f6",
+      "fontFamily": "arial, sans-serif"
+    }
+  }
+}%%
 flowchart LR
     %% Definitions
     subgraph ClientLayer ["1. Client Application Layer (Camera / Portal)"]
