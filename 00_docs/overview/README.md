@@ -1,63 +1,51 @@
-<div align="center">
-  <h1>Sākṣī (साक्षी)</h1>
-  <p><b>Preserving a separate, independent copy of important media.</b></p>
-  <p><i>Sākṣī ≈ Sakshi</i></p>
-</div>
+# Sākṣī Ecosystem Overview
 
----
+Welcome to the documentation for the Sākṣī ecosystem.
 
-Sākṣī (meaning "Witness" in Sanskrit) is an open-source Android ecosystem designed to help you retain a separate copy of personal, private, or important media. When capturing evidence of wrongdoing, people may be pressured to delete recordings from their phones. Sākṣī helps reduce the risk of losing the only copy by storing an independent copy in Vault. Once Vault has successfully received the media, deleting the ordinary original from the phone's gallery does not delete the copy stored in Vault.
+Sākṣī (साक्षी) is a suite of independent, local-first Android applications designed to solve a specific problem: preserving a separate copy of important media so that forced or accidental deletion of the visible original does not destroy the evidence.
 
-## The Ecosystem
+This documentation serves as the central guide for understanding, using, and integrating with Sākṣī.
 
-Sākṣī is made up of four independent components that work together. You can use the ready-made Android applications or integrate the SDK into your own application.
+## What is Sākṣī?
 
-### Sākṣī Vault
-**The storage service**
+At its core, Sākṣī provides a mechanism to safely capture and store media (photos and videos) separately from the standard Android Gallery or file manager.
 
-A background-only application with no user interface. Vault receives and stores independent copies of media, maintains synchronization metadata, and supports scheduled deletion workflows. It is designed to work locally without requiring an internet connection.
+It achieves this through a modular design involving four main components:
 
-[Explore Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault)
+1.  **Sākṣī Vault:** The secure, background storage service.
+2.  **Sākṣī Camera:** A capture application with specialized, crash-safe recording capabilities.
+3.  **Sākṣī Portal:** The user interface for managing and viewing preserved media.
+4.  **Sākṣī SDK:** The integration library that allows these independent apps to communicate.
 
-### Sākṣī Camera
-**The capture application**
+> **Read the full [Ecosystem Overview](ecosystem-overview.md) to understand how these components interact.**
 
-Capture photos and videos and synchronize them with Vault. Fragmented MP4 (fMP4) recordings can be synchronized incrementally while recording, helping preserve already-written fragments if recording is interrupted.
+## Documentation Structure
 
-[Explore Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera)
+This repository is organized into specific guides based on your needs:
 
-### Sākṣī Portal
-**The media interface**
+### For Users
 
-Browse, play, manage, and export media stored in Vault. Portal works locally and does not upload your private media to a cloud service.
+If you want to install and use the Sākṣī applications on your device, start with the **[User Guide](../user-guide/index.md)**.
+*   [Installation Instructions](../user-guide/getting-started/installation.md)
+*   [Using Sākṣī Camera](../user-guide/camera/recording-and-sync.md)
+*   [Managing Media with Sākṣī Portal](../user-guide/portal/browsing-and-exporting.md)
 
-[Explore Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal)
+### For Developers
 
-### Sākṣī SDK
-**The developer library**
+If you want to understand the system architecture, contribute to the projects, or integrate your own application with Sākṣī Vault, refer to the **[Developer Guide](../developer-guide/README.md)**.
+*   [Architecture Flow](../developer-guide/concepts/architecture-flow.md)
+*   [SDK Integration](../developer-guide/sdk/integration.md)
+*   [API Reference](../developer-guide/sdk/api/README.md)
 
-A lightweight, headless Android library that provides the IPC APIs client applications use to communicate with the Vault service and transfer media.
+### Security and Privacy
 
-[Explore Sākṣī SDK](https://github.com/RajnishKMehta/Sakshi-SDK)
+Understanding the security boundaries and privacy guarantees of Sākṣī is critical. Sākṣī is an offline-first system, but it has specific limitations.
 
-## Security and Privacy Scope
+*   Read the **[Security & Privacy Overview](../security-privacy/README.md)** to understand the threat model and what Sākṣī can and cannot protect against.
+*   Review our comprehensive **[Privacy Policy](../security-privacy/privacy-policy.md)** to understand how your data remains on your device.
 
-Sākṣī provides an additional layer of media preservation. It is not an absolute security guarantee.
+## Core Philosophy
 
-**What Sākṣī is designed to do**
-- Keep a separate copy of media in the Vault application.
-- Reduce the risk of losing the only copy when the ordinary original is deleted from a gallery or file manager.
-- Synchronize supported fMP4 recordings incrementally while recording.
-- Keep stored media on the device without depending on cloud backup.
-
-**What Sākṣī does not guarantee**
-- **Invisibility:** Vault may be discoverable through Android settings, installed-app lists, or device-management tools.
-- **Protection from device-level compromise:** Sākṣī cannot prevent data loss caused by physical seizure, factory reset, root-level attacks, or privileged system access.
-- **Complete recovery:** Recovery of an interrupted recording depends on which fragments were successfully written and synchronized before the interruption.
-
-## Continue Reading
-
-Choose the documentation that matches what you want to do:
-
-- **[User Guide](../user-guide/index.md):** installation, everyday workflows, camera and portal usage, and troubleshooting.
-- **[Developer Guide](../developer-guide/README.md):** understand the architecture and integrate with the Sākṣī ecosystem.
+*   **Local First:** Sākṣī applications do not require an internet connection to function.
+*   **Separation of Concerns:** Capture, storage, and management are intentionally kept separate to maximize resilience.
+*   **User Control:** Your data is stored in the Vault, and you control when (or if) it is exported back to the public filesystem.
