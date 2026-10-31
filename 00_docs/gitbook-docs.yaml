@@ -21,3 +21,9 @@ site:
       path: developer-guide
       content:
         directory: ./developer-guide
+    - type: space
+      key: space-security-privacy
+      title: Security & Privacy
+      path: security-privacy
+      content:
+        directory: ./security-privacy
