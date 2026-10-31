@@ -12,10 +12,10 @@ At its core, Sākṣī provides a mechanism to safely capture and store media (p
 
 It achieves this through a modular design involving four main components:
 
-1.  **Sākṣī Vault:** The secure, background storage service.
-2.  **Sākṣī Camera:** A capture application with specialized, crash-safe recording capabilities.
-3.  **Sākṣī Portal:** The user interface for managing and viewing preserved media.
-4.  **Sākṣī SDK:** The integration library that allows these independent apps to communicate.
+1.  **[Sākṣī Vault](https://github.com/RajnishKMehta/Sakshi-Vault):** The secure, background storage service.
+2.  **[Sākṣī Camera](https://github.com/RajnishKMehta/Sakshi-Camera):** A capture application with specialized, crash-safe recording capabilities.
+3.  **[Sākṣī Portal](https://github.com/RajnishKMehta/Sakshi-Portal):** The user interface for managing and viewing preserved media.
+4.  **[Sākṣī SDK](https://github.com/RajnishKMehta/Sakshi-SDK):** The integration library that allows these independent apps to communicate.
 
 > **Read the full [Ecosystem Overview](ecosystem-overview.md) to understand how these components interact.**
 
