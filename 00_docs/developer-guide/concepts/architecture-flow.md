@@ -3,16 +3,16 @@
 This flowchart illustrates the detailed sequence of interactions between client applications, the Sākṣī SDK, and the Vault service during a typical operation. It outlines the responsibilities of each component and the specific Android and IPC mechanisms involved.
 
 ```mermaid
-flowchart TD
+flowchart LR
     %% Definitions
     subgraph ClientLayer ["1. Client Application Layer (Camera / Portal)"]
-        direction TB
+        direction LR
         ClientReq(["Client Request\n(e.g., suspend fun listMedia)"])
         ClientRes(["SakshiResult\n(Success / Failure)"])
     end
 
     subgraph SDKLayer ["2. Sākṣī SDK (rajnishkmehta.sakshi.sdk)"]
-        direction TB
+        direction LR
         SakshiClient["SakshiClientImpl"]
         CheckConn{"VaultServiceConnection\nIs Service Connected?"}
         BindService["Context.bindService()\n(Intent to Vault)"]
@@ -21,13 +21,13 @@ flowchart TD
     end
 
     subgraph OS ["3. Android OS (IPC)"]
-        direction TB
+        direction LR
         BinderReq[("Android Binder\n(ISakshiVaultService.aidl)")]
         BinderRes[("Android Binder\n(Bundle Callback)")]
     end
 
     subgraph VaultLayer ["4. Vault Service Layer (Sakshi-Vault)"]
-        direction TB
+        direction LR
         VaultBinder["SakshiVaultServiceBinder\n(Receives AIDL call)"]
         Validate{"Validation &\nPathValidator"}
         Processing["CoroutineScope /\nRoom runBlocking"]
@@ -35,7 +35,7 @@ flowchart TD
     end
 
     subgraph StorageLayer ["5. Vault Core Storage Layer"]
-        direction TB
+        direction LR
         DB[("Room 3 Database\n(MediaRecord)")]
         FileStore[("Vault Internal\nFile Storage")]
         WorkManager["WorkManager\n(Sync/Deletion)"]
