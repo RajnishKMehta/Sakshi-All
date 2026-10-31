@@ -15,6 +15,34 @@ The Sākṣī ecosystem separates capture, communication, storage, and media man
 The following diagram shows the local data flow between the Sākṣī components. Media transfer and service communication are designed to work without an internet connection.
 
 ```mermaid
+---
+config:
+  layout: elk
+  theme: base
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#333333"
+    primaryBorderColor: "#7c4dff"
+    secondaryColor: "#f3e5f5"
+    secondaryTextColor: "#4a3b59"
+    tertiaryColor: "#ede7f6"
+    lineColor: "#7c4dff"
+    textColor: "#333333"
+    edgeLabelBackground: "#f3e5f5"
+    clusterBkg: "#faf7ff"
+    clusterBorder: "#d8ccff"
+    nodeTextColor: "#333333"
+    defaultLinkColor: "#7c4dff"
+    fontSize: "14px"
+    fontFamily: "Arial, sans-serif"
+  flowchart:
+    nodeSpacing: 60
+    rankSpacing: 75
+    diagramPadding: 20
+    curve: linear
+    htmlLabels: false
+---
 flowchart TD
     subgraph Clients["Client Applications"]
         C["Sākṣī Camera"]
@@ -22,14 +50,15 @@ flowchart TD
     end
 
     SDK["Sākṣī SDK"]
+
     subgraph Storage["Storage Layer"]
         V["Sākṣī Vault Service"]
-        DB[("Room3 Database")]
+        DB[("Room 3 Database")]
         FS[("Private File Storage")]
     end
 
-    C <--> SDK
-    P <--> SDK
+    C <-->|SDK API| SDK
+    P <-->|SDK API| SDK
     SDK <-->|Local IPC / AIDL| V
     V --> DB
     V --> FS
