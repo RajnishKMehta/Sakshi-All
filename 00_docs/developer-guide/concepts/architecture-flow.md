@@ -63,12 +63,12 @@ flowchart TD
     Unpack -->|7. Map to SDK Models| ClientRes
 
     %% Styling classes
-    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef sdk fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef os fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef vault fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef storage fill:#fffde7,stroke:#fbc02d,stroke-width:2px
-    classDef check fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+    classDef sdk fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    classDef os fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100
+    classDef vault fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c
+    classDef storage fill:#fffde7,stroke:#fbc02d,stroke-width:2px,color:#f57f17
+    classDef check fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c
 
     %% Apply styles
     class ClientReq,ClientRes client
