@@ -3,31 +3,61 @@
 This flowchart illustrates the detailed sequence of interactions between client applications, the Sākṣī SDK, and the Vault service during a typical operation. It outlines the responsibilities of each component and the specific Android and IPC mechanisms involved.
 
 ```mermaid
-%%{
-  init: {
-    "flowchart": { "defaultRenderer": "elk" },
-    "theme": "base",
-    "themeVariables": {
-      "primaryColor": "#ffffff",
-      "primaryTextColor": "#333333",
-      "primaryBorderColor": "#7c4dff",
-      "lineColor": "#7c4dff",
-      "secondaryColor": "#f3e5f5",
-      "tertiaryColor": "#ede7f6",
-      "fontFamily": "arial, sans-serif"
-    }
-  }
-}%%
-flowchart LR
+---
+config:
+  layout: elk
+  theme: base
+  look: classic
+
+  # Typography
+  fontFamily: "Arial, sans-serif"
+  htmlLabels: false
+
+  # Diagram colors and appearance
+  themeVariables:
+    background: "#ffffff"
+
+    primaryColor: "#ffffff"
+    primaryTextColor: "#333333"
+    primaryBorderColor: "#7c4dff"
+
+    secondaryColor: "#f3e5f5"
+    secondaryTextColor: "#4a3b59"
+
+    tertiaryColor: "#ede7f6"
+    lineColor: "#7c4dff"
+    textColor: "#333333"
+
+    # Edge labels
+    edgeLabelBackground: "#f3e5f5"
+
+    # Subgraph containers
+    clusterBkg: "#faf7ff"
+    clusterBorder: "#d8ccff"
+
+    # Nodes and connections
+    nodeTextColor: "#333333"
+    defaultLinkColor: "#7c4dff"
+
+    # Font size
+    fontSize: "14px"
+
+  # Flowchart layout
+  flowchart:
+    nodeSpacing: 60
+    rankSpacing: 75
+    diagramPadding: 20
+    curve: linear
+    inheritDir: true
+---
+flowchart
     %% Definitions
     subgraph ClientLayer ["1. Client Application Layer (Camera / Portal)"]
-        direction LR
         ClientReq(["Client Request\n(e.g., suspend fun listMedia)"])
         ClientRes(["SakshiResult\n(Success / Failure)"])
     end
 
     subgraph SDKLayer ["2. Sākṣī SDK (rajnishkmehta.sakshi.sdk)"]
-        direction LR
         SakshiClient["SakshiClientImpl"]
         CheckConn{"VaultServiceConnection\nIs Service Connected?"}
         BindService["Context.bindService()\n(Intent to Vault)"]
@@ -36,13 +66,11 @@ flowchart LR
     end
 
     subgraph OS ["3. Android OS (IPC)"]
-        direction LR
         BinderReq[("Android Binder\n(ISakshiVaultService.aidl)")]
         BinderRes[("Android Binder\n(Bundle Callback)")]
     end
 
     subgraph VaultLayer ["4. Vault Service Layer (Sakshi-Vault)"]
-        direction LR
         VaultBinder["SakshiVaultServiceBinder\n(Receives AIDL call)"]
         Validate{"Validation &\nPathValidator"}
         Processing["CoroutineScope /\nRoom runBlocking"]
@@ -50,7 +78,6 @@ flowchart LR
     end
 
     subgraph StorageLayer ["5. Vault Core Storage Layer"]
-        direction LR
         DB[("Room 3 Database\n(MediaRecord)")]
         FileStore[("Vault Internal\nFile Storage")]
         WorkManager["WorkManager\n(Sync/Deletion)"]
