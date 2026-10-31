@@ -3,30 +3,14 @@
 This flowchart illustrates the detailed sequence of interactions between client applications, the Sākṣī SDK, and the Vault service during a typical operation. It outlines the responsibilities of each component and the specific Android and IPC mechanisms involved.
 
 ```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': '#ffffff',
-      'primaryTextColor': '#333333',
-      'primaryBorderColor': '#7c4dff',
-      'lineColor': '#7c4dff',
-      'secondaryColor': '#f3e5f5',
-      'tertiaryColor': '#ede7f6',
-      'fontFamily': 'arial, sans-serif'
-    }
-  }
-}%%
 flowchart TD
     %% Definitions
     subgraph ClientLayer ["1. Client Application Layer (Camera / Portal)"]
-        direction TB
         ClientReq(["Client Request\n(e.g., suspend fun listMedia)"])
         ClientRes(["SakshiResult\n(Success / Failure)"])
     end
 
     subgraph SDKLayer ["2. Sākṣī SDK (rajnishkmehta.sakshi.sdk)"]
-        direction TB
         SakshiClient["SakshiClientImpl"]
         CheckConn{"VaultServiceConnection\nIs Service Connected?"}
         BindService["Context.bindService()\n(Intent to Vault)"]
@@ -35,13 +19,11 @@ flowchart TD
     end
 
     subgraph OS ["3. Android OS (IPC)"]
-        direction TB
         BinderReq[("Android Binder\n(ISakshiVaultService.aidl)")]
         BinderRes[("Android Binder\n(Bundle Callback)")]
     end
 
     subgraph VaultLayer ["4. Vault Service Layer (Sakshi-Vault)"]
-        direction TB
         VaultBinder["SakshiVaultServiceBinder\n(Receives AIDL call)"]
         Validate{"Validation &\nPathValidator"}
         Processing["CoroutineScope /\nRoom runBlocking"]
@@ -49,7 +31,6 @@ flowchart TD
     end
 
     subgraph StorageLayer ["5. Vault Core Storage Layer"]
-        direction TB
         DB[("Room 3 Database\n(MediaRecord)")]
         FileStore[("Vault Internal\nFile Storage")]
         WorkManager["WorkManager\n(Sync/Deletion)"]
@@ -82,12 +63,12 @@ flowchart TD
     Unpack -->|7. Map to SDK Models| ClientRes
 
     %% Styling classes
-    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
-    classDef sdk fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
-    classDef os fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100
-    classDef vault fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c
-    classDef storage fill:#fffde7,stroke:#fbc02d,stroke-width:2px,color:#f57f17
-    classDef check fill:#ffebee,stroke:#c62828,stroke-width:2px,shape:diamond,color:#b71c1c
+    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef sdk fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef os fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef vault fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef storage fill:#fffde7,stroke:#fbc02d,stroke-width:2px
+    classDef check fill:#ffebee,stroke:#c62828,stroke-width:2px
 
     %% Apply styles
     class ClientReq,ClientRes client
