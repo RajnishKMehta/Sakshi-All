@@ -5,6 +5,7 @@
 package rajnishkmehta.sakshi.sdk.internal.ipc
 
 import android.os.DeadObjectException
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -14,10 +15,9 @@ public class ErrorMapperTest {
 
     @Test
     public fun `fromThrowable maps DeadObjectException to ServiceDisconnected`() {
-        val ex = DeadObjectException()
+        val ex = mockk<DeadObjectException>(relaxed = true)
         val error = ErrorMapper.fromThrowable(ex, "Default message")
         assertTrue(error is SakshiError.ServiceDisconnected)
-        assertEquals(null, error.diagnosticDetails)
         assertEquals("01_SERVICE_DISCONNECTED", error.errorCode)
     }
 

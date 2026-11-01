@@ -130,7 +130,7 @@ public class SakshiClientImplTest {
 
         val mockBundle = mockk<Bundle>(relaxed = true)
         every { mockBundle.getBoolean("success", false) } returns false
-        every { mockBundle.getString("error") } returns "File not found"
+        every { mockBundle.getString("error") } returns "ENOENT"
 
         every { mockService.deleteMedia(any()) } returns mockBundle
 

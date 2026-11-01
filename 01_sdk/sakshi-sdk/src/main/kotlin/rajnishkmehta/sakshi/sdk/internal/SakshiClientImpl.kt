@@ -63,8 +63,7 @@ internal class SakshiClientImpl(
             SakshiResult.Success(pingResponse)
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Ping IPC transaction failed")
+                ErrorMapper.fromThrowable(e, "Ping IPC transaction failed")
             )
         }
     }
@@ -104,8 +103,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to copy file")
+                            ErrorMapper.fromThrowable(e, "Failed to copy file")
                         )
                     )
                 }
@@ -161,8 +159,7 @@ internal class SakshiClientImpl(
         } catch (e: Throwable) {
             trySend(
                 SakshiResult.Failure(
-                    ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to start audio/video sync")
+                    ErrorMapper.fromThrowable(e, "Failed to start audio/video sync")
                 )
             )
             close()
@@ -211,8 +208,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to stop audio/video sync")
+                            ErrorMapper.fromThrowable(e, "Failed to stop audio/video sync")
                         )
                     )
                 }
@@ -259,8 +255,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to pause audio/video sync")
+                            ErrorMapper.fromThrowable(e, "Failed to pause audio/video sync")
                         )
                     )
                 }
@@ -307,8 +302,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to resume audio/video sync")
+                            ErrorMapper.fromThrowable(e, "Failed to resume audio/video sync")
                         )
                     )
                 }
@@ -330,8 +324,7 @@ internal class SakshiClientImpl(
             SakshiResult.Success(queryResponse)
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to query recording status")
+                ErrorMapper.fromThrowable(e, "Failed to query recording status")
             )
         }
     }
@@ -361,7 +354,6 @@ internal class SakshiClientImpl(
         } catch (e: Throwable) {
             SakshiResult.Failure(
                 ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to list media")
             )
         }
     }
@@ -388,8 +380,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                ErrorMapper.fromThrowable(e, "Failed to list media")
-//                ErrorMapper.fromThrowable(e, "Failed to list deleted media")
+                ErrorMapper.fromThrowable(e, "Failed to list deleted media")
             )
         }
     }
