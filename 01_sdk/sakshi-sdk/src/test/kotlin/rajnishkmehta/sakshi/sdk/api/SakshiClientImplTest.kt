@@ -144,8 +144,7 @@ public class SakshiClientImplTest {
         val result = client.deleteMedia("file_missing")
         assertTrue(result is SakshiResult.Failure)
         val error = (result as SakshiResult.Failure).error
-        assertTrue(error is SakshiError.IpcError)
-        assertEquals("File not found", error.message)
+        assertTrue(error is SakshiError.SourceFileInaccessible)
     }
 
     @Test
@@ -173,7 +172,6 @@ public class SakshiClientImplTest {
         assertTrue(result is SakshiResult.Failure)
         val error = (result as SakshiResult.Failure).error
         assertTrue(error is SakshiError.IpcError)
-        assertEquals("Internal Server Error", error.message)
     }
     @Test
     public fun `recoverMedia single success calls service correctly`(): Unit = runBlocking {
@@ -259,7 +257,7 @@ public class SakshiClientImplTest {
 
         val result = client.recoverMedia("file_missing")
         assertTrue(result is SakshiResult.Failure)
-        assertEquals("Invalid ID", result.errorOrNull()?.message)
+        assertEquals("Failed to recover media", result.errorOrNull()?.message)
     }
 
     @Test
@@ -283,7 +281,7 @@ public class SakshiClientImplTest {
 
         val result = client.recoverMedia(listOf("file_1", "file_2"))
         assertTrue(result is SakshiResult.Failure)
-        assertEquals("Total failure", result.errorOrNull()?.message)
+        assertEquals("Failed to batch recover media", result.errorOrNull()?.message)
     }
     @Test
     public fun `listMedia handles valid json correctly`(): Unit = runBlocking {

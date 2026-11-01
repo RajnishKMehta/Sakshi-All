@@ -25,41 +25,27 @@ suspend fun attemptDelete(client: SakshiClient, fileId: String) {
 }
 ```
 
-## `SakshiError` Types
+## `SakshiError` and `errorCode`
 
-The `SakshiError` sealed class hierarchy represents typed errors that occur during SDK operation or IPC communication. Because it inherits from `Throwable`, it can also be logged or thrown if necessary, but it is typically handled through flow control.
+Every `SakshiError` provides a stable `errorCode` representing the specific failure reason, making it easy to handle programmatically.
 
-### Setup and Connection Errors
+```kotlin
+import rajnishkmehta.sakshi.sdk.api.SakshiErrorCode
 
-These errors typically occur before a request successfully reaches the Vault.
+fun handleError(error: SakshiError) {
+    // 1. Programmatically identify failure
+    if (error.errorCode == SakshiErrorCode.DUPLICATE_FILE_ID) {
+        // e.g. generate a new ID and try again
+    }
+}
+```
 
-*   **`VaultNotInstalled`**: The Android system cannot resolve the Vault service intent. This means the Vault app is either not installed, disabled, or the client app is missing the required `<queries>` block in its manifest.
-    *   *Resolution*: Instruct the user to install the Vault, or check the client manifest.
-*   **`ServiceUnavailable`**: The client attempted to bind, but the connection timed out, or binding failed due to system limitations.
-    *   *Resolution*: Retry the operation later.
-*   **`ServiceDisconnected`**: The connection to the Vault was lost unexpectedly while a request was active, usually because the Vault process crashed or was killed by the OS.
-    *   *Resolution*: The SDK will attempt to reconnect on the next request. For interrupted operations, client apps must decide if it is safe to retry.
-*   **`PermissionDenied`**: The system blocked the bind request due to security constraints.
-    *   *Resolution*: Ensure correct Android intent and manifest setup.
+For a full list of SDK errors and practical resolution steps, refer to the [Error Codes](error-codes.md) reference.
 
-### Request Execution Errors
+## Extensibility
 
-These errors are usually returned from the Vault itself after the request reaches it, serialized across the IPC boundary by `VaultResponder.sendError()`.
+The SDK accepts any error code provided by the Vault. It does not force you to restrict logic to specific predefined constants. If an unrecognized code is returned by the Vault, it will be encapsulated properly inside a `SakshiError.Unknown` or `SakshiError.IpcError` with the corresponding `errorCode` (if supported).
 
-*   **`RecordingNotFound`**: The requested operation targets a `fileId` that does not exist in the Vault's database.
-    *   *Properties*: Exposes the `fileId` that was not found.
-    *   *Resolution*: Refresh the client catalog or handle the missing file.
-*   **`InvalidPayload`**: The parameters passed to the SDK were invalid or malformed (e.g., empty `fileId`, unresolvable URI, unsupported `mediaType`).
-    *   *Resolution*: Fix the arguments passed to the SDK.
+## Diagnostics
 
-### IPC and General Errors
-
-*   **`IpcError`**: A generalized error occurring during the Binder transaction or reported by the Vault. This can wrap remote exceptions.
-    *   *Properties*: May contain an integer `code` if provided by the Vault.
-*   **`Unknown`**: A fallback error for unexpected failures, unclassified exceptions, or errors parsing the SDK response.
-
-## Error Handling Strategies
-
-1.  **Check for Success**: Use `result.isSuccess` or `result.isFailure` for simple checks.
-2.  **Safe Extraction**: Use `result.getOrNull()` to extract the data gracefully, handling nulls if the operation failed.
-3.  **Pattern Matching**: Use a `when` block to provide specific UI feedback based on the exact subclass of `SakshiError`.
+The `diagnosticDetails` property contains safe internal details, such as raw string messages returned by the Vault or system exceptions. This should be logged for debugging but typically not shown directly to users.
