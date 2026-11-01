@@ -184,21 +184,34 @@ class ImageCapturer(val mActivity: MainActivity) {
 
 
         val mimeType = item.mimeType()
-        // Generate a better ID than just filename
-        val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
-        val fileId = "img_${uniqueHash}"
 
-        val fileCopyRequest = FileCopyRequest(
-            fileId = fileId,
-            uri = item.uri,
-            mediaType = "PHOTO",
-            fileExtension = imageFileFormat.removePrefix(".")
-        )
         mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         CoroutineScope(Dispatchers.IO).launch {
-            val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
-            if (result is SakshiResult.Failure) {
-                Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
+            var currentFileId = "img_${UUID.randomUUID().toString().substring(0, 8)}"
+            var success = false
+            var attempts = 0
+
+            while (!success && attempts < 5) {
+                val fileCopyRequest = FileCopyRequest(
+                    fileId = currentFileId,
+                    uri = item.uri,
+                    mediaType = "PHOTO",
+                    fileExtension = imageFileFormat.removePrefix(".")
+                )
+
+                val result = mActivity.sakshiClient.copyFile(fileCopyRequest)
+                if (result is SakshiResult.Failure) {
+                    if (result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
+                        Log.w("SakshiSDK", "Duplicate file ID $currentFileId, retrying...")
+                        currentFileId = "img_${UUID.randomUUID().toString().substring(0, 8)}"
+                        attempts++
+                    } else {
+                        Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)
+                        break
+                    }
+                } else {
+                    success = true
+                }
             }
         }
 

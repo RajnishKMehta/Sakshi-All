@@ -1,12 +1,21 @@
+/*
+ * Copyright 2026 Rajnish Kumar
+ * SPDX-License-Identifier: Apache-2.0
+ */
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         mavenLocal()
         gradlePluginPortal()
     }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -32,10 +41,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Sakshi-Camera"
-
 include(":app")
 
-/*
 includeBuild("../01_sdk") {
     dependencySubstitution {
         substitute(
@@ -45,4 +52,3 @@ includeBuild("../01_sdk") {
         )
     }
 }
-*/
