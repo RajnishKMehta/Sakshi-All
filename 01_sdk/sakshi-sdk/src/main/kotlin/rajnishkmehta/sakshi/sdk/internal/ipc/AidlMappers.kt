@@ -164,6 +164,8 @@ internal object AidlMappers {
             1 -> SakshiError.PermissionDenied(msg)
             2 -> fileId?.let { SakshiError.RecordingNotFound(it, msg) } ?: SakshiError.InvalidPayload(msg)
             3 -> SakshiError.InvalidPayload(msg)
+            4 -> SakshiError.DuplicateFileId(fileId ?: "unknown", msg)
+            5 -> SakshiError.SourceFileInaccessible(msg)
             else -> SakshiError.IpcError(code = errorCode, message = msg)
         }
     }
@@ -174,12 +176,16 @@ internal object AidlMappers {
                 is SakshiError.PermissionDenied -> 1
                 is SakshiError.RecordingNotFound -> 2
                 is SakshiError.InvalidPayload -> 3
+                is SakshiError.DuplicateFileId -> 4
+                is SakshiError.SourceFileInaccessible -> 5
                 is SakshiError.IpcError -> error.code
                 else -> -1
             }
             putInt(KEY_ERROR_CODE, code)
             putString(KEY_MESSAGE, error.message)
             if (error is SakshiError.RecordingNotFound) {
+                putString(KEY_FILE_ID, error.fileId)
+            } else if (error is SakshiError.DuplicateFileId) {
                 putString(KEY_FILE_ID, error.fileId)
             }
         }
