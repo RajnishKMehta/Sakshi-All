@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import rajnishkmehta.sakshi.sdk.api.SakshiError
-import rajnishkmehta.sakshi.sdk.api.SakshiErrorCode
 
 public class ErrorMapperTest {
 
@@ -19,7 +18,7 @@ public class ErrorMapperTest {
         val error = ErrorMapper.fromThrowable(ex, "Default message")
         assertTrue(error is SakshiError.ServiceDisconnected)
         assertEquals(null, error.diagnosticDetails)
-        assertEquals(SakshiErrorCode.SERVICE_DISCONNECTED, error.errorCode)
+        assertEquals("01_SERVICE_DISCONNECTED", error.errorCode)
     }
 
     @Test
@@ -29,7 +28,7 @@ public class ErrorMapperTest {
         assertTrue(error is SakshiError.PermissionDenied)
         assertEquals("Default message", error.message)
         assertEquals("Permission denied", error.diagnosticDetails)
-        assertEquals(SakshiErrorCode.PERMISSION_DENIED, error.errorCode)
+        assertEquals("03_PERMISSION_DENIED", error.errorCode)
     }
 
     @Test
@@ -39,7 +38,7 @@ public class ErrorMapperTest {
         assertTrue(error is SakshiError.DuplicateFileId)
         val dupError = error as SakshiError.DuplicateFileId
         assertEquals("test-123", dupError.fileId)
-        assertEquals(SakshiErrorCode.DUPLICATE_FILE_ID, error.errorCode)
+        assertEquals("02_DUPLICATE_FILE_ID", error.errorCode)
     }
 
     @Test
@@ -48,7 +47,7 @@ public class ErrorMapperTest {
         val error = ErrorMapper.fromErrorMessage(message)
         assertTrue(error is SakshiError.SourceFileInaccessible)
         assertEquals(message, error.diagnosticDetails)
-        assertEquals(SakshiErrorCode.SOURCE_FILE_INACCESSIBLE, error.errorCode)
+        assertEquals("03_SOURCE_FILE_INACCESSIBLE", error.errorCode)
     }
 
     @Test
@@ -58,6 +57,6 @@ public class ErrorMapperTest {
         assertTrue(error is SakshiError.IpcError)
         assertEquals("Vault operation failed", error.message)
         assertEquals(message, error.diagnosticDetails)
-        assertEquals(SakshiErrorCode.IPC_ERROR, error.errorCode)
+        assertEquals("04_IPC_ERROR", error.errorCode)
     }
 }
