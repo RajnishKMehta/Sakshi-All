@@ -77,7 +77,7 @@ class SakshiVaultServiceBinder(
         Log.d(tag, "Received copyFile request: fileId=$fileId, uri=$uriStr, mediaType=$mediaType, fileExtension=$fileExtension")
 
         if (fileId.isEmpty() || uriStr.isEmpty()) {
-            val error = SakshiError.Unknown("Invalid file payload: empty file_id or uri", null)
+            val error = SakshiError.InvalidPayload("Invalid file payload: empty file_id or uri")
             VaultResponder.sendError(callback, error)
             return
         }
@@ -107,7 +107,7 @@ class SakshiVaultServiceBinder(
                 Log.e(tag, "Failed to copy file $fileId", e)
                 VaultResponder.sendError(
                     callback,
-                    SakshiError.Unknown("Failed to copy file to vault storage: ${e.message}", e)
+                    SakshiError.IpcError(message = "Failed to copy file to vault storage: ${e.message}", cause = e)
                 )
             }
         }
@@ -124,7 +124,7 @@ class SakshiVaultServiceBinder(
         Log.d(tag, "Received startAVSync request: fileId=$fileId, uri=$sourceUriStr, mediaType=$mediaType, fileExtension=$fileExtension")
 
         if (fileId.isEmpty() || sourceUriStr.isEmpty()) {
-            val error = SakshiError.Unknown("Invalid video sync payload: empty file_id or uri", null)
+            val error = SakshiError.InvalidPayload("Invalid video sync payload: empty file_id or uri")
             VaultResponder.sendError(callback, error)
             return
         }
@@ -136,7 +136,7 @@ class SakshiVaultServiceBinder(
             } catch (e: IllegalArgumentException) {
                 Log.e(tag, "Invalid path components for startAVSync: ${e.message}", e)
                 // Mark sync failed natively handled since it never starts properly, just return error
-                val error = SakshiError.Unknown("Invalid payload: ${e.message}", e)
+                val error = SakshiError.InvalidPayload("Invalid payload: ${e.message}")
                 VaultResponder.sendError(callback, error)
             }
         }
@@ -149,7 +149,7 @@ class SakshiVaultServiceBinder(
     override fun stopAVSync(fileId: String, callback: ISakshiVaultCallback) {
         Log.d(tag, "Received stopAVSync request: fileId=$fileId")
         if (fileId.isEmpty()) {
-            val error = SakshiError.Unknown("Invalid stopAVSync payload: empty file_id", null)
+            val error = SakshiError.InvalidPayload("Invalid stopAVSync payload: empty file_id")
             VaultResponder.sendError(callback, error)
             return
         }
@@ -166,7 +166,7 @@ class SakshiVaultServiceBinder(
     override fun pauseAVSync(fileId: String, callback: ISakshiVaultCallback) {
         Log.d(tag, "Received pauseAVSync request: fileId=${fileId}")
         if (fileId.isEmpty()) {
-            val error = SakshiError.Unknown("Invalid pauseAVSync payload: empty file_id", null)
+            val error = SakshiError.InvalidPayload("Invalid pauseAVSync payload: empty file_id")
             VaultResponder.sendError(callback, error)
             return
         }
@@ -178,7 +178,7 @@ class SakshiVaultServiceBinder(
     override fun resumeAVSync(fileId: String, callback: ISakshiVaultCallback) {
         Log.d(tag, "Received resumeAVSync request: fileId=${fileId}")
         if (fileId.isEmpty()) {
-            val error = SakshiError.Unknown("Invalid resumeAVSync payload: empty file_id", null)
+            val error = SakshiError.InvalidPayload("Invalid resumeAVSync payload: empty file_id")
             VaultResponder.sendError(callback, error)
             return
         }
