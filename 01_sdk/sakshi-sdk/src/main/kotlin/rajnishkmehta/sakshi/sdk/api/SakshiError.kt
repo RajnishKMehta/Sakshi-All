@@ -74,6 +74,8 @@ public sealed class SakshiError(
      * Error indicating that the provided file ID is already used by another file in the Vault.
      *
      * @property fileId The duplicate file ID.
+     * @property message Human-readable description of the error.
+     * @property diagnosticDetails Safe, internal details (like exception messages) for debugging, not intended for user UI.
      */
     public data class DuplicateFileId(
         public val fileId: String,
@@ -97,17 +99,22 @@ public sealed class SakshiError(
     public data class IpcError(
         public val code: Int = -1,
         override val message: String,
-        override val diagnosticDetails: String? = null,
-        override val cause: Throwable? = null
+        override val cause: Throwable? = null,
+        override val diagnosticDetails: String? = null
     ) : SakshiError(SakshiErrorCode.IPC_ERROR, message, diagnosticDetails, cause)
 
     /**
      * Fallback error for unexpected or unclassified failures.
+     *
+     * @property message Human-readable description of the error.
+     * @property cause Optional underlying exception cause.
+     * @property diagnosticDetails Safe, internal details (like exception messages) for debugging, not intended for user UI.
+     * @property customErrorCode A custom string error code if provided.
      */
     public data class Unknown(
         override val message: String,
-        override val diagnosticDetails: String? = null,
         override val cause: Throwable? = null,
+        override val diagnosticDetails: String? = null,
         public val customErrorCode: String = SakshiErrorCode.UNKNOWN_ERROR
     ) : SakshiError(customErrorCode, message, diagnosticDetails, cause)
 }

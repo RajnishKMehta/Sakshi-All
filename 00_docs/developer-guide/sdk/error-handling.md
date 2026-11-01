@@ -44,7 +44,7 @@ For a full list of SDK errors and practical resolution steps, refer to the [Erro
 
 ## Extensibility
 
-The SDK accepts any error code provided by the Vault. It does not force you to restrict logic to specific predefined constants. If an unrecognized code is returned by the Vault, it will be encapsulated properly inside a `SakshiError.Unknown` or `SakshiError.IpcError` with the corresponding `errorCode` (if supported).
+The SDK accepts any error code provided by the Vault. It does not force you to restrict logic to specific predefined constants. If an unrecognized integer code is returned by the Vault, it will be encapsulated properly inside a `SakshiError.IpcError`, with the original integer available in `IpcError.code` and `errorCode` set to `04_IPC_ERROR`.
 
 ## Diagnostics
 

@@ -32,8 +32,7 @@ internal object ErrorMapper {
         val lowerMsg = message.lowercase()
 
         // Match Duplicate File ID
-        if (lowerMsg.contains("unique constraint") || lowerMsg.contains("already exists") || lowerMsg.contains("duplicate")) {
-            // Best effort extraction of fileId if present in the string (e.g. "File ID 'abc' already exists")
+        if (message.contains("02_DUPLICATE_FILE_ID") || message.contains("UNIQUE constraint failed: file_id")) {
             val regex = "'([^']+)'".toRegex()
             val match = regex.find(message)
             val fileId = match?.groupValues?.get(1) ?: "unknown"
@@ -41,12 +40,12 @@ internal object ErrorMapper {
         }
 
         // Match Source File Inaccessible
-        if (lowerMsg.contains("file not found") || lowerMsg.contains("no such file") || lowerMsg.contains("enoent") || lowerMsg.contains("permission denied") && lowerMsg.contains("open")) {
+        if (message.contains("03_SOURCE_FILE_INACCESSIBLE") || message.contains("ENOENT")) {
              return SakshiError.SourceFileInaccessible(diagnosticDetails = message)
         }
 
         // Match Invalid Payload
-        if (lowerMsg.contains("invalid path components") || lowerMsg.contains("invalid payload")) {
+        if (message.contains("02_INVALID_PAYLOAD")) {
             return SakshiError.InvalidPayload(message = defaultMessage, diagnosticDetails = message)
         }
 
