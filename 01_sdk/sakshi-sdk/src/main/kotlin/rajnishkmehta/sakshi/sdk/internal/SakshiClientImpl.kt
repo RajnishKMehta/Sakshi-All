@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import rajnishkmehta.sakshi.sdk.internal.ipc.ErrorMapper
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
 import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.SakshiError
@@ -62,7 +63,7 @@ internal class SakshiClientImpl(
             SakshiResult.Success(pingResponse)
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Ping IPC transaction failed", cause = e)
+                ErrorMapper.fromThrowable(e, "Ping IPC transaction failed")
             )
         }
     }
@@ -102,7 +103,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            SakshiError.IpcError(message = e.message ?: "Failed to copy file", cause = e)
+                            ErrorMapper.fromThrowable(e, "Failed to copy file")
                         )
                     )
                 }
@@ -158,7 +159,7 @@ internal class SakshiClientImpl(
         } catch (e: Throwable) {
             trySend(
                 SakshiResult.Failure(
-                    SakshiError.IpcError(message = e.message ?: "Failed to start audio/video sync", cause = e)
+                    ErrorMapper.fromThrowable(e, "Failed to start audio/video sync")
                 )
             )
             close()
@@ -207,7 +208,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            SakshiError.IpcError(message = e.message ?: "Failed to stop audio/video sync", cause = e)
+                            ErrorMapper.fromThrowable(e, "Failed to stop audio/video sync")
                         )
                     )
                 }
@@ -254,7 +255,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            SakshiError.IpcError(message = e.message ?: "Failed to pause audio/video sync", cause = e)
+                            ErrorMapper.fromThrowable(e, "Failed to pause audio/video sync")
                         )
                     )
                 }
@@ -301,7 +302,7 @@ internal class SakshiClientImpl(
                 if (continuation.isActive) {
                     continuation.resume(
                         SakshiResult.Failure(
-                            SakshiError.IpcError(message = e.message ?: "Failed to resume audio/video sync", cause = e)
+                            ErrorMapper.fromThrowable(e, "Failed to resume audio/video sync")
                         )
                     )
                 }
@@ -323,10 +324,7 @@ internal class SakshiClientImpl(
             SakshiResult.Success(queryResponse)
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(
-                    message = e.message ?: "Failed to query recording status",
-                    cause = e
-                )
+                ErrorMapper.fromThrowable(e, "Failed to query recording status")
             )
         }
     }
@@ -355,10 +353,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(
-                    message = e.message ?: "Failed to list media",
-                    cause = e
-                )
+                ErrorMapper.fromThrowable(e, "Failed to list media")
             )
         }
     }
@@ -385,10 +380,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(
-                    message = e.message ?: "Failed to list deleted media",
-                    cause = e
-                )
+                ErrorMapper.fromThrowable(e, "Failed to list deleted media")
             )
         }
     }
@@ -408,7 +400,7 @@ internal class SakshiClientImpl(
 
             if (!bundle.containsKey("contentUri")) {
                  return SakshiResult.Failure(
-                    SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to get media details", cause = null)
+                    ErrorMapper.fromErrorMessage(bundle.getString("error") ?: "Failed to get media details", "Failed to get media details")
                 )
             }
 
@@ -424,7 +416,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to get media details", cause = e)
+                ErrorMapper.fromThrowable(e, "Failed to get media details")
             )
         }
     }
@@ -446,7 +438,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to get thumbnail template", cause = e)
+                ErrorMapper.fromThrowable(e, "Failed to get thumbnail template")
             )
         }
     }
@@ -468,14 +460,14 @@ internal class SakshiClientImpl(
                 SakshiResult.Success(Unit)
             } else {
                 SakshiResult.Failure(
-                    SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to delete media", cause = null)
+                    ErrorMapper.fromErrorMessage(bundle.getString("error") ?: "Failed to delete media", "Failed to delete media")
                 )
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to delete media", cause = e)
+                ErrorMapper.fromThrowable(e, "Failed to delete media")
             )
         }
     }
@@ -511,7 +503,7 @@ internal class SakshiClientImpl(
             }
 
             if (successfulIds.isEmpty() && failedIds.isEmpty()) {
-                 SakshiResult.Failure(SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to batch delete media", cause = null))
+                 SakshiResult.Failure(ErrorMapper.fromErrorMessage(bundle.getString("error") ?: "Failed to batch delete media", "Failed to batch delete media"))
             } else {
                 SakshiResult.Success(BatchMediaDeleteResponse(successfulIds, failedIds))
             }
@@ -519,7 +511,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to batch delete media", cause = e)
+                ErrorMapper.fromThrowable(e, "Failed to batch delete media")
             )
         }
     }
@@ -542,14 +534,14 @@ internal class SakshiClientImpl(
                 SakshiResult.Success(Unit)
             } else {
                 SakshiResult.Failure(
-                    SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to recover media", cause = null)
+                    ErrorMapper.fromErrorMessage(bundle.getString("error") ?: "Failed to recover media", "Failed to recover media")
                 )
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to recover media", cause = e)
+                ErrorMapper.fromThrowable(e, "Failed to recover media")
             )
         }
     }
@@ -585,7 +577,7 @@ internal class SakshiClientImpl(
             }
 
             if (successfulIds.isEmpty() && failedIds.isEmpty()) {
-                 SakshiResult.Failure(SakshiError.IpcError(message = bundle.getString("error") ?: "Failed to batch recover media", cause = null))
+                 SakshiResult.Failure(ErrorMapper.fromErrorMessage(bundle.getString("error") ?: "Failed to batch recover media", "Failed to batch recover media"))
             } else {
                 SakshiResult.Success(BatchMediaRecoverResponse(successfulIds, failedIds))
             }
@@ -593,7 +585,7 @@ internal class SakshiClientImpl(
             throw e
         } catch (e: Throwable) {
             SakshiResult.Failure(
-                SakshiError.IpcError(message = e.message ?: "Failed to batch recover media", cause = e)
+                ErrorMapper.fromThrowable(e, "Failed to batch recover media")
             )
         }
     }

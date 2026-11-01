@@ -11,6 +11,7 @@
 * [Connection Lifecycle](sdk/connection-lifecycle.md)
 * [Data Models](sdk/data-models.md)
 * [Error Handling](sdk/error-handling.md)
+* [Error Codes](sdk/error-codes.md)
 
 ## API Reference
 * [API Index](sdk/api/README.md)
