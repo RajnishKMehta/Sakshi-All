@@ -25,9 +25,9 @@ suspend fun attemptDelete(client: SakshiClient, fileId: String) {
 }
 ```
 
-## `SakshiError` and `SakshiErrorCode`
+## `SakshiError` and `errorCode`
 
-Every `SakshiError` provides a stable `errorCode` representing the specific failure reason, making it easy to handle programmatically. You can inspect `errorCode.isRetryable` to determine if retrying the identical operation later might succeed. A `SakshiErrorCategory` property is also available to categorize the failure (e.g., `CONNECTION`, `VALIDATION`).
+Every `SakshiError` provides a stable `errorCode` representing the specific failure reason, making it easy to handle programmatically.
 
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiErrorCode
@@ -37,24 +37,14 @@ fun handleError(error: SakshiError) {
     if (error.errorCode == SakshiErrorCode.DUPLICATE_FILE_ID) {
         // e.g. generate a new ID and try again
     }
-
-    // 2. Or rely on retryability guidance
-    if (error.errorCode.isRetryable) {
-        // e.g. delay and retry
-    } else {
-        // notify user based on error.errorCode.recommendedAction
-    }
 }
 ```
 
-## Error Categories (`SakshiErrorCategory`)
-
-*   **`CONNECTION`**: Failures related to binding, finding, or communicating with the Vault service.
-*   **`VALIDATION`**: Failures related to invalid arguments, missing files, or bad state in the request.
-*   **`ENVIRONMENT`**: Failures caused by system limitations like permissions or I/O access.
-*   **`SYSTEM_FAULT`**: Unexpected system faults or remote exceptions.
-
 For a full list of SDK errors and practical resolution steps, refer to the [Error Codes](error-codes.md) reference.
+
+## Extensibility
+
+The SDK accepts any error code provided by the Vault. It does not force you to restrict logic to specific predefined constants. If an unrecognized code is returned by the Vault, it will be encapsulated properly inside a `SakshiError.Unknown` or `SakshiError.IpcError` with the corresponding `errorCode` (if supported).
 
 ## Diagnostics
 

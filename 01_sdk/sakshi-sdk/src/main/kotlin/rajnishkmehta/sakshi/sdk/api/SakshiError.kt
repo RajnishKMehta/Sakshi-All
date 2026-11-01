@@ -7,15 +7,13 @@ package rajnishkmehta.sakshi.sdk.api
 /**
  * Represents typed, structured errors that can occur during Sakshi SDK operation or IPC communication.
  *
- * @property errorCode The standardized code identifying the specific failure condition.
- * @property category The high-level category of the error.
+ * @property errorCode The code identifying the specific failure condition.
  * @property message Human-readable description of the error.
  * @property diagnosticDetails Safe, internal details (like exception messages) for debugging, not intended for user UI.
  * @property cause Optional underlying exception cause.
  */
 public sealed class SakshiError(
-    public val errorCode: SakshiErrorCode,
-    public val category: SakshiErrorCategory,
+    public val errorCode: String,
     override val message: String,
     public open val diagnosticDetails: String? = null,
     override val cause: Throwable? = null
@@ -27,7 +25,7 @@ public sealed class SakshiError(
     public data class VaultNotInstalled(
         override val message: String = "Vault application is not installed on this device.",
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.VAULT_NOT_INSTALLED, SakshiErrorCategory.CONNECTION, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.VAULT_NOT_INSTALLED, message, diagnosticDetails)
 
     /**
      * Error indicating that binding to the Vault service failed or the connection timed out.
@@ -35,7 +33,7 @@ public sealed class SakshiError(
     public data class ServiceUnavailable(
         override val message: String = "Vault service connection could not be established.",
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.SERVICE_UNAVAILABLE, SakshiErrorCategory.CONNECTION, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.SERVICE_UNAVAILABLE, message, diagnosticDetails)
 
     /**
      * Error indicating that the Vault service disconnected unexpectedly during an operation.
@@ -43,7 +41,7 @@ public sealed class SakshiError(
     public data class ServiceDisconnected(
         override val message: String = "Vault service disconnected unexpectedly.",
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.SERVICE_DISCONNECTED, SakshiErrorCategory.CONNECTION, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.SERVICE_DISCONNECTED, message, diagnosticDetails)
 
     /**
      * Error indicating that the requested operation was rejected due to missing permissions.
@@ -51,7 +49,7 @@ public sealed class SakshiError(
     public data class PermissionDenied(
         override val message: String,
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.PERMISSION_DENIED, SakshiErrorCategory.ENVIRONMENT, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.PERMISSION_DENIED, message, diagnosticDetails)
 
     /**
      * Error indicating that a recording file ID was not found in Vault.
@@ -62,7 +60,7 @@ public sealed class SakshiError(
         public val fileId: String,
         override val message: String = "Recording with file ID '$fileId' was not found.",
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.RECORDING_NOT_FOUND, SakshiErrorCategory.VALIDATION, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.RECORDING_NOT_FOUND, message, diagnosticDetails)
 
     /**
      * Error indicating an invalid argument or payload passed to the SDK.
@@ -70,7 +68,7 @@ public sealed class SakshiError(
     public data class InvalidPayload(
         override val message: String,
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.INVALID_PAYLOAD, SakshiErrorCategory.VALIDATION, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.INVALID_PAYLOAD, message, diagnosticDetails)
 
     /**
      * Error indicating that the provided file ID is already used by another file in the Vault.
@@ -81,7 +79,7 @@ public sealed class SakshiError(
         public val fileId: String,
         override val message: String = "File ID '$fileId' already exists.",
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.DUPLICATE_FILE_ID, SakshiErrorCategory.VALIDATION, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.DUPLICATE_FILE_ID, message, diagnosticDetails)
 
     /**
      * Error indicating that the source file URI provided is missing, unreadable, or inaccessible.
@@ -89,7 +87,7 @@ public sealed class SakshiError(
     public data class SourceFileInaccessible(
         override val message: String = "Source file is inaccessible or missing.",
         override val diagnosticDetails: String? = null
-    ) : SakshiError(SakshiErrorCode.SOURCE_FILE_INACCESSIBLE, SakshiErrorCategory.ENVIRONMENT, message, diagnosticDetails)
+    ) : SakshiError(SakshiErrorCode.SOURCE_FILE_INACCESSIBLE, message, diagnosticDetails)
 
     /**
      * Error indicating an IPC communication fault or Binder transaction exception.
@@ -101,7 +99,7 @@ public sealed class SakshiError(
         override val message: String,
         override val diagnosticDetails: String? = null,
         override val cause: Throwable? = null
-    ) : SakshiError(SakshiErrorCode.IPC_ERROR, SakshiErrorCategory.SYSTEM_FAULT, message, diagnosticDetails, cause)
+    ) : SakshiError(SakshiErrorCode.IPC_ERROR, message, diagnosticDetails, cause)
 
     /**
      * Fallback error for unexpected or unclassified failures.
@@ -109,6 +107,7 @@ public sealed class SakshiError(
     public data class Unknown(
         override val message: String,
         override val diagnosticDetails: String? = null,
-        override val cause: Throwable? = null
-    ) : SakshiError(SakshiErrorCode.UNKNOWN_ERROR, SakshiErrorCategory.SYSTEM_FAULT, message, diagnosticDetails, cause)
+        override val cause: Throwable? = null,
+        public val customErrorCode: String = SakshiErrorCode.UNKNOWN_ERROR
+    ) : SakshiError(customErrorCode, message, diagnosticDetails, cause)
 }
