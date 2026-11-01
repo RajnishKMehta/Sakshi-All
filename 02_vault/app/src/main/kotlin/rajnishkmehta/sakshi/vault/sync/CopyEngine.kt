@@ -51,8 +51,9 @@ class CopyEngine(
         }
 
     private suspend fun copyFileLocked(fileId: String, sourceUriStr: String, mediaType: String, fileExtension: String): String {
-        check(mediaRecordDao.getRecord(fileId)?.state != MediaState.DELETE) {
-            "File $fileId is scheduled for deletion and cannot be overwritten"
+        val existingRecord = mediaRecordDao.getRecord(fileId)
+        if (existingRecord != null) {
+            throw IllegalArgumentException("Duplicate file ID: $fileId")
         }
         val uri = Uri.parse(sourceUriStr)
         val inputStream = context.contentResolver.openInputStream(uri) ?: throw IOException("ContentResolver returned null InputStream for $uri")

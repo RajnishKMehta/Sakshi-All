@@ -81,24 +81,12 @@ class CopyEngineDeletionLockTest {
     )
 
     @Test
-    fun `deletion scheduled during a copy retry waits for the copy and is not overwritten`() = runBlocking {
+    fun `copy retry fails with DuplicateFileId exception for existing completed record`() = runBlocking {
         val dao = FakeMediaRecordDao(testRecord(fileId = fileId, state = MediaState.COMPLETED))
-
-        val copy = async(Dispatchers.IO) { copyEngine(dao).copyFile(fileId, "content://camera/$fileId", "PHOTO", "jpg") }
-        assertTrue(saveStarted.await(5, TimeUnit.SECONDS))
-
-        val schedule = async(Dispatchers.Default) { deletionScheduler(dao).schedule(fileId) }
-        delay(200)
-        assertFalse(schedule.isCompleted, "Scheduling must wait for the in-flight copy")
-
-        releaseSave.countDown()
-        withTimeout(5_000) { copy.await() }
-        val result = withTimeout(5_000) { schedule.await() }
-
-        assertEquals(DeletionScheduleResult.Scheduled(fileId, 9_000L, alreadyScheduled = false), result)
-        val record = dao.records.getValue(fileId)
-        assertEquals(MediaState.DELETE, record.state)
-        assertEquals(9_000L, record.deletionScheduledAt)
+        val exception = assertThrows<IllegalArgumentException> {
+            runBlocking { copyEngine(dao).copyFile(fileId, "content://camera/$fileId", "PHOTO", "jpg") }
+        }
+        assertTrue(exception.message?.startsWith("Duplicate file ID") == true)
     }
 
     @Test
@@ -106,7 +94,7 @@ class CopyEngineDeletionLockTest {
         val scheduled = testRecord(fileId = fileId, state = MediaState.DELETE, deletionScheduledAt = 1L)
         val dao = FakeMediaRecordDao(scheduled)
 
-        assertThrows<IllegalStateException> {
+        assertThrows<IllegalArgumentException> {
             runBlocking { copyEngine(dao).copyFile(fileId, "content://camera/$fileId", "PHOTO", "jpg") }
         }
 
