@@ -42,7 +42,7 @@ class MediaDeletionRepositoryTest {
         )
 
         assertEquals(
-            ScheduleDeletionResult.Failed("Communication error with Vault."),
+            ScheduleDeletionResult.Failed("Vault operation failed."),
             repository.scheduleDeletion("video_0001")
         )
         assertTrue(store.removedIds.value.isEmpty())

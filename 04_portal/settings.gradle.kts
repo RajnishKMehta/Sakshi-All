@@ -18,7 +18,11 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenLocal()
+        mavenLocal {
+            content {
+                includeModule("io.github.rajnishkmehta.sakshi", "sakshi-sdk")
+            }
+        }
         
         val gprUser = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
         val gprKey = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
@@ -42,3 +46,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sakshi-Portal"
 include(":app")
+includeBuild("../01_sdk")
