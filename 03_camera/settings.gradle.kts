@@ -12,7 +12,7 @@ dependencyResolutionManagement {
 
     repositories {
         mavenLocal()
-                val gprUser =
+        val gprUser =
             providers.gradleProperty("gpr.user").orNull
                 ?: System.getenv("GITHUB_ACTOR")
 
