@@ -25,8 +25,8 @@ If you want to build a compatible client application (like a custom voice record
 
 Detailed documentation for every public SDK method:
 
-*   **[API Index](../../reference/api/README.md):** The complete list of available operations.
-*   *Key APIs:* [copyFile](../../reference/api/copyFile.md), [startAVSync (Crash-Safe Recording)](../../reference/api/startAVSync.md), [deleteMedia](../../reference/api/deleteMedia.md).
+*   **[API Index](../../developer-reference/api/README.md):** The complete list of available operations.
+*   *Key APIs:* [copyFile](../../developer-reference/api/copyFile.md), [startAVSync (Crash-Safe Recording)](../../developer-reference/api/startAVSync.md), [deleteMedia](../../developer-reference/api/deleteMedia.md).
 
 ## Security and Trust
 

@@ -23,10 +23,10 @@ site:
         directory: ./developer-guide
     - type: space
       key: space-reference
-      title: Reference
-      path: reference
+      title: Developer Reference
+      path: developer-reference
       content:
-        directory: ./reference
+        directory: ./developer-reference
     - type: space
       key: space-security-privacy
       title: Security & Privacy

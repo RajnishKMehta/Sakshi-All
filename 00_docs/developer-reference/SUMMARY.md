@@ -1,6 +1,6 @@
 # Summary
 
-* [Sākṣī Reference](README.md)
+* [Sākṣī Developer Reference](README.md)
 * [Configuration](configuration.md)
 * [Data Models](data-models.md)
 * [Error Codes](error-codes.md)

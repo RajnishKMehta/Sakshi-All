@@ -1,6 +1,6 @@
-# Reference
+# Developer Reference
 
-Welcome to the Sākṣī Reference Documentation.
+Welcome to the Sākṣī Developer Reference Documentation.
 
 This section provides precise technical specifications, API contracts, data models, error definitions, and ecosystem constraints for developers working with Sākṣī.
 

@@ -1,10 +1,10 @@
 # SDK Error Handling
 
-The Sākṣī SDK leverages Kotlin's sealed classes to represent the result of operations safely, avoiding uncontrolled exceptions. Asynchronous API calls return a `SakshiResult<T>`, encapsulating either a successful result containing data of type `T`, or a failure containing a specific `SakshiError`.
+The Sākṣī SDK leverages Kotlin's sealed classes to represent the result of operations safely, avoiding uncontrolled exceptions. Asynchronous API calls return a [`SakshiResult<T>`](../../developer-reference/data-models.md#sakshiresultt), encapsulating either a successful result containing data of type `T`, or a failure containing a specific [`SakshiError`](../../developer-reference/data-models.md#sakshierror).
 
 ## The `SakshiResult` Wrapper
 
-The `SakshiResult<T>` wrapper makes error handling explicit. Developers must evaluate the result state.
+The [`SakshiResult<T>`](../../developer-reference/data-models.md#sakshiresultt) wrapper makes error handling explicit. Developers must evaluate the result state.
 
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
@@ -25,9 +25,9 @@ suspend fun attemptDelete(client: SakshiClient, fileId: String) {
 }
 ```
 
-## `SakshiError` and `errorCode`
+## [`SakshiError`](../../developer-reference/data-models.md#sakshierror) and `errorCode`
 
-Every `SakshiError` provides a stable `errorCode` representing the specific failure reason, making it easy to handle programmatically.
+Every [`SakshiError`](../../developer-reference/data-models.md#sakshierror) provides a stable `errorCode` representing the specific failure reason, making it easy to handle programmatically.
 
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiErrorCode
@@ -40,7 +40,7 @@ fun handleError(error: SakshiError) {
 }
 ```
 
-For a full list of SDK errors and practical resolution steps, refer to the [Error Codes](../../reference/error-codes.md) reference.
+For a full list of SDK errors and practical resolution steps, refer to the [Error Codes](../../developer-reference/error-codes.md) reference.
 
 ## Extensibility
 

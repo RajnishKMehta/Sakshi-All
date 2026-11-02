@@ -12,7 +12,7 @@ public fun startAVSync(request: AVSyncRequest): Flow<SakshiResult<AVSyncStatus>>
 
 ## Behaviour
 
-The SDK sends a request to the Vault to start syncing an audio or video file. Instead of a single synchronous return, it returns a Kotlin `Flow` which continuously emits `AVSyncStatus` objects.
+The SDK sends a request to the Vault to start syncing an audio or video file. Instead of a single synchronous return, it returns a Kotlin `Flow` which continuously emits [`AVSyncStatus`](../data-models.md#avsyncstatus) objects.
 
 ## Client Application Integration
 
