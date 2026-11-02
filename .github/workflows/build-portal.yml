@@ -34,6 +34,12 @@ jobs:
           cache: gradle
 
       - name: Make gradlew executable
+        run: chmod +x gradlew 01_sdk/gradlew
+
+      - name: Build SDK
+        run: cd 01_sdk && ./gradlew publishToMavenLocal
+
+      - name: Make gradlew executable
         run: chmod +x gradlew 04_portal/gradlew
 
       - name: Build Portal
