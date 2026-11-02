@@ -83,13 +83,11 @@ class SakshiVaultServiceBinder(
         }
 
         serviceScope?.launch {
-            val exists = runBlocking { database?.mediaRecordDao()?.getRecord(fileId) != null }
-            if (exists) {
-                VaultResponder.sendError(callback, SakshiError.DuplicateFileId(fileId))
-                return@launch
-            }
-
             try {
+                val exists = database?.mediaRecordDao()?.getRecord(fileId) != null
+                if (exists) {
+                    throw IllegalArgumentException("Duplicate file ID: $fileId")
+                }
                 val vaultPath = copyEngine?.copyFile(fileId, uriStr, mediaType, fileExtension) ?: throw IllegalStateException("CopyEngine not initialized")
                 val fileLength = File(vaultPath).length()
 
@@ -144,19 +142,23 @@ class SakshiVaultServiceBinder(
         }
 
         serviceScope?.launch {
-            val exists = runBlocking { database?.mediaRecordDao()?.getRecord(fileId) != null }
-            if (exists) {
-                VaultResponder.sendError(callback, SakshiError.DuplicateFileId(fileId))
-                return@launch
-            }
-
             try {
+                val exists = database?.mediaRecordDao()?.getRecord(fileId) != null
+                if (exists) {
+                    throw IllegalArgumentException("Duplicate file ID: $fileId")
+                }
                 PathValidator.validatePathComponents(fileId, mediaType, fileExtension)
-                scheduler?.startSync(fileId, sourceUriStr, mediaType, fileExtension, callback)
+                val started = scheduler?.startSync(fileId, sourceUriStr, mediaType, fileExtension, callback) ?: false
+                if (!started) {
+                    throw IllegalArgumentException("Duplicate file ID: $fileId")
+                }
             } catch (e: IllegalArgumentException) {
-                Log.e(tag, "Invalid path components for startAVSync: ${e.message}", e)
-                // Mark sync failed natively handled since it never starts properly, just return error
-                val error = SakshiError.InvalidPayload("Invalid payload: ${e.message}")
+                Log.e(tag, "Failed to start AVSync for $fileId", e)
+                val error = if (e.message?.startsWith("Duplicate file ID") == true) {
+                    SakshiError.DuplicateFileId(fileId, "Duplicate file ID: $fileId")
+                } else {
+                    SakshiError.InvalidPayload("Invalid payload: ${e.message}")
+                }
                 VaultResponder.sendError(callback, error)
             }
         }

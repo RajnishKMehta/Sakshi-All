@@ -62,15 +62,25 @@ class SyncScheduler(
      * Starts a periodic synchronization loop for the given [fileId], [sourceUri] .
      * If a synchronization loop is already running for this [fileId], it does nothing.
      */
-    fun startSync(fileId: String, sourceUri: String, mediaType: String, fileExtension: String, callback: ISakshiVaultCallback) {
-        activeCallbacks[fileId] = callback
-
-        if (activeJobs.containsKey(fileId)) {
-            Log.d(tag, "Sync already active for fileId: $fileId")
-            return
+    fun startSync(fileId: String, sourceUri: String, mediaType: String, fileExtension: String, callback: ISakshiVaultCallback): Boolean {
+        if (activeCallbacks.putIfAbsent(fileId, callback) != null) {
+            Log.d(tag, "Sync callback already active for fileId: $fileId")
+            return false
         }
 
-        val job = coroutineScope.launch {
+        // Pre-create an empty job just to reserve the ID
+        val dummyJob = Job()
+        if (activeJobs.putIfAbsent(fileId, dummyJob) != null) {
+            Log.d(tag, "Sync already active for fileId: $fileId")
+            // Revert callback if job existed but callback didn't
+            activeCallbacks.remove(fileId)
+            return false
+        }
+
+        val launchJob = coroutineScope.launch {
+            // Replace the dummy job with the actual running job, so cancellation works properly
+            activeJobs[fileId] = coroutineContext[Job]!!
+
             try {
                 runSyncLoop(fileId, sourceUri, mediaType, fileExtension)
             } catch (e: Exception) {
@@ -87,7 +97,7 @@ class SyncScheduler(
                 activeJobs.remove(fileId)
             }
         }
-        activeJobs[fileId] = job
+        return true
     }
 
     /**
