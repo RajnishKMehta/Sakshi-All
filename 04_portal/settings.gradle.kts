@@ -18,6 +18,8 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()
+        
         val gprUser = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
         val gprKey = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
         if (!gprUser.isNullOrEmpty() && !gprKey.isNullOrEmpty()) {
@@ -35,11 +37,8 @@ dependencyResolutionManagement {
 
         google()
         mavenCentral()
-        mavenLocal()
-        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "Sakshi-Portal"
 include(":app")
-includeBuild("../01_sdk")
