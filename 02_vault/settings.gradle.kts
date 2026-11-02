@@ -43,6 +43,7 @@ dependencyResolutionManagement {
 rootProject.name = "Sakshi-Vault"
 include(":app")
 
+/*
 includeBuild("../01_sdk") {
     dependencySubstitution {
         substitute(
@@ -52,3 +53,4 @@ includeBuild("../01_sdk") {
         )
     }
 }
+*/
