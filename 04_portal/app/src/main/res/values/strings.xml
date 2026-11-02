@@ -123,6 +123,6 @@
     <string name="error_invalid_payload">Invalid request payload.</string>
     <string name="error_duplicate_file_id">Media already exists.</string>
     <string name="error_source_file_inaccessible">Source file is inaccessible.</string>
-    <string name="error_ipc_error">Communication error with Vault.</string>
+    <string name="error_ipc_error">Vault operation failed.</string>
     <string name="error_unknown_sakshi">Unknown error: %1$s</string>
 </resources>
