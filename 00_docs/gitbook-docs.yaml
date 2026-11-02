@@ -22,6 +22,12 @@ site:
       content:
         directory: ./developer-guide
     - type: space
+      key: space-reference
+      title: Reference
+      path: reference
+      content:
+        directory: ./reference
+    - type: space
       key: space-security-privacy
       title: Security & Privacy
       path: security-privacy

@@ -40,7 +40,7 @@ fun handleError(error: SakshiError) {
 }
 ```
 
-For a full list of SDK errors and practical resolution steps, refer to the [Error Codes](error-codes.md) reference.
+For a full list of SDK errors and practical resolution steps, refer to the [Error Codes](../../reference/error-codes.md) reference.
 
 ## Extensibility
 
