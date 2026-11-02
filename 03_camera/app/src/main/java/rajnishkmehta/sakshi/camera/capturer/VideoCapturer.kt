@@ -38,6 +38,7 @@ import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.VideoCaptureActivity
 import rajnishkmehta.sakshi.camera.ui.showCustomMessageDialog
 import rajnishkmehta.sakshi.camera.util.formatVideoDuration
+import rajnishkmehta.sakshi.camera.util.generateShortId
 import rajnishkmehta.sakshi.camera.util.getTreeDocumentUri
 import rajnishkmehta.sakshi.camera.util.removePendingFlagFromUri
 import java.text.SimpleDateFormat
@@ -278,7 +279,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         !videoSyncStarted && event.recordingStats.numBytesRecorded > 1024
                     ) {
                         videoSyncStarted = true
-                        val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
+                        val uniqueHash = generateShortId()
                         fileId = "vid_${uniqueHash}"
                         currentFileId = fileId
                         val avSyncRequest = AVSyncRequest(
@@ -570,7 +571,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
      */
     private fun submitFinishedRecordingToVault(uri: Uri) {
         val ctx = mActivity
-        val fileId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+        val fileId = "vid_${generateShortId()}"
         val fileCopyRequest = FileCopyRequest(
             fileId = fileId,
             uri = uri,

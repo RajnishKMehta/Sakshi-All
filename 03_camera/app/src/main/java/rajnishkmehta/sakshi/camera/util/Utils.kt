@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.PrintStream
 import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.RejectedExecutionException
 
@@ -98,4 +99,8 @@ fun removePendingFlagFromUri(contentResolver: ContentResolver, uri: Uri) {
     if (contentResolver.update(uri, cv, null, null) != 1) {
         throw IOException("unable to remove IS_PENDING flag")
     }
+}
+
+fun generateShortId(): String {
+    return UUID.randomUUID().toString().substring(0, 8)
 }

@@ -23,6 +23,7 @@ import rajnishkmehta.sakshi.camera.ui.activities.MainActivity
 import rajnishkmehta.sakshi.camera.ui.activities.SecureMainActivity
 import rajnishkmehta.sakshi.camera.ui.showIgnoringShortEdgeMode
 import rajnishkmehta.sakshi.camera.util.printStackTraceToString
+import rajnishkmehta.sakshi.camera.util.generateShortId
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -185,7 +186,7 @@ class ImageCapturer(val mActivity: MainActivity) {
 
         val mimeType = item.mimeType()
         // Generate a better ID than just filename
-        val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
+        val uniqueHash = generateShortId()
         val fileId = "img_${uniqueHash}"
 
         val fileCopyRequest = FileCopyRequest(
