@@ -42,7 +42,7 @@ class MediaDeletionRepositoryTest {
         )
 
         assertEquals(
-            ScheduleDeletionResult.Failed("Media file is still being synchronized"),
+            ScheduleDeletionResult.Failed("Communication error with Vault."),
             repository.scheduleDeletion("video_0001")
         )
         assertTrue(store.removedIds.value.isEmpty())

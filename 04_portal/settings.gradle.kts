@@ -41,3 +41,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sakshi-Portal"
 include(":app")
+includeBuild("../01_sdk")
