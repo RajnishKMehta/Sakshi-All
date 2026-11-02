@@ -1,0 +1,10 @@
+fix(vault): correctly handle duplicate file ID error mapping
+
+- Updated SyncScheduler.kt to throw IllegalArgumentException when a duplicate file ID is encountered during startSync.
+- Handled IllegalArgumentException correctly in SyncScheduler.startSync and mapped to SakshiError.DuplicateFileId in line with SDK RC.4 expectations.
+- Removed commented-out local SDK include logic in settings.gradle.kts to ensure it runs correctly with SDK RC.4 features locally.
+
+Tested and verified that:
+- Vault correctly maps duplicate file IDs to the 02_DUPLICATE_FILE_ID error code.
+- AIDL responses preserve the complete error information.
+- No relevant failure path was missed.

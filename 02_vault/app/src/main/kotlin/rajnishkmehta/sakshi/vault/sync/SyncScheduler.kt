@@ -86,10 +86,13 @@ class SyncScheduler(
             } catch (e: Exception) {
                 if (e !is CancellationException) {
                     Log.e(tag, "Error in sync loop for $fileId", e)
-                    val sakshiError = SakshiError.Unknown(
-                        "Sync loop failed: ${e.message}",
-                        e
-                    )
+                    val sakshiError = if (e is IllegalArgumentException && e.message?.startsWith("Duplicate file ID") == true) {
+                        SakshiError.DuplicateFileId(fileId, "Duplicate file ID: $fileId")
+                    } else if (e is IllegalArgumentException) {
+                        SakshiError.InvalidPayload("Invalid payload: ${e.message}")
+                    } else {
+                        SakshiError.Unknown("Sync loop failed: ${e.message}", e)
+                    }
                     VaultResponder.sendError(callback, sakshiError)
                     updateDatabaseState(fileId, MediaState.FAILED)
                 }
@@ -326,6 +329,9 @@ class SyncScheduler(
         // 1. Ensure a record exists in the database
         val dao = database.mediaRecordDao()
         val existing = dao.getRecord(fileId)
+        if (existing != null) {
+            throw IllegalArgumentException("Duplicate file ID: $fileId")
+        }
         if (existing == null) {
             val now = System.currentTimeMillis()
             dao.insertRecord(
