@@ -11,8 +11,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
     repositories {
-        mavenLocal()
-        val gprUser =
+                val gprUser =
             providers.gradleProperty("gpr.user").orNull
                 ?: System.getenv("GITHUB_ACTOR")
 
@@ -46,7 +45,7 @@ rootProject.name = "Sakshi-Camera"
 
 include(":app")
 
-/*
+
 includeBuild("../01_sdk") {
     dependencySubstitution {
         substitute(
@@ -56,4 +55,3 @@ includeBuild("../01_sdk") {
         )
     }
 }
-*/
