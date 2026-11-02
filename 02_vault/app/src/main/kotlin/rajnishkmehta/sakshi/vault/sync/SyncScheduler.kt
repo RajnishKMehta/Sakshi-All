@@ -212,7 +212,7 @@ class SyncScheduler(
             if (storedCallback != null) {
                 VaultResponder.sendError(
                     storedCallback,
-                    SakshiError.Unknown("Cannot pause: record not found or already completed", null)
+                    if (record == null) SakshiError.RecordingNotFound(fileId, "Cannot pause: record not found") else SakshiError.InvalidPayload("Cannot pause: record already completed")
                 )
             }
             return
@@ -225,7 +225,7 @@ class SyncScheduler(
                 if (storedCallback != null) {
                     VaultResponder.sendError(
                         storedCallback,
-                        SakshiError.Unknown("Cannot pause: record not found or already completed", null)
+                        if (currentRecord == null) SakshiError.RecordingNotFound(fileId, "Cannot pause: record not found") else SakshiError.InvalidPayload("Cannot pause: record already completed")
                     )
                 }
                 return@withLock
@@ -264,10 +264,8 @@ class SyncScheduler(
         if (record == null || record.state != MediaState.PAUSED) {
             val storedCallback = activeCallbacks[fileId]
             if (storedCallback != null) {
-                VaultResponder.sendError(
-                    storedCallback,
-                    SakshiError.Unknown("Cannot resume: record not found or not paused", null)
-                )
+                val error = if (record == null) SakshiError.RecordingNotFound(fileId, "Cannot resume: record not found") else SakshiError.InvalidPayload("Cannot resume: record not paused")
+                VaultResponder.sendError(storedCallback, error)
             }
             return
         }
@@ -277,10 +275,8 @@ class SyncScheduler(
             if (currentRecord == null || currentRecord.state != MediaState.PAUSED) {
                 val storedCallback = activeCallbacks[fileId]
                 if (storedCallback != null) {
-                    VaultResponder.sendError(
-                        storedCallback,
-                        SakshiError.Unknown("Cannot resume: record not found or not paused", null)
-                    )
+                    val error = if (currentRecord == null) SakshiError.RecordingNotFound(fileId, "Cannot resume: record not found") else SakshiError.InvalidPayload("Cannot resume: record not paused")
+                    VaultResponder.sendError(storedCallback, error)
                 }
                 return@withLock
             }
@@ -384,7 +380,7 @@ class SyncScheduler(
                 Log.e(tag, "Validation failed for $fileId", e)
                 dao.deleteRecord(fileId)
                 if (callback != null) {
-                    val sakshiError = SakshiError.Unknown("Validation failed: ${e.message}", e)
+                    val sakshiError = SakshiError.InvalidPayload("Validation failed: ${e.message}")
                     VaultResponder.sendError(callback, sakshiError)
                 }
                 activeJobs.remove(fileId)

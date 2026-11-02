@@ -45,6 +45,7 @@ import androidx.lifecycle.lifecycleScope
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.takeWhile
 import android.content.Intent
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -278,22 +279,45 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         !videoSyncStarted && event.recordingStats.numBytesRecorded > 1024
                     ) {
                         videoSyncStarted = true
-                        val uniqueHash = UUID.randomUUID().toString().substring(0, 8)
-                        fileId = "vid_${uniqueHash}"
-                        currentFileId = fileId
-                        val avSyncRequest = AVSyncRequest(
-                            fileId = fileId!!,
-                            uri = recordingCtx.uri,
-                            mediaType = "VIDEO",
-                            fileExtension = videoFileFormat.removePrefix(".")
-                        )
                         ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         if (ctx is MainActivity) {
                             CoroutineScope(Dispatchers.IO).launch {
-                                Log.d("VideoCapturer", "Calling SakshiClient.startAVSync with fileId: $fileId")
-                                ctx.sakshiClient.startAVSync(avSyncRequest).collect { result ->
-                                    if (result is SakshiResult.Failure) {
-                                        Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                var currentId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+                                var attempts = 0
+                                var retryNeeded: Boolean
+
+                                while (attempts < 5) {
+                                    retryNeeded = false
+                                    fileId = currentId
+                                    currentFileId = currentId
+
+                                    val avSyncRequest = AVSyncRequest(
+                                        fileId = currentId,
+                                        uri = recordingCtx.uri,
+                                        mediaType = "VIDEO",
+                                        fileExtension = videoFileFormat.removePrefix(".")
+                                    )
+
+                                    Log.d("VideoCapturer", "Calling SakshiClient.startAVSync with fileId: $currentId")
+                                    ctx.sakshiClient.startAVSync(avSyncRequest).takeWhile { result ->
+                                        if (result is SakshiResult.Failure && result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
+                                            Log.w("VideoCapturer", "Duplicate file ID $currentId, retrying startAVSync...")
+                                            retryNeeded = true
+                                            false
+                                        } else {
+                                            true
+                                        }
+                                    }.collect { result ->
+                                        if (result is SakshiResult.Failure) {
+                                            Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                                        }
+                                    }
+
+                                    if (retryNeeded) {
+                                        currentId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+                                        attempts++
+                                    } else {
+                                        break
                                     }
                                 }
                             }
@@ -570,19 +594,39 @@ class VideoCapturer(private val mActivity: MainActivity) {
      */
     private fun submitFinishedRecordingToVault(uri: Uri) {
         val ctx = mActivity
-        val fileId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
-        val fileCopyRequest = FileCopyRequest(
-            fileId = fileId,
-            uri = uri,
-            mediaType = "VIDEO",
-            fileExtension = videoFileFormat.removePrefix(".")
-        )
-        ctx.grantVaultUriPermission(fileId, uri)
         CoroutineScope(Dispatchers.IO).launch {
-            Log.d("VideoCapturer", "Calling SakshiClient.copyFile with fileId: $fileId")
-            when (val result = ctx.sakshiClient.copyFile(fileCopyRequest)) {
-                is SakshiResult.Success -> ctx.revokeVaultUriPermission(fileId, uri)
-                is SakshiResult.Failure -> Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+            var currentFileId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+            var success = false
+            var attempts = 0
+
+            while (!success && attempts < 5) {
+                val fileCopyRequest = FileCopyRequest(
+                    fileId = currentFileId,
+                    uri = uri,
+                    mediaType = "VIDEO",
+                    fileExtension = videoFileFormat.removePrefix(".")
+                )
+
+                ctx.grantVaultUriPermission(currentFileId, uri)
+                Log.d("VideoCapturer", "Calling SakshiClient.copyFile with fileId: $currentFileId")
+
+                when (val result = ctx.sakshiClient.copyFile(fileCopyRequest)) {
+                    is SakshiResult.Success -> {
+                        ctx.revokeVaultUriPermission(currentFileId, uri)
+                        success = true
+                    }
+                    is SakshiResult.Failure -> {
+                        if (result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
+                            Log.w("VideoCapturer", "Duplicate file ID $currentFileId, retrying copyFile...")
+                            ctx.revokeVaultUriPermission(currentFileId, uri)
+                            currentFileId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+                            attempts++
+                        } else {
+                            Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)
+                            break
+                        }
+                    }
+                }
             }
         }
     }
