@@ -46,6 +46,7 @@ rootProject.name = "Sakshi-Camera"
 
 include(":app")
 
+
 /*
 includeBuild("../01_sdk") {
     dependencySubstitution {
@@ -56,4 +57,5 @@ includeBuild("../01_sdk") {
         )
     }
 }
+
 */

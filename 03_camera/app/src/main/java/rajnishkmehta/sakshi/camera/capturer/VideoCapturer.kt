@@ -47,7 +47,7 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.takeWhile
 import android.content.Intent
-import java.util.UUID
+import rajnishkmehta.sakshi.camera.util.generateShortId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import rajnishkmehta.sakshi.sdk.api.SakshiResult
@@ -282,7 +282,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         ctx.grantUriPermission(camConfig.vaultPackage, recordingCtx.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         if (ctx is MainActivity) {
                             CoroutineScope(Dispatchers.IO).launch {
-                                var currentId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+                                var currentId = "vid_${generateShortId()}"
                                 var attempts = 0
                                 var retryNeeded: Boolean
 
@@ -314,7 +314,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                                     }
 
                                     if (retryNeeded) {
-                                        currentId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+                                        currentId = "vid_${generateShortId()}"
                                         attempts++
                                     } else {
                                         break
@@ -595,7 +595,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
     private fun submitFinishedRecordingToVault(uri: Uri) {
         val ctx = mActivity
         CoroutineScope(Dispatchers.IO).launch {
-            var currentFileId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+            var currentFileId = "vid_${generateShortId()}"
             var success = false
             var attempts = 0
 
@@ -619,7 +619,7 @@ class VideoCapturer(private val mActivity: MainActivity) {
                         if (result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
                             Log.w("VideoCapturer", "Duplicate file ID $currentFileId, retrying copyFile...")
                             ctx.revokeVaultUriPermission(currentFileId, uri)
-                            currentFileId = "vid_${UUID.randomUUID().toString().substring(0, 8)}"
+                            currentFileId = "vid_${generateShortId()}"
                             attempts++
                         } else {
                             Log.e("SakshiSDK", "Video ingestion failed: " + result.error.message)

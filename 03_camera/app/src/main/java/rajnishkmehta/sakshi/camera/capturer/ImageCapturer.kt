@@ -26,7 +26,7 @@ import rajnishkmehta.sakshi.camera.util.printStackTraceToString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import java.util.UUID
+import rajnishkmehta.sakshi.camera.util.generateShortId
 import java.util.Locale
 import android.content.Intent
 import kotlinx.coroutines.CoroutineScope
@@ -187,7 +187,7 @@ class ImageCapturer(val mActivity: MainActivity) {
 
         mActivity.grantUriPermission(camConfig.vaultPackage, item.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         CoroutineScope(Dispatchers.IO).launch {
-            var currentFileId = "img_${UUID.randomUUID().toString().substring(0, 8)}"
+            var currentFileId = "img_${generateShortId()}"
             var success = false
             var attempts = 0
 
@@ -203,7 +203,7 @@ class ImageCapturer(val mActivity: MainActivity) {
                 if (result is SakshiResult.Failure) {
                     if (result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
                         Log.w("SakshiSDK", "Duplicate file ID $currentFileId, retrying...")
-                        currentFileId = "img_${UUID.randomUUID().toString().substring(0, 8)}"
+                        currentFileId = "img_${generateShortId()}"
                         attempts++
                     } else {
                         Log.e("SakshiSDK", "File ingestion failed: " + result.error.message)

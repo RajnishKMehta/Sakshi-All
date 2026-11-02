@@ -15,8 +15,12 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.PrintStream
 import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.RejectedExecutionException
+
+
+fun generateShortId(): String = UUID.randomUUID().toString().substring(0, 8)
 
 fun Throwable.printStackTraceToString(): String {
     val baos = ByteArrayOutputStream(1000)
