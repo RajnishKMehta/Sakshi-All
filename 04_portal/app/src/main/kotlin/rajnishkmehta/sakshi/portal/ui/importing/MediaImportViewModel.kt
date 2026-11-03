@@ -20,6 +20,7 @@ import rajnishkmehta.sakshi.sdk.api.SakshiClientConfig
 import rajnishkmehta.sakshi.sdk.api.models.FileCopyRequest
 import rajnishkmehta.sakshi.portal.debug.DebugLogger as Log
 import java.util.UUID
+import rajnishkmehta.sakshi.portal.utils.MediaUtils
 import kotlinx.coroutines.flow.firstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -99,13 +100,7 @@ class MediaImportViewModel(
 
                         app.grantUriPermission(vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-                        val mimeType = app.contentResolver.getType(uri) ?: ""
-                        val mediaType = when {
-                            mimeType.startsWith("image/") -> "PHOTO"
-                            mimeType.startsWith("video/") -> "VIDEO"
-                            mimeType.startsWith("audio/") -> "AUDIO"
-                            else -> "OTHER"
-                        }
+                        val mediaType = MediaUtils.getMediaType(app, uri)
 
                         var fileExtension = fileName.substringAfterLast('.', "")
                         try {
@@ -119,11 +114,30 @@ class MediaImportViewModel(
                             }
                         }
 
+                        val sanitizedFileName = fileName.lowercase().replace(Regex("[^a-z0-9_-]"), "")
+                        val limitedFileName = if (sanitizedFileName.length > 50) sanitizedFileName.substring(0, 50) else sanitizedFileName
+
+                        val prefix = when (mediaType) {
+                            "PHOTO" -> "img_"
+                            "VIDEO" -> "vid_"
+                            "AUDIO" -> "aud_"
+                            else -> "oth_"
+                        }
+
+                        var baseFileId = prefix + limitedFileName
+                        if (baseFileId.length < 8) {
+                            baseFileId += UUID.randomUUID().toString().replace("-", "").substring(0, 8 - baseFileId.length)
+                        }
+
                         var success = false
                         var attempts = 0
 
                         while (!success && attempts < 3) {
-                            val currentFileId = "${mediaType.lowercase().substring(0, 3)}_${UUID.randomUUID().toString().substring(0, 8)}"
+                            val currentFileId = if (attempts == 0) {
+                                baseFileId
+                            } else {
+                                prefix + UUID.randomUUID().toString().replace("-", "").substring(0, 12)
+                            }
 
                             val request = FileCopyRequest(
                                 fileId = currentFileId,
