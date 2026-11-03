@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 ```mermaid
 ---
 config:
