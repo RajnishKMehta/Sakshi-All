@@ -1,16 +1,11 @@
 # Architecture Flow
 
-This flowchart illustrates the detailed sequence of interactions between client applications, the Sākṣī SDK, and the Vault service during a typical operation. It outlines the responsibilities of each component and the specific Android and IPC mechanisms involved.
+This flowchart illustrates the detailed sequence of interactions between a client application, the Sākṣī SDK, and the Vault service during a typical operation. The same calling application (Camera or Portal) sends the request and receives the resulting `SakshiResult` back through the SDK.
 
 ```mermaid
 ---
 config:
-  layout: elk
   theme: base
-  look: classic
-  fontFamily: "Inter, Arial, sans-serif"
-  htmlLabels: false
-
   themeVariables:
     background: "#F8FAFC"
     primaryColor: "#EEF2FF"
@@ -22,65 +17,45 @@ config:
     lineColor: "#64748B"
     textColor: "#1E293B"
     edgeLabelBackground: "#FFFFFF"
-    clusterBkg: "#FFFFFF"
-    clusterBorder: "#CBD5E1"
-    nodeTextColor: "#1E293B"
-    defaultLinkColor: "#64748B"
     fontSize: "14px"
-
+    fontFamily: "Inter, Arial, sans-serif"
   flowchart:
-    nodeSpacing: 55
-    rankSpacing: 75
-    diagramPadding: 24
-    curve: basis
-    inheritDir: true
-
+    nodeSpacing: 48
+    rankSpacing: 64
+    diagramPadding: 20
+    curve: linear
+    htmlLabels: false
 ---
-flowchart TD
+flowchart TB
 
-    %% 1. CLIENT APPLICATION LAYER
-    subgraph ClientLayer["01 · CLIENT APPLICATION LAYER"]
-        direction LR
-        ClientReq(["Client Request<br/>(e.g. suspend fun listMedia)"])
-        ClientRes(["SakshiResult<br/>(Success / Failure)"])
-    end
+    %% THE SAME CLIENT APP STARTS THE REQUEST AND RECEIVES THE RESULT
+    ClientApp(["01 · CALLING CLIENT APP<br/>Sākṣī Camera / Portal<br/>Request caller and result receiver"])
 
-    %% 2. SDK LAYER
-    subgraph SDKLayer["02 · SĀKṢĪ SDK"]
-        direction TB
-        SakshiClient["SakshiClientImpl"]
-        CheckConn{"Vault Service<br/>Connected?"}
-        BindService["bindService()<br/>Connect to Vault"]
-        DispatchIO["withContext<br/>(Dispatchers.IO)"]
-        Unpack["Unpack Bundle<br/>Map to Data Models"]
-    end
+    %% SĀKṢĪ SDK
+    SakshiClient["02 · SĀKṢĪ SDK<br/>SakshiClientImpl"]
+    CheckConn{"Vault Service<br/>Connected?"}
+    BindService["bindService()<br/>Connect to Vault"]
+    DispatchIO["withContext<br/>(Dispatchers.IO)"]
+    Unpack["Unpack Bundle<br/>Map to Data Models"]
 
-    %% 3. ANDROID IPC LAYER
-    subgraph OS["03 · ANDROID IPC LAYER"]
-        direction LR
-        BinderReq[("AIDL Request<br/>ISakshiVaultService")]
-        BinderRes[("Bundle Callback<br/>Response")]
-    end
 
-    %% 4. VAULT SERVICE LAYER
-    subgraph VaultLayer["04 · VAULT SERVICE LAYER"]
-        direction TB
-        VaultBinder["SakshiVaultServiceBinder"]
-        Validate{"Validation<br/>& PathValidator"}
-        Processing["CoroutineScope<br/>Request Processing"]
-        PackBundle["Build Response Bundle<br/>Result / Error"]
-    end
+    %% ANDROID IPC
+    BinderReq[("03 · ANDROID IPC LAYER<br/>AIDL Request<br/>ISakshiVaultService")]
+    BinderRes[("Bundle Callback<br/>Response")]
 
-    %% 5. CORE STORAGE LAYER
-    subgraph StorageLayer["05 · VAULT CORE STORAGE"]
-        direction LR
-        DB[("Room3 Database<br/>MediaRecord")]
-        FileStore[("Private File Storage")]
-        WorkManager["WorkManager<br/>Background Tasks"]
-    end
+    %% VAULT SERVICE
+    VaultBinder["04 · VAULT SERVICE LAYER<br/>SakshiVaultServiceBinder"]
+    Validate{"Validation<br/>& PathValidator"}
+    Processing["CoroutineScope<br/>Request Processing"]
+    PackBundle["Build Response Bundle<br/>Result / Error"]
+
+    %% VAULT CORE STORAGE
+    DB[("05 · VAULT CORE STORAGE<br/>Room3 Database<br/>MediaRecord")]
+    FileStore[("Private File Storage")]
+    WorkManager["WorkManager<br/>Background Tasks"]
 
     %% REQUEST FLOW
-    ClientReq -->|"1 · SDK API"| SakshiClient
+    ClientApp -->|"1 · SDK API Request"| SakshiClient
     SakshiClient -->|"2 · Check connection"| CheckConn
 
     CheckConn -->|"No"| BindService
@@ -92,20 +67,18 @@ flowchart TD
 
     %% VAULT PROCESSING
     VaultBinder --> Validate
-
     Validate -->|"Valid"| Processing
     Validate -->|"Invalid"| PackBundle
 
     Processing <-->|"4a · Query / Update"| DB
     Processing <-->|"4b · Read / Write"| FileStore
     Processing -.->|"4c · Schedule Tasks"| WorkManager
-
     Processing -->|"5 · Processing Complete"| PackBundle
 
     %% RESPONSE FLOW
     PackBundle -->|"6 · Return Bundle"| BinderRes
     BinderRes -->|"7 · IPC Response"| Unpack
-    Unpack -->|"8 · SDK Model Mapping"| ClientRes
+    Unpack -->|"8 · SakshiResult returned to the SAME caller"| ClientApp
 
     %% NODE STYLES
     classDef client fill:#EEF2FF,stroke:#6366F1,stroke-width:2px,color:#312E81
@@ -117,7 +90,7 @@ flowchart TD
     classDef storage fill:#DBEAFE,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A
     classDef background fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#14532D
 
-    class ClientReq,ClientRes client
+    class ClientApp client
     class SakshiClient sdkCore
     class BindService,DispatchIO,Unpack sdk
     class CheckConn,Validate decision
@@ -125,13 +98,6 @@ flowchart TD
     class VaultBinder,Processing,PackBundle vault
     class DB,FileStore storage
     class WorkManager background
-
-    %% LAYER STYLES
-    style ClientLayer fill:#F8FAFF,stroke:#A5B4FC,stroke-width:1.5px,color:#3730A3
-    style SDKLayer fill:#F5F3FF,stroke:#C4B5FD,stroke-width:1.5px,color:#5B21B6
-    style OS fill:#FFF7ED,stroke:#FDBA74,stroke-width:1.5px,color:#9A3412
-    style VaultLayer fill:#F0FDFA,stroke:#99F6E4,stroke-width:1.5px,color:#115E59
-    style StorageLayer fill:#EFF6FF,stroke:#93C5FD,stroke-width:1.5px,color:#1E40AF
 ```
 
 ## Key Interactions
@@ -140,4 +106,4 @@ flowchart TD
 2. **Connection Management**: The SDK's `VaultServiceConnection` checks if it's already bound to the Vault. If not, it uses Android's `bindService` to establish the connection before proceeding.
 3. **Cross-Process Execution**: The SDK moves the actual AIDL execution to the `Dispatchers.IO` thread to avoid blocking the client's main thread during the IPC transaction.
 4. **Vault Processing**: Once `SakshiVaultServiceBinder` receives the request inside the Vault process, it validates the inputs. It then performs the necessary operations using Room (database) and local file storage, either synchronously (`runBlocking` for fast database reads) or asynchronously (`CoroutineScope` for I/O).
-5. **Response Translation**: The result from the Vault is packed into an Android `Bundle` and sent back over the Binder. The SDK unpacks this, mapping it into a clean [`SakshiResult.Success`](../../developer-reference/data-models.md#sakshiresultt) or [`SakshiResult.Failure`](../../developer-reference/data-models.md#sakshiresultt) for the client to consume natively.
+5. **Response Translation**: The result from the Vault is packed into an Android `Bundle` and sent back over the Binder. The SDK unpacks this, mapping it into a clean [`SakshiResult.Success`](../../developer-reference/data-models.md#sakshiresultt) or [`SakshiResult.Failure`](../../developer-reference/data-models.md#sakshiresultt). That result is returned to the **same client application that initiated the request** (Camera or Portal), not to a separate application.
