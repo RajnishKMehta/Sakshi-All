@@ -55,7 +55,7 @@ flowchart TD
     subgraph Storage["STORAGE LAYER"]
         direction LR
         V["Sākṣī Vault Service"]
-        DB[("Room 3 Database")]
+        DB[("Room3 Database")]
         FS[("Private File Storage")]
     end
 
