@@ -1,6 +1,6 @@
 # Shared Vault Integration
 
-All requests made through the `SakshiClient` ultimately route to the [Vault application](https://github.com/RajnishKMehta/Sakshi-Vault). This document explains the common patterns used by the Vault to handle these requests.
+All requests made through the [`SakshiClient`](README.md) ultimately route to the [Vault application](https://github.com/RajnishKMehta/Sakshi-Vault). This document explains the common patterns used by the Vault to handle these requests.
 
 ## `SakshiVaultServiceBinder`
 
@@ -19,6 +19,6 @@ When a client application invokes a method on the SDK, the SDK constructs an IPC
 
 ## Shared Error Handling (`VaultResponder`)
 
-For asynchronous methods utilizing callbacks, the Vault utilizes a shared `VaultResponder` utility. If validation fails (e.g., `PathValidator` throws an exception for invalid path components), or an error occurs during execution, the Vault uses `VaultResponder.sendError(callback, error)` to safely transmit a serialized `SakshiError` back to the SDK client.
+For asynchronous methods utilizing callbacks, the Vault utilizes a shared `VaultResponder` utility. If validation fails (e.g., `PathValidator` throws an exception for invalid path components), or an error occurs during execution, the Vault uses `VaultResponder.sendError(callback, error)` to safely transmit a serialized [`SakshiError`](../data-models.md#sakshierror) back to the SDK client.
 
-This guarantees that unhandled exceptions on the Vault side do not crash the remote service but instead surface as structured failures within the `SakshiResult` returned by the client application's SDK call.
+This guarantees that unhandled exceptions on the Vault side do not crash the remote service but instead surface as structured failures within the [`SakshiResult`](../data-models.md#sakshiresultt) returned by the client application's SDK call.

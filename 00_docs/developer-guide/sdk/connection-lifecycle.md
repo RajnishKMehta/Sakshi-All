@@ -10,16 +10,16 @@ It handles thread-safe connections, binding, unbinding, death recipient monitori
 
 ## Binding Process
 
-When a client application invokes an API on `SakshiClient` (e.g., `copyFile`, `startAVSync`), the SDK checks if a connection to the Vault already exists. If not, it automatically initiates the binding process.
+When a client application invokes an API on [`SakshiClient`](../../developer-reference/api/README.md) (e.g., [`copyFile`](../../developer-reference/api/copyFile.md), [`startAVSync`](../../developer-reference/api/startAVSync.md)), the SDK checks if a connection to the Vault already exists. If not, it automatically initiates the binding process.
 
-1.  **Intent Construction**: The SDK creates an intent targeting the Vault's remote service using the package name and action defined in `SakshiClientConfig` (defaulting to `rajnishkmehta.sakshi.vault` and `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE`).
+1.  **Intent Construction**: The SDK creates an intent targeting the Vault's remote service using the package name and action defined in [`SakshiClientConfig`](../../developer-reference/configuration.md) (defaulting to `rajnishkmehta.sakshi.vault` and `rajnishkmehta.sakshi.vault.BIND_VAULT_SERVICE`).
 2.  **`bindService` Call**: The SDK calls `Context.bindService()` using `Context.BIND_AUTO_CREATE`.
 3.  **Suspension and Timeout**: The calling coroutine suspends until the `ServiceConnection` receives the `onServiceConnected` callback or the configured connection timeout (`connectionTimeoutMs`) expires. The default timeout is 5000ms.
 4.  **Death Monitoring**: Once connected, the SDK registers a `DeathRecipient` on the binder to detect if the Vault application crashes or is forcibly stopped by the system.
 
 ## Connection States and Failures
 
-During the binding process, several errors can occur, wrapped in a `SakshiResult.Failure`.
+During the binding process, several errors can occur, wrapped in a [[`SakshiResult.Failure`](../../developer-reference/data-models.md#sakshiresultt)](../../developer-reference/data-models.md#sakshiresultt).
 
 *   **`VaultNotInstalled`**: If `bindService` returns `false` (meaning the OS cannot find a service matching the intent), the SDK assumes the Vault app is not installed on the device, or the service is disabled/unavailable.
 *   **`ServiceUnavailable`**: If the connection takes longer than `connectionTimeoutMs` to establish, or if an exception occurs during the bind process, the SDK fails the request with this error.
@@ -33,7 +33,7 @@ However, holding a connection to a background service consumes system resources.
 
 ### Explicit Disconnection
 
-Developers should explicitly disconnect when the SDK is no longer actively needed by calling `disconnect()`. This immediately unbinds the service and clears internal connection states.
+Developers should explicitly disconnect when the SDK is no longer actively needed by calling [`disconnect()`](../../developer-reference/api/disconnect.md). This immediately unbinds the service and clears internal connection states.
 
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
@@ -52,4 +52,4 @@ class MyViewModel(private val client: SakshiClient) : ViewModel() {
 
 If the Vault service is killed by the system (e.g., due to low memory) or crashes, the `DeathRecipient` triggers. The SDK clears its internal connection state. The next API call initiated by the client will automatically attempt to bind to the Vault again.
 
-There is no automatic retry for in-flight requests that are interrupted by a disconnection. These will fail with an appropriate `SakshiError` (such as an `IpcError`), and the client application must decide whether to retry the operation.
+There is no automatic retry for in-flight requests that are interrupted by a disconnection. These will fail with an appropriate [[`SakshiError`](../../developer-reference/data-models.md#sakshierror)](../../developer-reference/data-models.md#sakshierror) (such as an `IpcError`), and the client application must decide whether to retry the operation.

@@ -58,7 +58,7 @@ If you want to install and use the Sākṣī applications on your device, start 
 If you want to understand the system architecture, contribute to the projects, or integrate your own application with Sākṣī Vault, refer to the **[Developer Guide](../developer-guide/README.md)**.
 *   [Architecture Flow](../developer-guide/concepts/architecture-flow.md)
 *   [SDK Integration](../developer-guide/sdk/integration.md)
-*   [API Reference](../developer-guide/sdk/api/README.md)
+*   [API Reference](../developer-reference/api/README.md)
 
 ### Security and Privacy
 

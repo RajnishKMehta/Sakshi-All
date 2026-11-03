@@ -12,6 +12,7 @@
 ## Portal
 
 * [Browsing & Exporting](portal/browsing-and-exporting.md)
+* [Adding Media to Vault](portal/add-to-vault.md)
 * [Scheduled Deletions](portal/scheduled-deletion.md)
 * [App Lock Security](portal/app-lock.md)
 * [Changing the Vault in Portal](portal/changing-vault.md)
