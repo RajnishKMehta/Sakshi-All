@@ -8,122 +8,130 @@ config:
   layout: elk
   theme: base
   look: classic
-
-  # Typography
-  fontFamily: "Arial, sans-serif"
+  fontFamily: "Inter, Arial, sans-serif"
   htmlLabels: false
 
-  # Diagram colors and appearance
   themeVariables:
-    background: "#ffffff"
-
-    primaryColor: "#ffffff"
-    primaryTextColor: "#333333"
-    primaryBorderColor: "#7c4dff"
-
-    secondaryColor: "#f3e5f5"
-    secondaryTextColor: "#4a3b59"
-
-    tertiaryColor: "#ede7f6"
-    lineColor: "#7c4dff"
-    textColor: "#333333"
-
-    # Edge labels
-    edgeLabelBackground: "#f3e5f5"
-
-    # Subgraph containers
-    clusterBkg: "#faf7ff"
-    clusterBorder: "#d8ccff"
-
-    # Nodes and connections
-    nodeTextColor: "#333333"
-    defaultLinkColor: "#7c4dff"
-
-    # Font size
+    background: "#F8FAFC"
+    primaryColor: "#EEF2FF"
+    primaryTextColor: "#312E81"
+    primaryBorderColor: "#6366F1"
+    secondaryColor: "#CCFBF1"
+    secondaryTextColor: "#134E4A"
+    tertiaryColor: "#DBEAFE"
+    lineColor: "#64748B"
+    textColor: "#1E293B"
+    edgeLabelBackground: "#FFFFFF"
+    clusterBkg: "#FFFFFF"
+    clusterBorder: "#CBD5E1"
+    nodeTextColor: "#1E293B"
+    defaultLinkColor: "#64748B"
     fontSize: "14px"
 
-  # Flowchart layout
   flowchart:
-    nodeSpacing: 60
+    nodeSpacing: 55
     rankSpacing: 75
-    diagramPadding: 20
-    curve: linear
+    diagramPadding: 24
+    curve: basis
     inheritDir: true
+
 ---
-flowchart
-    %% Definitions
-    subgraph ClientLayer ["1. Client Application Layer (Camera / Portal)"]
-        ClientReq(["Client Request\n(e.g., suspend fun listMedia)"])
-        ClientRes(["SakshiResult\n(Success / Failure)"])
+flowchart TD
+
+    %% 1. CLIENT APPLICATION LAYER
+    subgraph ClientLayer["01 · CLIENT APPLICATION LAYER"]
+        direction LR
+        ClientReq(["Client Request<br/>(e.g. suspend fun listMedia)"])
+        ClientRes(["SakshiResult<br/>(Success / Failure)"])
     end
 
-    subgraph SDKLayer ["2. Sākṣī SDK (rajnishkmehta.sakshi.sdk)"]
+    %% 2. SDK LAYER
+    subgraph SDKLayer["02 · SĀKṢĪ SDK"]
+        direction TB
         SakshiClient["SakshiClientImpl"]
-        CheckConn{"VaultServiceConnection\nIs Service Connected?"}
-        BindService["Context.bindService()\n(Intent to Vault)"]
-        DispatchIO["withContext(Dispatchers.IO)"]
-        Unpack["Unpack Android Bundle\n& Map to Data Models"]
+        CheckConn{"Vault Service<br/>Connected?"}
+        BindService["bindService()<br/>Connect to Vault"]
+        DispatchIO["withContext<br/>(Dispatchers.IO)"]
+        Unpack["Unpack Bundle<br/>Map to Data Models"]
     end
 
-    subgraph OS ["3. Android OS (IPC)"]
-        BinderReq[("Android Binder\n(ISakshiVaultService.aidl)")]
-        BinderRes[("Android Binder\n(Bundle Callback)")]
+    %% 3. ANDROID IPC LAYER
+    subgraph OS["03 · ANDROID IPC LAYER"]
+        direction LR
+        BinderReq[("AIDL Request<br/>ISakshiVaultService")]
+        BinderRes[("Bundle Callback<br/>Response")]
     end
 
-    subgraph VaultLayer ["4. Vault Service Layer (Sakshi-Vault)"]
-        VaultBinder["SakshiVaultServiceBinder\n(Receives AIDL call)"]
-        Validate{"Validation &\nPathValidator"}
-        Processing["CoroutineScope /\nRoom runBlocking"]
-        PackBundle["Pack Result/Error\ninto Bundle"]
+    %% 4. VAULT SERVICE LAYER
+    subgraph VaultLayer["04 · VAULT SERVICE LAYER"]
+        direction TB
+        VaultBinder["SakshiVaultServiceBinder"]
+        Validate{"Validation<br/>& PathValidator"}
+        Processing["CoroutineScope<br/>Request Processing"]
+        PackBundle["Build Response Bundle<br/>Result / Error"]
     end
 
-    subgraph StorageLayer ["5. Vault Core Storage Layer"]
-        DB[("Room 3 Database\n(MediaRecord)")]
-        FileStore[("Vault Internal\nFile Storage")]
-        WorkManager["WorkManager\n(Sync/Deletion)"]
+    %% 5. CORE STORAGE LAYER
+    subgraph StorageLayer["05 · VAULT CORE STORAGE"]
+        direction LR
+        DB[("Room 3 Database<br/>MediaRecord")]
+        FileStore[("Private File Storage")]
+        WorkManager["WorkManager<br/>Background Tasks"]
     end
 
-    %% Flow - Request Phase
-    ClientReq -->|1a. Calls SDK| SakshiClient
-    SakshiClient -->|1b. Delegates to| CheckConn
-    CheckConn -- "No" --> BindService
-    BindService --> |"Waits for ServiceConnection"| CheckConn
-    CheckConn -- "Yes" --> DispatchIO
+    %% REQUEST FLOW
+    ClientReq -->|"1 · SDK API"| SakshiClient
+    SakshiClient -->|"2 · Check connection"| CheckConn
 
-    DispatchIO -->|2. AIDL Method Call| BinderReq
-    BinderReq -->|3. Cross-process Request| VaultBinder
+    CheckConn -->|"No"| BindService
+    BindService -->|"Service Connected"| CheckConn
+    CheckConn -->|"Yes"| DispatchIO
 
-    %% Flow - Vault Processing Phase
+    DispatchIO -->|"3 · AIDL Method Call"| BinderReq
+    BinderReq -->|"4 · IPC Request"| VaultBinder
+
+    %% VAULT PROCESSING
     VaultBinder --> Validate
-    Validate -- "Valid" --> Processing
-    Validate -- "Invalid" --> PackBundle
 
-    Processing <-->|4a. Query / Update| DB
-    Processing <-->|4b. I/O Operations| FileStore
-    Processing -.->|4c. Schedule Background Tasks| WorkManager
+    Validate -->|"Valid"| Processing
+    Validate -->|"Invalid"| PackBundle
 
-    Processing -->|4d. Result Ready| PackBundle
+    Processing <-->|"4a · Query / Update"| DB
+    Processing <-->|"4b · Read / Write"| FileStore
+    Processing -.->|"4c · Schedule Tasks"| WorkManager
 
-    %% Flow - Response Phase
-    PackBundle -->|5. Return Bundle| BinderRes
-    BinderRes -->|6. Cross-process Response| Unpack
-    Unpack -->|7. Map to SDK Models| ClientRes
+    Processing -->|"5 · Processing Complete"| PackBundle
 
-    %% Styling classes
-    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
-    classDef sdk fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
-    classDef os fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100
-    classDef vault fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c
-    classDef storage fill:#fffde7,stroke:#fbc02d,stroke-width:2px,color:#f57f17
-    classDef check fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c
+    %% RESPONSE FLOW
+    PackBundle -->|"6 · Return Bundle"| BinderRes
+    BinderRes -->|"7 · IPC Response"| Unpack
+    Unpack -->|"8 · SDK Model Mapping"| ClientRes
 
-    %% Apply styles
+    %% NODE STYLES
+    classDef client fill:#EEF2FF,stroke:#6366F1,stroke-width:2px,color:#312E81
+    classDef sdk fill:#E0E7FF,stroke:#4F46E5,stroke-width:2px,color:#312E81
+    classDef sdkCore fill:#4338CA,stroke:#312E81,stroke-width:3px,color:#FFFFFF
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E
+    classDef os fill:#FFF7ED,stroke:#EA580C,stroke-width:2px,color:#9A3412
+    classDef vault fill:#CCFBF1,stroke:#0D9488,stroke-width:2px,color:#134E4A
+    classDef storage fill:#DBEAFE,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A
+    classDef background fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#14532D
+
     class ClientReq,ClientRes client
-    class SakshiClient,BindService,DispatchIO,Unpack sdk
-    class CheckConn check
+    class SakshiClient sdkCore
+    class BindService,DispatchIO,Unpack sdk
+    class CheckConn,Validate decision
     class BinderReq,BinderRes os
-    class VaultBinder,Validate,Processing,PackBundle vault
-    class DB,FileStore,WorkManager storage
+    class VaultBinder,Processing,PackBundle vault
+    class DB,FileStore storage
+    class WorkManager background
+
+    %% LAYER STYLES
+    style ClientLayer fill:#F8FAFF,stroke:#A5B4FC,stroke-width:1.5px,color:#3730A3
+    style SDKLayer fill:#F5F3FF,stroke:#C4B5FD,stroke-width:1.5px,color:#5B21B6
+    style OS fill:#FFF7ED,stroke:#FDBA74,stroke-width:1.5px,color:#9A3412
+    style VaultLayer fill:#F0FDFA,stroke:#99F6E4,stroke-width:1.5px,color:#115E59
+    style StorageLayer fill:#EFF6FF,stroke:#93C5FD,stroke-width:1.5px,color:#1E40AF
 ```
 
 ## Key Interactions
