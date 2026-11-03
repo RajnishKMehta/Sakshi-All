@@ -20,38 +20,40 @@ config:
   layout: elk
   theme: base
   themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#333333"
-    primaryBorderColor: "#7c4dff"
-    secondaryColor: "#f3e5f5"
-    secondaryTextColor: "#4a3b59"
-    tertiaryColor: "#ede7f6"
-    lineColor: "#7c4dff"
-    textColor: "#333333"
-    edgeLabelBackground: "#f3e5f5"
-    clusterBkg: "#faf7ff"
-    clusterBorder: "#d8ccff"
-    nodeTextColor: "#333333"
-    defaultLinkColor: "#7c4dff"
-    fontSize: "14px"
-    fontFamily: "Arial, sans-serif"
+    background: "#F8FAFC"
+    primaryColor: "#EEF2FF"
+    primaryTextColor: "#312E81"
+    primaryBorderColor: "#6366F1"
+    secondaryColor: "#ECFDF5"
+    secondaryTextColor: "#065F46"
+    tertiaryColor: "#F0FDFA"
+    lineColor: "#64748B"
+    textColor: "#1E293B"
+    edgeLabelBackground: "#FFFFFF"
+    clusterBkg: "#F1F5F9"
+    clusterBorder: "#CBD5E1"
+    nodeTextColor: "#1E293B"
+    fontSize: "15px"
+    fontFamily: "Inter, Arial, sans-serif"
   flowchart:
-    nodeSpacing: 60
-    rankSpacing: 75
-    diagramPadding: 20
-    curve: linear
+    nodeSpacing: 65
+    rankSpacing: 80
+    diagramPadding: 24
+    curve: basis
     htmlLabels: false
 ---
 flowchart TD
-    subgraph Clients["Client Applications"]
+
+    subgraph Clients["CLIENT APPLICATIONS"]
+        direction LR
         C["Sākṣī Camera"]
         P["Sākṣī Portal"]
     end
 
     SDK["Sākṣī SDK"]
 
-    subgraph Storage["Storage Layer"]
+    subgraph Storage["STORAGE LAYER"]
+        direction LR
         V["Sākṣī Vault Service"]
         DB[("Room 3 Database")]
         FS[("Private File Storage")]
@@ -59,9 +61,26 @@ flowchart TD
 
     C <-->|SDK API| SDK
     P <-->|SDK API| SDK
+
     SDK <-->|Local IPC / AIDL| V
+
     V --> DB
     V --> FS
+
+    classDef client fill:#EEF2FF,stroke:#6366F1,color:#312E81,stroke-width:2px
+    classDef sdk fill:#4338CA,stroke:#312E81,color:#FFFFFF,stroke-width:3px
+    classDef vault fill:#CCFBF1,stroke:#0D9488,color:#134E4A,stroke-width:2px
+    classDef database fill:#DBEAFE,stroke:#3B82F6,color:#1E3A8A,stroke-width:2px
+    classDef filesystem fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
+
+    class C,P client
+    class SDK sdk
+    class V vault
+    class DB database
+    class FS filesystem
+
+    style Clients fill:#F8FAFC,stroke:#C7D2FE,stroke-width:1.5px,color:#3730A3
+    style Storage fill:#F8FAFC,stroke:#99F6E4,stroke-width:1.5px,color:#115E59
 ```
 
 For a deeper technical breakdown of the IPC and component interaction, see the [Detailed Architecture Flowchart](../developer-guide/concepts/architecture-flow.md).
