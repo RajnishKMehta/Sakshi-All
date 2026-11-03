@@ -30,7 +30,7 @@ Please locate and review the `CONTRIBUTING.md` file within the repository you wi
 
 ## Basic Expectations
 
-- **English Only**: All source code, comments, documentation, commit messages, issues, and pull requests must strictly be in English.
-- **Documentation**: Update or add KDoc for any new public APIs or important classes. Ensure related documentation in this central `Sakshi-Docs` repository is updated if your changes affect public interfaces.
+- **Language Options**: All source code, code comments, and commit messages must strictly be in English. However, for issues, discussions, and pull requests, you may communicate in English or Hindi.
+- **Documentation**: Update or add KDoc for any new public APIs or important classes. If your code changes require corresponding updates to the broader documentation, you must update the documentation files and submit a Pull Request to the central [Sakshi-Docs](https://github.com/RajnishKMehta/Sakshi-Docs) repository.
 - **Testing**: Maintain high test coverage. Ensure all unit and integration tests pass before requesting a review.
 - **Clean Code**: Follow modern Kotlin style guides and ensure your code compiles cleanly without warnings.
