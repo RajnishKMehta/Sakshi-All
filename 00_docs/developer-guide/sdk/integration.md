@@ -41,7 +41,7 @@ The standard configuration targets the default Vault package name (`rajnishkmeht
 
 ## Initialization and Configuration
 
-The entry point to the SDK is the `SakshiClient` interface. You instantiate it using `SakshiClient.create()`, passing in an application or component `Context` and an optional `SakshiClientConfig`.
+The entry point to the SDK is the [`SakshiClient`](../../developer-reference/api/README.md) interface. You instantiate it using [`SakshiClient.create()`](../../developer-reference/api/README.md#create), passing in an application or component `Context` and an optional [`SakshiClientConfig`](../../developer-reference/configuration.md).
 
 ### Default Configuration
 
@@ -56,7 +56,7 @@ val sakshiClient = SakshiClient.create(applicationContext)
 
 ### Custom Configuration
 
-If you need to connect to a different package name or modify the connection timeout, you can provide a custom `SakshiClientConfig`.
+If you need to connect to a different package name or modify the connection timeout, you can provide a custom [`SakshiClientConfig`](../../developer-reference/configuration.md).
 
 ```kotlin
 import rajnishkmehta.sakshi.sdk.api.SakshiClient
@@ -73,7 +73,7 @@ val sakshiClient = SakshiClient.create(applicationContext, config)
 
 ## Connection and Lifecycle Handling
 
-The `SakshiClient` automatically manages binding and unbinding from the Vault's remote service when making API calls.
+The [`SakshiClient`](../../developer-reference/api/README.md) automatically manages binding and unbinding from the Vault's remote service when making API calls.
 
 When you are completely finished using the SDK, or when your component (e.g., an Activity or ViewModel) is destroyed, you should explicitly disconnect to release internal resources.
 
