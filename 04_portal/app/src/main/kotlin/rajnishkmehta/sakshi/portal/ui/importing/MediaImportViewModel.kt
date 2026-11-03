@@ -114,7 +114,8 @@ class MediaImportViewModel(
                             }
                         }
 
-                        val sanitizedFileName = fileName.lowercase().replace(Regex("[^a-z0-9_-]"), "")
+                        val nameWithoutExtension = fileName.substringBeforeLast('.', fileName)
+                        val sanitizedFileName = nameWithoutExtension.lowercase().replace(Regex("[^a-z0-9_-]"), "")
                         val limitedFileName = if (sanitizedFileName.length > 50) sanitizedFileName.substring(0, 50) else sanitizedFileName
 
                         val prefix = when (mediaType) {
