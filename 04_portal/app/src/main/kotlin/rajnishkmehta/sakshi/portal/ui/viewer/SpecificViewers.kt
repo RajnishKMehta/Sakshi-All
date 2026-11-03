@@ -261,21 +261,26 @@ fun AudioViewer(uri: String) {
             contentAlignment = Alignment.Center
         ) {
             if (hasArtwork) {
-                if (!isPlaying) {
-                    // Show artwork while paused
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(artworkData)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "Album Art",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize(0.8f)
-                    )
-                } else {
-                    // During playback, show decorative animated visualization
-                    AudioVisualization(isPlaying = true, modifier = Modifier.fillMaxSize(0.8f))
+                var currentRotation by remember { mutableStateOf(0f) }
+                LaunchedEffect(isPlaying) {
+                    while (isPlaying) {
+                        currentRotation += 0.5f
+                        if (currentRotation >= 360f) currentRotation = 0f
+                        delay(16) // ~60fps
+                    }
                 }
+
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(artworkData)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Album Art",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize(0.8f)
+                        .graphicsLayer { rotationZ = currentRotation }
+                )
             } else {
                 // If album artwork does NOT exist: Keep the decorative bars/visualization visible even while paused.
                 AudioVisualization(isPlaying = isPlaying, modifier = Modifier.fillMaxSize(0.8f))
