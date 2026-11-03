@@ -1,0 +1,25 @@
+# Summary
+
+* [Sākṣī Developer Reference](README.md)
+* [Configuration](configuration.md)
+* [Data Models](data-models.md)
+* [Error Codes](error-codes.md)
+* [Validation Constraints](validation-constraints.md)
+
+## API Reference
+* [API Index](api/README.md)
+* [Shared Vault Integration](api/vault-integration.md)
+* [pingVault](api/pingVault.md)
+* [copyFile](api/copyFile.md)
+* [startAVSync](api/startAVSync.md)
+* [pauseAVSync](api/pauseAVSync.md)
+* [resumeAVSync](api/resumeAVSync.md)
+* [stopAVSync](api/stopAVSync.md)
+* [isAVSynced](api/isAVSynced.md)
+* [listMedia](api/listMedia.md)
+* [listDeletedMedia](api/listDeletedMedia.md)
+* [getMedia](api/getMedia.md)
+* [getThumbnail](api/getThumbnail.md)
+* [deleteMedia](api/deleteMedia.md)
+* [recoverMedia](api/recoverMedia.md)
+* [disconnect](api/disconnect.md)
