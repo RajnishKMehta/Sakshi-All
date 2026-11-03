@@ -23,6 +23,7 @@ import java.util.UUID
 import kotlinx.coroutines.flow.firstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.CancellationException
 
 class MediaImportViewModel(
     application: Application,
@@ -44,10 +45,13 @@ class MediaImportViewModel(
         _isMinimized.value = false
     }
 
+    private var importJob: kotlinx.coroutines.Job? = null
+
     fun importMedia(uris: List<Uri>) {
         if (uris.isEmpty()) return
+        if (importJob?.isActive == true) return
 
-        viewModelScope.launch {
+        importJob = viewModelScope.launch {
             val total = uris.size
             var completed = 0
             var failed = 0
@@ -68,85 +72,94 @@ class MediaImportViewModel(
 
             val client = SakshiClient.create(app, config)
 
-            for (uri in uris) {
-                var fileName = "unknown"
-                try {
-                    app.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                            if (nameIndex != -1) {
-                                fileName = cursor.getString(nameIndex)
+            try {
+                for (uri in uris) {
+                    try {
+                        var fileName = "unknown"
+                        try {
+                            app.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                                if (cursor.moveToFirst()) {
+                                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                                    if (nameIndex != -1) {
+                                        fileName = cursor.getString(nameIndex)
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("MediaImportViewModel", "Error getting file name for $uri: ${e.message}")
+                        }
+
+                        _uiState.value = MediaImportUiState.InProgress(total, completed, fileName, failed)
+
+                        try {
+                            app.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        } catch (e: SecurityException) {
+                            // Ignore if we can't take persistable permission
+                        }
+
+                        app.grantUriPermission(vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                        val mimeType = app.contentResolver.getType(uri) ?: ""
+                        val mediaType = when {
+                            mimeType.startsWith("image/") -> "PHOTO"
+                            mimeType.startsWith("video/") -> "VIDEO"
+                            mimeType.startsWith("audio/") -> "AUDIO"
+                            else -> "OTHER"
+                        }
+
+                        var fileExtension = fileName.substringAfterLast('.', "")
+                        try {
+                            rajnishkmehta.sakshi.sdk.api.validation.PathValidator.validateFileExtension(fileExtension)
+                        } catch (e: IllegalArgumentException) {
+                            fileExtension = when (mediaType) {
+                                "PHOTO" -> "jpg"
+                                "VIDEO" -> "mp4"
+                                "AUDIO" -> "m4a"
+                                else -> "bin"
                             }
                         }
-                    }
-                } catch (e: Exception) {
-                    Log.e("MediaImportViewModel", "Error getting file name for $uri: ${e.message}")
-                }
 
-                _uiState.value = MediaImportUiState.InProgress(total, completed, fileName, failed)
+                        var success = false
+                        var attempts = 0
 
-                try {
-                    app.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                } catch (e: SecurityException) {
-                    // Ignore if we can't take persistable permission
-                }
+                        while (!success && attempts < 3) {
+                            val currentFileId = "${mediaType.lowercase().substring(0, 3)}_${UUID.randomUUID().toString().substring(0, 8)}"
 
-                app.grantUriPermission(vaultPackage, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            val request = FileCopyRequest(
+                                fileId = currentFileId,
+                                uri = uri,
+                                mediaType = mediaType,
+                                fileExtension = fileExtension
+                            )
 
-                val mimeType = app.contentResolver.getType(uri) ?: ""
-                val mediaType = when {
-                    mimeType.startsWith("image/") -> "PHOTO"
-                    mimeType.startsWith("video/") -> "VIDEO"
-                    mimeType.startsWith("audio/") -> "AUDIO"
-                    else -> "OTHER"
-                }
-
-                var fileExtension = fileName.substringAfterLast('.', "")
-                if (fileExtension.isEmpty()) {
-                    fileExtension = when (mediaType) {
-                        "PHOTO" -> "jpg"
-                        "VIDEO" -> "mp4"
-                        "AUDIO" -> "m4a"
-                        else -> "bin"
-                    }
-                }
-
-                val currentFileId = "${mediaType.lowercase().substring(0, 3)}_${UUID.randomUUID().toString().substring(0, 8)}"
-
-                val request = FileCopyRequest(
-                    fileId = currentFileId,
-                    uri = uri,
-                    mediaType = mediaType,
-                    fileExtension = fileExtension
-                )
-
-                var success = false
-                var attempts = 0
-
-                while (!success && attempts < 3) {
-                    val result = client.copyFile(request)
-                    if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
-                        if (result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
-                            attempts++
-                        } else {
-                            Log.e("MediaImportViewModel", "File ingestion failed: " + result.error.message)
-                            break
+                            val result = client.copyFile(request)
+                            if (result is rajnishkmehta.sakshi.sdk.api.SakshiResult.Failure) {
+                                if (result.error.errorCode == rajnishkmehta.sakshi.sdk.api.SakshiErrorCode.DUPLICATE_FILE_ID) {
+                                    attempts++
+                                } else {
+                                    Log.e("MediaImportViewModel", "File ingestion failed: " + result.error.message)
+                                    break
+                                }
+                            } else {
+                                success = true
+                            }
                         }
-                    } else {
-                        success = true
+
+                        if (success) {
+                            completed++
+                        } else {
+                            failed++
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        failed++
                     }
                 }
-
-                if (success) {
-                    completed++
-                } else {
-                    failed++
-                }
+                _uiState.value = MediaImportUiState.Completed(total, completed, failed)
+            } finally {
+                client.disconnect()
             }
-
-            client.disconnect()
-
-            _uiState.value = MediaImportUiState.Completed(total, completed, failed)
         }
     }
 }
