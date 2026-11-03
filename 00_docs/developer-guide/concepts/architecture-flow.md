@@ -74,7 +74,7 @@ flowchart TD
     %% 5. CORE STORAGE LAYER
     subgraph StorageLayer["05 · VAULT CORE STORAGE"]
         direction LR
-        DB[("Room 3 Database<br/>MediaRecord")]
+        DB[("Room3 Database<br/>MediaRecord")]
         FileStore[("Private File Storage")]
         WorkManager["WorkManager<br/>Background Tasks"]
     end
