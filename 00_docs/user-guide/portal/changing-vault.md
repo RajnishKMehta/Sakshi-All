@@ -1,3 +1,7 @@
+---
+description: "Sākṣī Portal automatically connects to the official Sākṣī Vault upon installation. If you are using a custom or third-party compatible Vault..."
+icon: monitor
+---
 # Changing the Vault in Portal
 
 Sākṣī Portal automatically connects to the official Sākṣī Vault upon installation. If you are using a custom or third-party compatible Vault application, you must explicitly select it in the Portal settings.

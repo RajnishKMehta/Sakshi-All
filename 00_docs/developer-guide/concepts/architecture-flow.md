@@ -1,3 +1,7 @@
+---
+description: "This flowchart illustrates the detailed sequence of interactions between a client application, the Sākṣī SDK, and the Vault service during a..."
+icon: terminal
+---
 # Architecture Flow
 
 This flowchart illustrates the detailed sequence of interactions between a client application, the Sākṣī SDK, and the Vault service during a typical operation. The same calling application (Camera or Portal) sends the request and receives the resulting `SakshiResult` back through the SDK.

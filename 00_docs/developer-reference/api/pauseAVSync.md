@@ -1,3 +1,7 @@
+---
+description: "Requests the Vault to temporarily pause an active audio/video synchronization."
+icon: code
+---
 # pauseAVSync
 
 ## Purpose

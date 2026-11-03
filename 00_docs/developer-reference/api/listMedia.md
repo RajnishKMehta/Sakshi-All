@@ -1,3 +1,7 @@
+---
+description: "Lists all stored media files grouped by media type in JSON format. This method retrieves the current media catalog, explicitly excluding any media..."
+icon: code
+---
 # listMedia
 
 ## Purpose

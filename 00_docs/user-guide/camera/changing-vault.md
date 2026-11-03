@@ -1,3 +1,7 @@
+---
+description: "By default, Sākṣī Camera automatically detects and connects to the official Sākṣī Vault. However, if you have installed a compatible alternative..."
+icon: camera
+---
 # Changing the Vault in Camera
 
 By default, Sākṣī Camera automatically detects and connects to the official Sākṣī Vault. However, if you have installed a compatible alternative Vault app created by a different developer, you can configure Camera to use it instead.

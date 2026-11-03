@@ -1,3 +1,7 @@
+---
+description: "Sākṣī is a modular Android ecosystem. Install the components you need; you do not have to install every component."
+icon: book
+---
 # Install Sākṣī
 
 Sākṣī is a modular Android ecosystem. Install the components you need; you do not have to install every component.

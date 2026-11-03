@@ -1,3 +1,7 @@
+---
+description: "Configuration settings used when instantiating `SakshiClient`."
+icon: terminal
+---
 # Configuration
 
 Configuration settings used when instantiating `SakshiClient`.

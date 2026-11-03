@@ -1,3 +1,7 @@
+---
+description: "Effective Date: 2026-10-31"
+icon: shield
+---
 # Sākṣī Ecosystem Privacy Policy
 
 **Effective Date:** 2026-10-31

@@ -1,3 +1,7 @@
+---
+description: "Explicitly disconnects from the Vault IPC service and releases internal resources."
+icon: code
+---
 # disconnect
 
 ## Purpose

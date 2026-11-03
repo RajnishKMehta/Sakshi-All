@@ -1,3 +1,7 @@
+---
+description: "Requests the Vault to resume a previously paused audio/video synchronization."
+icon: code
+---
 # resumeAVSync
 
 ## Purpose

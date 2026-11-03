@@ -1,3 +1,7 @@
+---
+description: "All requests made through the `SakshiClient` ultimately route to the Vault application. This document explains the common patterns used by the..."
+icon: code
+---
 # Shared Vault Integration
 
 All requests made through the [`SakshiClient`](README.md) ultimately route to the [Vault application](https://github.com/RajnishKMehta/Sakshi-Vault). This document explains the common patterns used by the Vault to handle these requests.

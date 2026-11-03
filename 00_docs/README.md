@@ -1,3 +1,7 @@
+---
+description: "This repository contains the documentation for the Sākṣī Android ecosystem."
+icon: book-open
+---
 # Sākṣī Documentation
 
 This repository contains the documentation for the Sākṣī Android ecosystem.

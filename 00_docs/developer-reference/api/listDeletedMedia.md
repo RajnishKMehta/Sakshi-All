@@ -1,3 +1,7 @@
+---
+description: "Lists all stored media files scheduled for deletion grouped by media type in JSON format."
+icon: code
+---
 # listDeletedMedia
 
 ## Purpose

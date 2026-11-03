@@ -1,3 +1,7 @@
+---
+description: "Initiates audio/video synchronization for a recording in Vault. This returns a cold flow that emits real-time updates until synchronization..."
+icon: code
+---
 # startAVSync
 
 ## Purpose

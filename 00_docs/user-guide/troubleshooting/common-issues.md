@@ -1,3 +1,7 @@
+---
+description: "Symptom:"
+icon: book
+---
 # Troubleshooting
 
 ## Vault Unavailable or Not Found

@@ -1,3 +1,7 @@
+---
+description: "Sends a file payload to Vault for ingestion. This is used when a client application wants to securely store a completely recorded media file (like..."
+icon: code
+---
 # copyFile
 
 ## Purpose

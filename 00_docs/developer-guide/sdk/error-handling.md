@@ -1,3 +1,7 @@
+---
+description: "The Sākṣī SDK leverages Kotlin's sealed classes to represent the result of operations safely, avoiding uncontrolled exceptions. Asynchronous API..."
+icon: terminal
+---
 # SDK Error Handling
 
 The Sākṣī SDK leverages Kotlin's sealed classes to represent the result of operations safely, avoiding uncontrolled exceptions. Asynchronous API calls return a [`SakshiResult<T>`](../../developer-reference/data-models.md#sakshiresultt), encapsulating either a successful result containing data of type `T`, or a failure containing a specific [`SakshiError`](../../developer-reference/data-models.md#sakshierror).

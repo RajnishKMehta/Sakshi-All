@@ -1,3 +1,7 @@
+---
+description: "The Sākṣī ecosystem is designed to address a specific problem: preserving a separate copy of important media so that forced or accidental deletion..."
+icon: book-open
+---
 # Security Overview
 
 The Sākṣī ecosystem is designed to address a specific problem: preserving a separate copy of important media so that forced or accidental deletion of the visible original does not destroy the evidence. It does this by separating the capture, storage, and management of media into independent local applications.

@@ -1,3 +1,7 @@
+---
+description: "Thank you for your interest in contributing to the Sākṣī ecosystem! We welcome and appreciate contributions of all forms, including bug reports,..."
+icon: terminal
+---
 # Contributing to Sākṣī
 
 Thank you for your interest in contributing to the Sākṣī ecosystem! We welcome and appreciate contributions of all forms, including bug reports, feature requests, documentation improvements, and code changes.

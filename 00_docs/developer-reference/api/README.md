@@ -1,3 +1,7 @@
+---
+description: "This section provides comprehensive documentation for all public methods exposed by the `SakshiClient` interface."
+icon: book-open
+---
 # SDK API Reference
 
 This section provides comprehensive documentation for all public methods exposed by the `SakshiClient` interface.

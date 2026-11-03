@@ -1,3 +1,7 @@
+---
+description: "The SDK applies strict validation constraints to prevent path traversal and ensure secure file system operations."
+icon: terminal
+---
 # Validation Constraints
 
 The SDK applies strict validation constraints to prevent path traversal and ensure secure file system operations.

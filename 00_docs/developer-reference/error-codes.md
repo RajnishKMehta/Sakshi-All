@@ -1,3 +1,7 @@
+---
+description: "Every failure from the SDK includes an `errorCode` string. This guide details standard error codes, when they happen, and how to recover. The..."
+icon: terminal
+---
 # Error Codes Reference
 
 Every failure from the SDK includes an `errorCode` string. This guide details standard error codes, when they happen, and how to recover. The Vault or SDK may return other codes in the future; unknown codes should be handled safely as standard failures.

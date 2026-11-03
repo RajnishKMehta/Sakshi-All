@@ -1,3 +1,7 @@
+---
+description: "The Sākṣī ecosystem separates capture, communication, storage, and media management into independent components. This modular design lets each..."
+icon: book-open
+---
 # Ecosystem Overview
 
 The Sākṣī ecosystem separates capture, communication, storage, and media management into independent components. This modular design lets each application focus on one responsibility while communicating locally with the Vault.
