@@ -17,7 +17,6 @@ The following diagram shows the local data flow between the Sākṣī components
 ```mermaid
 ---
 config:
-  layout: elk
   theme: base
   themeVariables:
     background: "#F8FAFC"
@@ -30,40 +29,27 @@ config:
     lineColor: "#64748B"
     textColor: "#1E293B"
     edgeLabelBackground: "#FFFFFF"
-    clusterBkg: "#F1F5F9"
-    clusterBorder: "#CBD5E1"
-    nodeTextColor: "#1E293B"
     fontSize: "15px"
     fontFamily: "Inter, Arial, sans-serif"
   flowchart:
-    nodeSpacing: 65
-    rankSpacing: 80
-    diagramPadding: 24
-    curve: basis
+    nodeSpacing: 56
+    rankSpacing: 72
+    diagramPadding: 20
+    curve: linear
     htmlLabels: false
 ---
-flowchart TD
+flowchart TB
 
-    subgraph Clients["CLIENT APPLICATIONS"]
-        direction LR
-        C["Sākṣī Camera"]
-        P["Sākṣī Portal"]
-    end
-
+    C["Sākṣī Camera"]
+    P["Sākṣī Portal"]
     SDK["Sākṣī SDK"]
+    V["Sākṣī Vault Service"]
+    DB[("Room3 Database")]
+    FS[("Private File Storage")]
 
-    subgraph Storage["STORAGE LAYER"]
-        direction LR
-        V["Sākṣī Vault Service"]
-        DB[("Room3 Database")]
-        FS[("Private File Storage")]
-    end
-
-    C <-->|SDK API| SDK
-    P <-->|SDK API| SDK
-
-    SDK <-->|Local IPC / AIDL| V
-
+    C <-->|"SDK API"| SDK
+    P <-->|"SDK API"| SDK
+    SDK <-->|"Local IPC / AIDL"| V
     V --> DB
     V --> FS
 
@@ -78,9 +64,6 @@ flowchart TD
     class V vault
     class DB database
     class FS filesystem
-
-    style Clients fill:#F8FAFC,stroke:#C7D2FE,stroke-width:1.5px,color:#3730A3
-    style Storage fill:#F8FAFC,stroke:#99F6E4,stroke-width:1.5px,color:#115E59
 ```
 
 For a deeper technical breakdown of the IPC and component interaction, see the [Detailed Architecture Flowchart](../developer-guide/concepts/architecture-flow.md).
