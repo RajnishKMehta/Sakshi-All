@@ -59,6 +59,7 @@ If you want to understand the system architecture, contribute to the projects, o
 *   [Architecture Flow](../developer-guide/concepts/architecture-flow.md)
 *   [SDK Integration](../developer-guide/sdk/integration.md)
 *   [API Reference](../developer-reference/api/README.md)
+*   [Contributing to Sākṣī](../developer-guide/contributing.md)
 
 ### Security and Privacy
 
