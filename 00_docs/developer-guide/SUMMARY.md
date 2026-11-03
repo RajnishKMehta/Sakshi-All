@@ -7,3 +7,5 @@
 * [Integration Setup](sdk/integration.md)
 * [Connection Lifecycle](sdk/connection-lifecycle.md)
 * [Error Handling](sdk/error-handling.md)
+## Contributing
+* [Contributing to Sākṣī](contributing.md)
