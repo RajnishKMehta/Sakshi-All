@@ -2,6 +2,8 @@
 
 This flowchart illustrates the detailed sequence of interactions between a client application, the Sākṣī SDK, and the Vault service during a typical operation. The same calling application (Camera or Portal) sends the request and receives the resulting `SakshiResult` back through the SDK.
 
+For a better visualization with enhanced styling, see <a href="https://github.com/RajnishKMehta/Sakshi-Docs/blob/main/developer-guide/concepts/api-architecture-flow.md">API Architecture Flow</a>.
+
 ```mermaid
 ---
 config:
