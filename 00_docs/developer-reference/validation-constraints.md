@@ -17,6 +17,7 @@ Must be a safe filename component.
 
 ## File Extension
 Must be a valid extension format.
+*   Allowed characters: ASCII letters, digits, underscores, hyphens, and internal dots. Other characters, such as plus signs, are not allowed.
 *   Length: Between `1` and `12` characters
 *   Must not start or end with a dot (`.`)
 *   Must not contain path separators (`/`, `\`) or traversal sequences (`..`)

@@ -21,3 +21,9 @@ Each API page details the method's purpose, signature, expected behaviour, and h
 * [deleteMedia](deleteMedia.md) - Schedules one or multiple media files for permanent deletion after a retention period.
 * [recoverMedia](recoverMedia.md) - Restores one or multiple media files previously scheduled for deletion back to a valid state.
 * [disconnect](disconnect.md) - Explicitly disconnects from the Vault IPC service and releases internal resources.
+
+## create
+```kotlin
+fun create(context: Context, config: SakshiClientConfig = SakshiClientConfig()): SakshiClient
+```
+Instantiates a new `SakshiClient` to communicate with the Vault.
