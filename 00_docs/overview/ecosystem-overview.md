@@ -1,6 +1,6 @@
 ---
 description: "The Sākṣī ecosystem separates capture, communication, storage, and media management into independent components."
-icon: book-open
+icon: cubes
 ---
 # Ecosystem Overview
 

@@ -1,6 +1,6 @@
 ---
 description: "The Sākṣī SDK leverages Kotlin's sealed classes to represent the result of operations safely, avoiding uncontrolled exceptions. Asynchronous API..."
-icon: terminal
+icon: triangle-exclamation
 ---
 # SDK Error Handling
 
