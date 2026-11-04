@@ -7,6 +7,7 @@
 package rajnishkmehta.sakshi.portal.ui.viewer
 
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -261,15 +262,21 @@ fun AudioViewer(uri: String) {
             contentAlignment = Alignment.Center
         ) {
             if (hasArtwork) {
+                val resolver = LocalContext.current.contentResolver
+                val animationScale = remember(resolver) {
+                    Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f)
+                }
                 var currentRotation by remember { mutableStateOf(0f) }
-                LaunchedEffect(isPlaying) {
-                    while (isPlaying) {
+                LaunchedEffect(isPlaying, animationScale) {
+                    while (isPlaying && animationScale > 0f) {
                         currentRotation += 0.5f
                         if (currentRotation >= 360f) currentRotation = 0f
                         delay(16) // ~60fps
                     }
                 }
 
+                // Scale by 1/sqrt(2) approx 0.707 to ensure the square fits entirely in the original bounds
+                // when rotated by 45 degrees.
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(artworkData)
@@ -279,7 +286,11 @@ fun AudioViewer(uri: String) {
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize(0.8f)
-                        .graphicsLayer { rotationZ = currentRotation }
+                        .graphicsLayer {
+                            rotationZ = currentRotation
+                            scaleX = 0.707f
+                            scaleY = 0.707f
+                        }
                 )
             } else {
                 // If album artwork does NOT exist: Keep the decorative bars/visualization visible even while paused.

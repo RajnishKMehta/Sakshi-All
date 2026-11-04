@@ -33,7 +33,7 @@ fun AppLockSetupDialog(
     AlertDialog(
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = {
-            // Dismissed by touching outside, we just mark it setup
+            // Dismissed by back button, we just mark it setup
             coroutineScope.launch {
                 settingsRepository.setAppLockSetupCompleted(true)
                 onDismiss()
