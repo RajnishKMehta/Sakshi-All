@@ -8,6 +8,9 @@ package rajnishkmehta.sakshi.portal.ui.viewer
 
 import android.net.Uri
 import android.provider.Settings
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -275,8 +278,8 @@ fun AudioViewer(uri: String) {
                     }
                 }
 
-                // Scale by 1/sqrt(2) approx 0.707 to ensure the square fits entirely in the original bounds
-                // when rotated by 45 degrees.
+                // Compute scale dynamically so that the rotated bounding box fits in the available dimensions.
+                // Assuming square content: scale = 1 / (abs(cos(angle)) + abs(sin(angle)))
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(artworkData)
@@ -287,9 +290,11 @@ fun AudioViewer(uri: String) {
                     modifier = Modifier
                         .fillMaxSize(0.8f)
                         .graphicsLayer {
+                            val rad = Math.toRadians(currentRotation.toDouble())
+                            val scale = 1f / (abs(cos(rad)) + abs(sin(rad))).toFloat()
                             rotationZ = currentRotation
-                            scaleX = 0.707f
-                            scaleY = 0.707f
+                            scaleX = scale
+                            scaleY = scale
                         }
                 )
             } else {
