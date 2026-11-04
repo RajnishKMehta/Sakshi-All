@@ -1,5 +1,5 @@
 ---
-description: "---"
+description: "Overview of the Sākṣī ecosystem and its independent components."
 icon: book-open
 ---
 <div align="center">

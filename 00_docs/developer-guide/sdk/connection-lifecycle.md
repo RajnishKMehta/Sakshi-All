@@ -1,5 +1,5 @@
 ---
-description: "The Sākṣī SDK uses an automatic, lazy-binding connection lifecycle to communicate with the Vault over Android Inter-Process Communication (IPC)...."
+description: "The Sākṣī SDK uses an automatic, lazy-binding connection lifecycle to communicate with the Vault over Android Inter-Process Communication (IPC)..."
 icon: terminal
 ---
 # SDK Connection Lifecycle
