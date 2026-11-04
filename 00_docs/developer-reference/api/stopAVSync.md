@@ -1,3 +1,7 @@
+---
+description: "Requests the Vault to stop an active audio/video synchronization for a specific file ID."
+icon: code
+---
 # stopAVSync
 
 ## Purpose

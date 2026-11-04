@@ -1,3 +1,7 @@
+---
+description: "Welcome to the Sākṣī Developer Reference Documentation."
+icon: book-open
+---
 # Developer Reference
 
 Welcome to the Sākṣī Developer Reference Documentation.

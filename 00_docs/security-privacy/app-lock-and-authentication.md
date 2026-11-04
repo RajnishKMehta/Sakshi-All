@@ -1,3 +1,7 @@
+---
+description: "Sākṣī Portal provides a user interface to browse and manage the media stored in Sākṣī Vault. To prevent unauthorized access to this interface by..."
+icon: shield
+---
 # App Lock & Authentication
 
 Sākṣī Portal provides a user interface to browse and manage the media stored in Sākṣī Vault. To prevent unauthorized access to this interface by someone who casually picks up an unlocked device, Portal includes an **App Lock** feature.

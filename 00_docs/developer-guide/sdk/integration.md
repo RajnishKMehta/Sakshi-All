@@ -1,3 +1,7 @@
+---
+description: "Integrate the Sākṣī SDK into your Android application to communicate with the Sākṣī Vault service."
+icon: terminal
+---
 # SDK Integration
 
 Integrate the Sākṣī SDK into your Android application to communicate with the Sākṣī Vault service.

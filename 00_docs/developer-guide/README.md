@@ -1,3 +1,7 @@
+---
+description: "Welcome to the Sākṣī Developer Guide. This section of the documentation provides the technical details necessary to understand the architecture,..."
+icon: book-open
+---
 # Sākṣī Developer Guide
 
 Welcome to the Sākṣī Developer Guide. This section of the documentation provides the technical details necessary to understand the architecture, contribute to the ecosystem, or integrate your own applications with Sākṣī Vault. For an overview of the data models and constraints used throughout the SDK, see the [Developer Reference](../developer-reference/README.md).

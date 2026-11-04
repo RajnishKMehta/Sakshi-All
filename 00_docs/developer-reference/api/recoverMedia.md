@@ -1,3 +1,7 @@
+---
+description: "Recovers a specific media file (or batch of files) previously scheduled for deletion in Vault."
+icon: code
+---
 # recoverMedia
 
 ## Purpose

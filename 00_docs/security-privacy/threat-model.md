@@ -1,3 +1,7 @@
+---
+description: "Sākṣī is designed with a specific threat model in mind: preventing the loss of important media when a user is forced or pressured to delete the..."
+icon: shield
+---
 # Security Limitations & Threat Model
 
 Sākṣī is designed with a specific threat model in mind: preventing the loss of important media when a user is forced or pressured to delete the visible, original copy from their standard gallery.

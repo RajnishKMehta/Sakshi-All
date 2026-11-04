@@ -1,3 +1,7 @@
+---
+description: "The Sākṣī SDK utilizes strongly-typed data models for arguments and return types. These models encapsulate the required data, ensuring safe..."
+icon: terminal
+---
 # SDK Data Models
 
 The Sākṣī SDK utilizes strongly-typed data models for arguments and return types. These models encapsulate the required data, ensuring safe transmission across the IPC boundary between the client app and the Vault.

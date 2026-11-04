@@ -1,3 +1,7 @@
+---
+description: "Welcome to the Sākṣī User Guide. This section will help you install, configure, and use the Sākṣī applications on your Android device."
+icon: book-open
+---
 # User Guide
 
 Welcome to the Sākṣī User Guide. This section will help you install, configure, and use the Sākṣī applications on your Android device.

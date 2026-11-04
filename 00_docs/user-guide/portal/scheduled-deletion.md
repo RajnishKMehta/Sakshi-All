@@ -1,3 +1,7 @@
+---
+description: "Sākṣī Vault does not delete files immediately when you request it. Instead, it uses a delayed deletion system to protect against accidental or..."
+icon: monitor
+---
 # Scheduling Deletions and Recovery
 
 Sākṣī Vault does not delete files immediately when you request it. Instead, it uses a delayed deletion system to protect against accidental or forced removal.

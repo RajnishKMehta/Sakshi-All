@@ -1,3 +1,7 @@
+---
+description: "Explains how the Sākṣī ecosystem handles privacy, data storage, and protects your media."
+icon: shield
+---
 # Sākṣī Ecosystem Privacy Policy
 
 **Effective Date:** 2026-10-31

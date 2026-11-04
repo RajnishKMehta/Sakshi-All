@@ -1,3 +1,7 @@
+---
+description: "The Sākṣī Portal app is your gateway to viewing the files stored securely inside the Vault. It operates entirely offline."
+icon: monitor
+---
 # Browsing and Exporting Media
 
 The Sākṣī Portal app is your gateway to viewing the files stored securely inside the Vault. It operates entirely offline.

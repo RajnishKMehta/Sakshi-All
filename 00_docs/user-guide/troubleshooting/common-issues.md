@@ -1,3 +1,7 @@
+---
+description: "Common troubleshooting issues, symptoms, and solutions for the Sākṣī ecosystem."
+icon: book
+---
 # Troubleshooting
 
 ## Vault Unavailable or Not Found
