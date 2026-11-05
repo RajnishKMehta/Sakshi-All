@@ -1,6 +1,6 @@
 ---
 description: "Configuration settings used when instantiating `SakshiClient`."
-icon: terminal
+icon: gear
 ---
 # Configuration
 

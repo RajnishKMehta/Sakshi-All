@@ -1,6 +1,6 @@
 ---
 description: "Every failure from the SDK includes an `errorCode` string. This guide details standard error codes, when they happen, and how to recover. The..."
-icon: terminal
+icon: triangle-exclamation
 ---
 # Error Codes Reference
 
